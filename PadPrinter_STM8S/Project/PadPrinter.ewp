@@ -1636,7 +1636,13 @@
   <group>
     <name>Logic</name>
     <file>
+      <name>$PROJ_DIR$\..\Logic\actions.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\Logic\management.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\Logic\misc.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\Logic\project.c</name>

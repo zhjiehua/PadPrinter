@@ -11,7 +11,7 @@
 #define RETURN_FILTER_TIME      300
 #define RETURN_POS_TIME         200
 #define PUSH_TIME               1000
-#define ACTIONUNIT_DELAY        1 //200
+#define ACTIONUNIT_DELAY        40 //200
 
 #define MAX_ACTIONUNIT_DELAY    30
 
@@ -56,8 +56,15 @@
 #define EEPROM_ADDR_PROGRAM7            EEPROM_ADDR_PROGRAM6+sizeof(process6)
 #define EEPROM_ADDR_PROGRAM8            EEPROM_ADDR_PROGRAM7+sizeof(process7)
 #define EEPROM_ADDR_PROGRAM9            EEPROM_ADDR_PROGRAM8+sizeof(process8)
-#define EEPROM_ADDR_PROGRAM0            EEPROM_ADDR_PROGRAM9+sizeof(process9)
+#define EEPROM_ADDR_PROGRAM0            EEPROM_ADDR_PROGRAM9+sizeof(process9)+5
 #define EEPROM_ADDR_END                 EEPROM_ADDR_PROGRAM0+MAX_ACTIONS_PER_PROJECT*3
+
+//设备类型
+typedef enum
+{
+    MACHINE_4SENSORS = 0,
+    MACHINE_2SENSORS = 1,
+}MachineType_TypeDef;
 
 //程序动作
 typedef enum
@@ -74,7 +81,8 @@ typedef enum
     SHIFT = 9,
     RETURN = 10,
     PUSH = 11,
-    HOME = 12,
+    PUSHHOME = 12,
+    HOME = 13,
 }ACT_TypeDef;
 
 typedef struct
@@ -163,6 +171,9 @@ typedef struct
     ACTION_TypeDef *pCurProSelfAction;
     
     uint8_t led;
+    
+    MachineType_TypeDef machineType;
+    uint8_t platformPushFlag;
     
 }PROJECT_TypeDef;
 

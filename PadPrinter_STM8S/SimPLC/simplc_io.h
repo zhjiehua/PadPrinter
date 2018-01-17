@@ -81,14 +81,17 @@ typedef struct
 #define M_KEY_FOOT              6
 #define M_KEY_CLEAR             7
 
-#define M_reserve0              8
-#define M_reserve1              9
+
+#define M_ONCE                  9
 #define M_BEEPER                10
 
 #define M_POWERON               11
 #define M_PROGRAM_SEL           12
 #define M_PROGRAM_SELF          13
 #define M_PROGRAM_SELF_CHANGE   14
+
+#define M_PROGRAM_HEAD_CHECK    15
+#define M_PROGRAM_PLATFORM_CHECK    16
 
 #define M_PROGRAM_READ          18
 #define M_SEG_FLASH             19
@@ -134,6 +137,8 @@ typedef struct
 
 #define M_INTSET                56
 
+#define M_PUSH_CHECK            64
+
 #define M_HOME_RETURN           65
 #define M_HOME_CHECK            66
 #define M_HOME_FINISH           67
@@ -141,6 +146,13 @@ typedef struct
 #define M_RESTORE_RETURN        68
 #define M_RESTORE_HOME          69
 #define M_RESTORE_UP            70
+
+
+#define M_OUTPUT_FLASH          71
+#define M_OUTPUT_FLASH_FLAG     72
+
+#define M_CAN_CHANGE_DELAY      75
+#define M_SAVE_DELAY            76
 
 //X
 #define X_ABSORB_O        0

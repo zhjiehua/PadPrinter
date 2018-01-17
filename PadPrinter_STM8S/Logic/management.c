@@ -1,6 +1,7 @@
-
 #include "management.h"
 #include "project.h"
+#include "misc.h"
+#include "actions.h"
 
 #include "simplc_io.h"
 #include "simplc_timer.h"
@@ -12,6 +13,9 @@
 #include "flash_eeprom.h"
 #include "24cxx.h"
 #include "tim5.h"
+
+//如果自编程需要手动则将该宏改为1
+#define PROGRAMSELF_ACTION  0
 
 
 //按键刷新
@@ -34,19 +38,15 @@ void ProgramSelf(void)
     {
         ProgramRead();
         
-        sprintf((char*)project.segStr, "%2d", project.programSelfPos);
+        project.programSelfPos = 0;
+        
+        sprintf((char*)project.segStr, "%2d-", project.programSelfPos);
         TM1638_SendData(0, project.segStr);
         
         project.pCurProSelfAction = project.program + project.programSelfPos;
         
         sprintf((char*)project.segStr, "%2d", project.pCurProSelfAction->act);
         TM1638_SendData(3, project.segStr);
-        
-        
-        if(project.pCurProSelfAction->flag)
-            TM1638_SendData(2, "-");
-        else
-            TM1638_SendData(2, " ");
     }
   
     if(GMR(M_KEY_FAST))//加步骤
@@ -57,16 +57,11 @@ void ProgramSelf(void)
         
         project.pCurProSelfAction = project.program + project.programSelfPos;
         
-        sprintf((char*)project.segStr, "%2d", project.programSelfPos);
+        sprintf((char*)project.segStr, "%2d-", project.programSelfPos);
         TM1638_SendData(0, project.segStr);
         
         sprintf((char*)project.segStr, "%2d", project.pCurProSelfAction->act);
         TM1638_SendData(3, project.segStr);
-        
-        if(project.pCurProSelfAction->flag)
-            TM1638_SendData(2, "-");
-        else
-            TM1638_SendData(2, " ");
     }
     else if(GMR(M_KEY_SLOW))//减步骤
     {
@@ -76,25 +71,62 @@ void ProgramSelf(void)
         
         project.pCurProSelfAction = project.program + project.programSelfPos;
         
-        sprintf((char*)project.segStr, "%2d", project.programSelfPos);
+        sprintf((char*)project.segStr, "%2d-", project.programSelfPos);
         TM1638_SendData(0, project.segStr);
         
         sprintf((char*)project.segStr, "%2d", project.pCurProSelfAction->act);
         TM1638_SendData(3, project.segStr);
-        
-        if(project.pCurProSelfAction->flag)
-            TM1638_SendData(2, "-");
-        else
-            TM1638_SendData(2, " ");
     }
     
+    //--------------------------------------------------------------------------------------
     if(GMR(M_KEY_UPDOWN))//加程序
     {
-        SML(M_PROGRAM_SELF_CHANGE, 1);  
-      
-        project.pCurProSelfAction->act++;
-        if(project.pCurProSelfAction->act > HOME)//12
-            project.pCurProSelfAction->act = ACTION_NONE;//0
+        SML(M_PROGRAM_SELF_CHANGE, 1);
+        
+        if(project.printHeadPos&FRONTBACK_MASK)
+        {
+            if(project.printHeadPos&UPDOWN_MASK)
+            {
+#if PROGRAMSELF_ACTION
+                //PrintUp();
+                SML(M_MAN_UPDOWN, 1);
+                SML(M_MODE_MANUAL, 1);
+#else
+                project.printHeadPos &= ~UPDOWN_MASK;          
+#endif
+                project.pCurProSelfAction->act = PRINT_UP;
+            }
+            else
+            {
+#if PROGRAMSELF_ACTION
+                //PrintDown();
+                SML(M_MAN_UPDOWN, 1);
+                SML(M_MODE_MANUAL, 1);
+#else
+                project.printHeadPos |= UPDOWN_MASK; 
+#endif
+                project.pCurProSelfAction->act = PRINT_DOWN;
+            }
+        }
+        else
+        {
+#if PROGRAMSELF_ACTION   
+            //Absorb();
+            SML(M_MAN_UPDOWN, 1);
+            SML(M_MODE_MANUAL, 1);
+#endif
+            
+            project.pCurProSelfAction->act = ABSORB;
+        }
+        
+        project.programSelfPos++;
+        if(project.programSelfPos >= MAX_ACTIONS_PER_PROJECT-3)
+            project.programSelfPos = 0;
+        
+        project.pCurProSelfAction = project.program + project.programSelfPos;
+        
+        sprintf((char*)project.segStr, "%2d-", project.programSelfPos);
+        TM1638_SendData(0, project.segStr);
         
         sprintf((char*)project.segStr, "%2d", project.pCurProSelfAction->act);
         TM1638_SendData(3, project.segStr);
@@ -103,9 +135,46 @@ void ProgramSelf(void)
     {
         SML(M_PROGRAM_SELF_CHANGE, 1);   
       
-        project.pCurProSelfAction->act--;
-        if(project.pCurProSelfAction->act >= 255)//12
-            project.pCurProSelfAction->act = HOME;
+        if(project.printHeadPos&UPDOWN_MASK)
+        {
+            ;
+        }
+        else
+        {
+            if(project.printHeadPos&FRONTBACK_MASK)
+            {
+                //Back();
+#if PROGRAMSELF_ACTION            
+                SML(M_MAN_FRONTBACK, 1);
+                SML(M_MODE_MANUAL, 1);
+#else
+                project.printHeadPos &= ~FRONTBACK_MASK;
+#endif
+            
+                project.pCurProSelfAction->act = BACK;
+            }
+            else
+            {
+#if PROGRAMSELF_ACTION            
+                SML(M_MAN_FRONTBACK, 1);
+                SML(M_MODE_MANUAL, 1);
+#else
+                project.printHeadPos |= FRONTBACK_MASK;
+#endif
+                project.pCurProSelfAction->act = FRONT;
+            }
+
+            
+        }
+        
+        project.programSelfPos++;
+        if(project.programSelfPos >= MAX_ACTIONS_PER_PROJECT-3)
+            project.programSelfPos = 0;
+        
+        project.pCurProSelfAction = project.program + project.programSelfPos;
+        
+        sprintf((char*)project.segStr, "%2d-", project.programSelfPos);
+        TM1638_SendData(0, project.segStr);
         
         sprintf((char*)project.segStr, "%2d", project.pCurProSelfAction->act);
         TM1638_SendData(3, project.segStr);
@@ -114,28 +183,138 @@ void ProgramSelf(void)
     if(GMR(M_KEY_AUX))//修改flag
     {
         SML(M_PROGRAM_SELF_CHANGE, 1);
+
+#if PROGRAMSELF_ACTION  
+        //Shift();
+        SML(M_MAN_AUX, 1);
+        SML(M_MODE_MANUAL, 1);
+#endif
         
-        if(!project.pCurProSelfAction->flag)//12
+        if(project.machineType == MACHINE_2SENSORS)
         {
-            project.pCurProSelfAction->flag = 1;
-            TM1638_SendData(2, "-");
+            if(!project.platformPushFlag)
+            {
+                project.pCurProSelfAction->act = PUSH;
+                project.platformPushFlag = 1;
+            }
+            else
+            {
+                project.pCurProSelfAction->act = RETURN;
+                project.platformPushFlag = 0;
+            }
         }
         else
-        {
-            project.pCurProSelfAction->flag = 0;
-            TM1638_SendData(2, " ");
-        }
+            project.pCurProSelfAction->act = SHIFT;
+        
+        project.programSelfPos++;
+        if(project.programSelfPos >= MAX_ACTIONS_PER_PROJECT-3)
+            project.programSelfPos = 0;
+        
+        project.pCurProSelfAction = project.program + project.programSelfPos;
+        
+        sprintf((char*)project.segStr, "%2d-", project.programSelfPos);
+        TM1638_SendData(0, project.segStr);
+        
+        sprintf((char*)project.segStr, "%2d", project.pCurProSelfAction->act);
+        TM1638_SendData(3, project.segStr);
     }
     
     if(GMR(M_KEY_STARTSTOP))
     {
         if(GML(M_PROGRAM_SELF_CHANGE))
+        {
+            UART1_printf("Saving the Program0...\r\n");
+            
+            project.pCurProSelfAction->act = HOME;
+            project.programSelfPos++;
+            project.pCurProSelfAction = project.program + project.programSelfPos;
+            project.pCurProSelfAction->act = ACTION_NONE;
+            
             Program0Save();
+            
+            //
+            project.programNum = 0;
+            AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM_NUM, project.programNum);
+            AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM_NUM, project.programNum);
+            AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM_NUM, project.programNum);
+        }
+        
+        UART1_printf("Saved the Program0 finish!\r\n");
         
         project.mode = NORMAL;
         
         SML(M_SEG_FLASH, 1);
+       
+        while(1);
     }
+
+#if PROGRAMSELF_ACTION  
+    
+    if(GML(M_MODE_MANUAL))
+    {
+        if(GML(M_MAN_FRONTBACK))
+        {
+            if(project.printHeadPos&UPDOWN_MASK)
+            {
+                UART1_printf("Warnning : Can not run the Back or Front action!\r\n");
+            }
+            else
+            {
+                if(project.printHeadPos&FRONTBACK_MASK)
+                {
+                    Back();
+                }
+                else
+                {
+                    Front();
+                }
+            }
+        }
+        
+        if(GML(M_MAN_UPDOWN))
+        {
+            if(project.printHeadPos&FRONTBACK_MASK)
+            {
+                if(project.printHeadPos&UPDOWN_MASK)
+                {
+                    PrintUp();
+                }
+                else
+                {
+                    PrintDown();
+                }
+            }
+            else
+            {
+                Absorb();
+            }
+        }
+        
+        if(GML(M_MAN_AUX))
+        {
+            if(project.machineType == MACHINE_2SENSORS)
+            {
+                if(project.platformPushFlag)
+                    Push();
+                else
+                    Return();
+            }
+            else
+            {
+                if(GML(M_MAN_AUX_RETURN))
+                    Return();
+                else
+                    Shift();
+                
+                SML(M_MAN_FLAG_AUX, 1);
+            }
+        }
+        
+        if(!GML(M_MAN_UPDOWN) && !GML(M_MAN_FRONTBACK) && !GML(M_MAN_AUX))
+            SML(M_MODE_MANUAL, 0);
+    }
+#endif
+    
 }
 
 //选择程序
@@ -209,18 +388,18 @@ void ProgramSelect(void)
             UART1_printf("The selected Program is %s\r\n", project.segStr);
             
             //选择完后退出选择程序
-            if(project.programNum == 0)
-            {
-                project.mode = PROGRAM_SELF;
-                SML(M_PROGRAM_SELF, 1);
-            }
-            else
+//            if(project.programNum == 0)
+//            {
+//                project.mode = PROGRAM_SELF;
+//                SML(M_PROGRAM_SELF, 1);
+//            }
+//            else
             {
                 project.mode = NORMAL;
                 SML(M_PROGRAM_READ, 1);
             }
         }
-        else
+        else//-------------------------------------------------------------------------------
         {
             SML(M_INTSET, 0);
             
@@ -289,50 +468,52 @@ void ProgramSelect(void)
     }
 }
 
-//数码管闪烁
-void SegFlash(void)
+//正常启动后的按键识别
+void Key_Distinguish(void)
 {
-    if(GMR(M_SEG_FLASH))
+    if(GML(M_CAN_CHANGE_DELAY))
     {
-        UART1_printf("Segment flashing...\r\n");      
-        TS(0, SEG_FLASH_PERIOD);
-        project.segFlashTimes = SEG_FLASH_TIMES;
-    }
-  
-    if(!GML(M_SEG_FLASHFLAG) && TG(0))
-    {
-        TM1638_SendData(0, "     ");
-        
-        SML(M_SEG_FLASHFLAG, 1);
-        TS(0, 1000);
-    }
-    if(GML(M_SEG_FLASHFLAG) && TG(0))
-    {
-        sprintf((char*)project.segStr, "Pro%2d", project.programNum);
-        TM1638_SendData(0, project.segStr);
-        
-        SML(M_SEG_FLASHFLAG, 0);
-        TS(0, 1000);
-        
-        project.segFlashCnt++;
-        if(project.segFlashCnt >= project.segFlashTimes)
+        if(TG(1))
         {
-            SML(M_SEG_FLASH, 0);
+            if(GML(M_KEY_FAST))//快
+            {
+                SML(M_OUTPUT_FLASH_FLAG, 0);
+                SML(M_SAVE_DELAY, 1);
+
+                project.pCurAction->delay++;
+                if(project.pCurAction->delay > MAX_ACTIONUNIT_DELAY)
+                    project.pCurAction->delay = MAX_ACTIONUNIT_DELAY;
+                
+                project.pCurAction->flag |= 0x80;//修改标志位，提示需要保存
+                
+                //UART1_printf("Add delay time.\r\n");
+                
+                sprintf((char*)project.segStr, "%5d", project.pCurAction->delay);
+                TM1638_SendData(0, project.segStr);
+            }
+            else if(GML(M_KEY_SLOW))//慢
+            {
+                SML(M_OUTPUT_FLASH_FLAG, 0);
+                SML(M_SAVE_DELAY, 1);
+                
+                project.pCurAction->delay--;
+                if(project.pCurAction->delay == 0 || project.pCurAction->delay >= MAX_ACTIONUNIT_DELAY)
+                    project.pCurAction->delay = 0;
+                
+                project.pCurAction->flag |= 0x80;//修改标志位，提示需要保存
+                
+                //UART1_printf("Dec delay time.\r\n");
+                
+                sprintf((char*)project.segStr, "%5d", project.pCurAction->delay);
+                TM1638_SendData(0, project.segStr);
+            }
+            else
+                SML(M_OUTPUT_FLASH_FLAG, 1);
             
-            SML(M_PROGRAM_READY, 1);
-            
-            UART1_printf("PadPrinter is ready...\r\n");
-            
-            //闪烁完后，显示产量
-            sprintf((char*)project.segStr, "%5d", project.productOutput);
-            TM1638_SendData(0, project.segStr);
+            TS(1, DELAY_KEY_FILTER_PERIOD);
         }
     }
-}
-
-//正常启动后的按键识别
-void KeyDistinguish(void)
-{
+    
     if(GML(M_MODE_AUTO))//正在执行自动程序
     {
         if(GMR(M_KEY_STARTSTOP))
@@ -355,12 +536,6 @@ void KeyDistinguish(void)
                 
                 UART1_printf("Add the auxiliary action to current program.\r\n");
             }
-//            else
-//            {
-//                SML(M_PROGRAM_AUX, 0);
-//                
-//                UART1_printf("Del the auxiliary action from current program.\r\n");
-//            }
         }
         if(GMR(M_KEY_FOOT))//脚踏
         {
@@ -447,36 +622,6 @@ void KeyDistinguish(void)
             
             SML(M_MODE_AUTO, 1);
         }
-        if(GMR(M_KEY_FAST))//快
-        {
-            SML(M_ADJ_DELAY, 1);
-            
-            project.pCurAction->delay++;
-            if(project.pCurAction->delay > MAX_ACTIONUNIT_DELAY)
-                project.pCurAction->delay = 0;
-            
-            project.delay = project.pCurAction->delay;
-            
-            UART1_printf("Add delay time.\r\n");
-            
-            sprintf((char*)project.segStr, "%5d", project.pCurAction->delay);
-            TM1638_SendData(0, project.segStr);
-        }
-        if(GMR(M_KEY_SLOW))//慢
-        {
-            SML(M_ADJ_DELAY, 1);
-            
-            project.pCurAction->delay--;
-            if(project.pCurAction->delay >= 255)
-                project.pCurAction->delay = MAX_ACTIONUNIT_DELAY;
-            
-            project.delay = project.pCurAction->delay;
-            
-            UART1_printf("Dec delay time.\r\n");
-            
-            sprintf((char*)project.segStr, "%5d", project.pCurAction->delay);
-            TM1638_SendData(0, project.segStr);
-        }
     }
 }
 
@@ -490,13 +635,11 @@ void NextAction(void)
             project.actionPos++;
             if(project.actionPos >= project.actionCnt)
             {
-                project.actionPos = 0;
-                
                 project.productOutput++;
                 sprintf((char*)project.segStr, "%5d", project.productOutput);
                 TM1638_SendData(0, project.segStr);
                 
-                AT24CXX_WriteLenByte(EEPROM_ADDR_PRODUCTOUTPUT, project.productOutput, 2);
+                //AT24CXX_WriteLenByte(EEPROM_ADDR_PRODUCTOUTPUT, project.productOutput, 2);
                 
                 if(GML(M_PROGRAM_PERIOD))
                 {
@@ -504,24 +647,54 @@ void NextAction(void)
                     SML(M_PROGRAM_PERIOD, 0);
                 }
                 
+                //保存修改过的延时参数
+                if(GML(M_SAVE_DELAY))
+                {
+                    for(project.actionPos=0;project.actionPos<project.actionCnt;project.actionPos++)
+                    {
+                        project.pCurAction = project.program + project.actionPos;
+                        if(project.pCurAction->flag&0x80)
+                        {
+                            project.pCurAction->flag &= ~0x80;
+                            
+                            AT24CXX_WriteOneByte(project.programAddr+project.actionPos*3+2, project.pCurAction->delay);
+                            AT24CXX_WriteOneByte(project.programAddr+project.actionPos*3+2, project.pCurAction->delay);
+                            AT24CXX_WriteOneByte(project.programAddr+project.actionPos*3+2, project.pCurAction->delay);
+                            
+                            UART1_printf("Save the action %d delay : %d\r\n", project.actionPos, project.pCurAction->delay);
+                        }
+                    }
+                    SML(M_SAVE_DELAY, 0);
+                }
+                
+                project.actionPos = 0;
+                
                 UART1_printf("\r\n");
             }
             
-            project.pCurAction = project.program + project.actionPos;
-        }while(!project.pCurAction->flag);
+            project.pCurAction = project.program + project.actionPos; 
+        }while(!(project.pCurAction->flag&0x01));
+        
+        if(project.pCurAction->act == ABSORB
+           || project.pCurAction->act == ABSORB_DOWN
+           || project.pCurAction->act == PRINT
+           || project.pCurAction->act == PRINT_DOWN)
+        {
+            SML(M_CAN_CHANGE_DELAY, 1);
+        }
+        else
+            SML(M_CAN_CHANGE_DELAY, 0);
     }
     else
     {
         project.actionPos++;
         if(project.actionPos >= project.actionCnt)
         {
-            project.actionPos = 0;
-            
             project.productOutput++;
             sprintf((char*)project.segStr, "%5d", project.productOutput);
             TM1638_SendData(0, project.segStr);
             
-            AT24CXX_WriteLenByte(EEPROM_ADDR_PRODUCTOUTPUT, project.productOutput, 2);
+            //AT24CXX_WriteLenByte(EEPROM_ADDR_PRODUCTOUTPUT, project.productOutput, 2);
             
             if(GML(M_PROGRAM_PERIOD))
             {
@@ -529,16 +702,53 @@ void NextAction(void)
                 SML(M_PROGRAM_PERIOD, 0);
             }
             
+            //保存修改过的延时参数
+            if(GML(M_SAVE_DELAY))
+            {
+                for(project.actionPos=0;project.actionPos<project.actionCnt;project.actionPos++)
+                {
+                    project.pCurAction = project.program + project.actionPos;
+                    if(project.pCurAction->flag&0x80)
+                    {
+                        project.pCurAction->flag &= ~0x80;
+                        
+                        AT24CXX_WriteOneByte(project.programAddr+project.actionPos*3+2, project.pCurAction->delay);
+                        AT24CXX_WriteOneByte(project.programAddr+project.actionPos*3+2, project.pCurAction->delay);
+                        AT24CXX_WriteOneByte(project.programAddr+project.actionPos*3+2, project.pCurAction->delay);
+                        
+                        UART1_printf("Save the action %d delay : %d\r\n", project.actionPos, project.pCurAction->delay);
+                    }
+                }
+                SML(M_SAVE_DELAY, 0);
+            }
+            
+            project.actionPos = 0;
+            
             UART1_printf("\r\n");
         }
         
         project.pCurAction = project.program + project.actionPos;
+        
+        if(project.pCurAction->act == ABSORB
+           || project.pCurAction->act == ABSORB_DOWN
+           || project.pCurAction->act == PRINT
+           || project.pCurAction->act == PRINT_DOWN)
+        {
+            SML(M_CAN_CHANGE_DELAY, 1);
+        }
+        else
+        {
+            SML(M_CAN_CHANGE_DELAY, 0);
+        }
     }
     
-    if(GML(M_CHANGEMODE_PAUSE))
+    if(!(project.printHeadPos&UPDOWN_MASK))//暂停不能压
     {
-        SML(M_MODE_AUTO, 0);
-        SML(M_CHANGEMODE_PAUSE, 0);
+        if(GML(M_CHANGEMODE_PAUSE))
+        {
+            SML(M_MODE_AUTO, 0);
+            SML(M_CHANGEMODE_PAUSE, 0);
+        }
     }
     
     project.delay = (*(project.pCurAction)).delay;
@@ -552,527 +762,87 @@ void NextAction(void)
         
         if(project.printHeadPos&UPDOWN_MASK)
             SML(M_RESTORE_UP, 1);
-                    
+        
         SML(M_RESTORE_HOME, 1);
         
         UART1_printf("\r\nRestore the initial status.\r\n");
     }
 }
 
-//吸油下
-void AbsorbDown(void)
+void Home_Check(void)
 {
-    switch(project.printHeadState)
+    if(project.machineType == MACHINE_4SENSORS)
     {
-        case 0:
-            SYL(Y_UPDOWN, 1);
-            project.printHeadState = 1;
-            
-            UART1_printf("Action----Absorb Down\r\n");
-        break;
-        case 1:
-            if(GXL(X_ABSORB_L))//动作到位
-            {
-                UART1_printf("Action----Absorb Down----Finish\r\n");
-              
-                if(GML(M_MODE_AUTO))
-                    NextAction();
-                else if(GML(M_MODE_MANUAL))
-                    SML(M_MAN_UPDOWN, 0);
-                
-                project.printHeadPos |= UPDOWN_MASK;
-                
-                project.printHeadState = 0;
-            }
-        break;
-        default:
-        break;
-    }
-}
-
-void AbsorbUp(void)
-{
-    switch(project.printHeadState)
-    {
-        case 0:
-            SYL(Y_UPDOWN, 0);
-            project.printHeadState = 1;
-            
-            UART1_printf("Action----Absorb Up\r\n");
-        break;
-        case 1:
-            if(GXL(X_ABSORB_O))//动作到位
-            {
-                UART1_printf("Action----Absorb Up----Finish\r\n");
-              
-                if(GML(M_MODE_AUTO))
-                {
-                    if(project.pCurAction->act != HOME)
-                        NextAction();
-                }
-                else if(GML(M_MODE_MANUAL))
-                    SML(M_MAN_UPDOWN, 0);
-                else if(GML(M_MODE_RESTORE))
-                    SML(M_RESTORE_UP, 0);
-                
-                project.printHeadPos &= ~UPDOWN_MASK;
-                
-                project.printHeadState = 0;
-            }
-        break;
-        default:
-        break;
-    }
-}
-
-//吸油
-void Absorb(void)
-{
-    switch(project.printHeadState)
-    {
-        case 0:
-            SYL(Y_UPDOWN, 1);
-            project.printHeadState = 1;
-            
-            UART1_printf("Action----Absorb\r\n");
-        break;
-        case 1:
-            if(GXL(X_ABSORB_L))//动作到位
-            {
-                SYL(Y_UPDOWN, 0);
-                project.printHeadState = 2;
-            }
-        break;
-        case 2:
-            if(GXL(X_ABSORB_O))//动作到位
-            {
-                UART1_printf("Action----Absorb----Finish\r\n");
-              
-                if(GML(M_MODE_AUTO))
-                    NextAction();
-                else if(GML(M_MODE_MANUAL))
-                    SML(M_MAN_UPDOWN, 0);
-                
-                project.printHeadState = 0;
-            }
-        break;
-        default:
-        break;
-    }
-}
-
-void Front(void)
-{
-    switch(project.printHeadState)
-    {
-        case 0:
-            SYL(Y_FRONTBACK, 1);
-            project.printHeadState = 1;
-            
-            UART1_printf("Action----Front\r\n");
-        break;
-        case 1:
-            if(GXL(X_PRINT_O))//动作到位
-            {
-                UART1_printf("Action----Front----Finish\r\n");
-              
-                if(GML(M_MODE_AUTO))
-                    NextAction();
-                else if(GML(M_MODE_MANUAL))
-                    SML(M_MAN_FRONTBACK, 0);
-                
-                project.printHeadPos |= FRONTBACK_MASK;
-                
-                project.printHeadState = 0;
-            }
-        break;
-        default:
-        break;
-    }
-}
-
-void Back(void)
-{
-    switch(project.printHeadState)
-    {
-        case 0:
-            SYL(Y_FRONTBACK, 0);
-            project.printHeadState = 1;
-            
-            UART1_printf("Action----Back\r\n");
-        break;
-        case 1:
-            if(GXL(X_ABSORB_O))//动作到位
-            {
-                UART1_printf("Action----Back----Finish\r\n");
-                
-                if(GML(M_MODE_AUTO))
-                    NextAction();
-                else if(GML(M_MODE_MANUAL))
-                    SML(M_MAN_FRONTBACK, 0);
-                else if(GML(M_MODE_RESTORE))
-                    SML(M_RESTORE_HOME, 0);
-                
-                project.printHeadPos &= ~FRONTBACK_MASK;
-                
-                project.printHeadState = 0;
-                
-                SML(M_HOME_RETURN, 0);
-            }
-        break;
-        default:
-        break;
-    }
-}
-
-void PrintDown(void)
-{
-    switch(project.printHeadState)
-    {
-        case 0:
-            if(GML(M_HOME_FINISH))//等待回原点到位
-            {
-                SYL(Y_UPDOWN, 1);
-                project.printHeadState = 1;
-                
-                UART1_printf("Action----Print Down\r\n");
-            }
-        break;
-        case 1:
-            if(GXL(X_PRINT_L))//动作到位
-            {
-                UART1_printf("Action----Print Down----Finish\r\n");
-              
-                if(GML(M_MODE_AUTO))
-                    NextAction();
-                else if(GML(M_MODE_MANUAL))
-                    SML(M_MAN_UPDOWN, 0);
-                
-                project.printHeadPos |= UPDOWN_MASK;
-                
-                project.printHeadState = 0;
-            }
-        break;
-        default:
-        break;
-    }
-}
-
-void PrintUp(void)
-{
-    switch(project.printHeadState)
-    {
-        case 0:
-            SYL(Y_UPDOWN, 0);
-            project.printHeadState = 1;
-            
-            UART1_printf("Action----Print Up\r\n");
-        break;
-        case 1:
-            if(GXL(X_PRINT_O))//动作到位
-            {
-                UART1_printf("Action----Print Up----Finish\r\n");
-              
-                if(GML(M_MODE_AUTO))
-                {
-                    if(project.pCurAction->act != HOME)
-                        NextAction();
-                }
-                else if(GML(M_MODE_MANUAL))
-                    SML(M_MAN_UPDOWN, 0);
-                else if(GML(M_MODE_RESTORE))
-                    SML(M_RESTORE_UP, 0);
-                
-                project.printHeadPos &= ~UPDOWN_MASK;
-                
-                project.printHeadState = 0;
-            }
-        break;
-        default:
-        break;
-    }
-}
-
-//吸油
-void Print(void)
-{
-    switch(project.printHeadState)
-    {
-        case 0:
-            if(GML(M_HOME_FINISH))//等待回原点到位
-            {
-                SYL(Y_UPDOWN, 1);
-                project.printHeadState = 1;
-                
-                UART1_printf("Action----Print\r\n");
-            }
-            else
-                UART1_printf("Action----Print----Waiting for Home Finish\r\n");
-        break;
-        case 1:
-            if(GXL(X_PRINT_L))//动作到位
-            {
-                SYL(Y_UPDOWN, 0);
-                project.printHeadState = 2;
-            }
-        break;
-        case 2:
-            if(GXL(X_PRINT_O))//动作到位
-            {
-                UART1_printf("Action----Print----Finish\r\n");
-              
-                if(GML(M_MODE_AUTO))
-                    NextAction();
-                else if(GML(M_MODE_MANUAL))
-                    SML(M_MAN_UPDOWN, 0);
-                
-                project.printHeadState = 0;
-            }
-        break;
-        default:
-        break;
-    }
-}
-
-void Shift(void)
-{
-    switch(project.platformState)
-    {
-        case 0:
-            if(GXL(X_SHIFT_L1) && GXL(X_SHIFT_L2))//当前点已到极限点，则先退回到原点
-            {
-                if(project.platformPos == 0)//只有一个位置，则跳过此步骤
-                {
-                    UART1_printf("Action----Shift----Finish----%d\r\n", project.platformPos);
-                    
-                    if(GML(M_MODE_AUTO))
-                        NextAction();
-                    else if(GML(M_MODE_MANUAL))
-                        SML(M_MAN_AUX, 0);
-                }
-                else//退回到位置0
-                {
-                    if(GML(M_MODE_AUTO))
-                        project.pCurAction->act = RETURN; //*(project.pCurAction)).act
-                    else if(GML(M_MODE_MANUAL))
-                        SML(M_MAN_AUX_RETURN, 1);
-                    
-                    UART1_printf("Action----Shift++++Return\r\n");
-                }
-            }
-            else
-            {                      
-                if(project.platformPos == 0)//位置0直接移位
-                {
-                    SYL(Y_POS, 1);
-                    SYL(Y_SHIFT, 1);
-                    
-                    UART1_printf("Action----Shift0----%d\r\n", project.platformPos);
-                    
-                    project.platformState = 3;
-                }
-                else//先回退一点
-                {
-                    SYL(Y_SHIFT, 0);//回退一点
-                    
-                    project.platformState = 1;
-                    
-                    UART1_printf("Action----Shift++++%d\r\n", project.platformPos);
-                }
-            }
-        break;
-        case 1:
-            if(GXF(X_SHIFT_L2))//回退到位
-            {
-                SYL(Y_POS, 0);
-                SYL(Y_SHIFT, 1);
-                
-                //UART1_printf("Action----Shift----%d\r\n", project.platformPos);
-                
-                project.platformState = 2;
-            }
-        break;
-        case 2:
-            if(GXL(X_POS))//启动定位气缸
-            {
-                SYL(Y_POS, 1);
-                
-                project.platformState = 3;
-            }
-        break;
-        case 3:
-            if(GXL(X_SHIFT_L1))
-            {     
-                UART1_printf("Action----Shift----Finish----%d\r\n", project.platformPos);
-              
-                project.platformPos++;
-                
-                if(GML(M_MODE_AUTO))
-                    NextAction();
-                else if(GML(M_MODE_MANUAL))
-                    SML(M_MAN_AUX, 0);
-                
-                project.platformState = 0;
-            }
-        break;
-        default:
-        break;
-    }
-}
-
-
-void Return(void)
-{
-    switch(project.platformState)
-    {
-        case 0://先回位一点
-            SYL(Y_SHIFT, 0);
-            
-            project.platformState = 1;
-            
-            UART1_printf("Action----Return\r\n");
-        break;
-        case 1:
-            if(GXF(X_SHIFT_L2))
+        if(project.platformState == 1)
+        {
+            if(!GXL(X_SHIFT_L2))
             {
                 SYL(Y_POS, 0);//再将定位气缸收回来
                 
                 project.platformState = 2;
             }
-        break;
-        case 2:
-            if(GXL(X_SHIFT_O))//确定到位
-            {
-                UART1_printf("Action----Return----Finish----%d\r\n", project.platformPos);
-              
-                project.platformPos = 0;
-                
-                //更新动作
-                if(GML(M_MODE_AUTO))
-                    NextAction();
-                else if(GML(M_MODE_MANUAL))
-                {
-                    SML(M_MAN_AUX, 0);
-                    SML(M_MAN_AUX_RETURN, 0);
-                }
-                
-                project.platformState = 0;
-            }
-        break;
-        default:
-        break;
-    }
-}
-
-void Push(void)
-{
-    switch(project.platformState)
-    {
-        case 0://
-            SYL(Y_POS, 0);
-            SYL(Y_SHIFT, 1);
-
-            project.platformState = 1;
-            
-            UART1_printf("Action----Push\r\n");
-        break;
-        case 1:
-            if(GXF(X_POS))
-            //if(GXR(X_SHIFT_O))
-            {
-                SYL(Y_SHIFT, 0);
-                
-                project.platformState = 2;
-            }
-        break;
-        case 2:
+//            else
+//                UART1_printf("Action----Home Return----Waiting for X_SHIFT_L2\r\n");
+        }
+        else if(project.platformState == 2)
+        {
             if(GXL(X_SHIFT_O))
             {
-                UART1_printf("Action----Push----Finish\r\n");
-              
-                SML(M_PUSH_RETURN, 0);
-                SML(M_PUSH, 0);
+                SML(M_HOME_FINISH, 1);
+                SML(M_HOME_CHECK, 0);
                 
-                if(GML(M_MODE_AUTO))
-                    NextAction();
+                project.platformPos = 0;
                 
                 project.platformState = 0;
+                
+                UART1_printf("Action----Home Return----Finish\r\n");
             }
-        break;
-        default:
-        break;
-    }
-}
-
-void Home(void)
-{
-    if(GML(M_PROGRAM_AUX) || project.platformHomeFlag)//
-    {
-        if(project.platformPos != 0)
-        {
-            //RETURN
-            if(!GML(M_HOME_RETURN))
-            {
-                SML(M_HOME_RETURN, 1);
-                switch(project.platformState)
-                {
-                    case 0://先回位一点
-                        SYL(Y_SHIFT, 0);
-                        
-                        SML(M_HOME_FINISH, 0);
-                        
-                        UART1_printf("Action----Home Return\r\n");
-                        
-                        SML(M_HOME_CHECK, 1);//开始检查是否回原点到位
-                        
-        //                if(project.platformPos != 0)
-        //                {
-                            project.platformState = 1;
-        //                }
-        //                else
-        //                {
-        //                    project.platformState = 2;
-        //                    SYL(Y_POS, 0);
-        //                }
-                    break;
-            //        case 1:
-            //            if(GXF(X_SHIFT_L2))
-            //            {
-            //                SYL(Y_POS, 0);//再将定位气缸收回来
-            //                
-            //                project.platformState = 0;
-            //                
-            //                SML(M_HOME_CHECK, 1);//开始检查是否回原点到位
-            //            }
-            //        break;
-            
-                    default:
-                    break;
-                }
-            }
+//            else
+//                UART1_printf("Action----Home Return----Waiting for X_SHIFT_O\r\n");
         }
     }
-    
-    if(project.printHeadPos&UPDOWN_MASK)
-    {
-        if(project.printHeadPos&FRONTBACK_MASK)
-            PrintUp();
-        else
-            AbsorbUp();
-    }
     else
-        Back();
+    {
+        if(GXL(X_POS))
+        {
+            SML(M_HOME_FINISH, 1);
+            SML(M_HOME_CHECK, 0);
+            
+            project.platformPos = 0;
+            
+            project.platformState = 0;
+            
+            UART1_printf("Action----Home Return----Finish\r\n");
+        }
+    }
 }
 
-void PrintHeadHome(void)
+void Push_Check(void)
 {
-    if(project.printHeadPos&UPDOWN_MASK)
+    if(project.platformState == 1)
     {
-        if(project.printHeadPos&FRONTBACK_MASK)
-            PrintUp();
-        else
-            AbsorbUp();
+        if(GXL(X_SHIFT_L1))
+        {
+            SYL(Y_SHIFT, 0);
+            
+            project.platformPos = 1;
+            project.platformState = 2;
+        }
     }
-    else
-        Back();
+    else if(project.platformState == 2)
+    {
+        if(GXL(X_POS))
+        {
+            SYL(Y_POS, 0);  
+          
+            SML(M_HOME_FINISH, 1);
+            SML(M_PUSH_CHECK, 0);
+            
+            project.platformPos = 0;
+            
+            project.platformState = 0;
+            
+            UART1_printf("Action----PushHome----Finish\r\n");
+        }
+    }
 }

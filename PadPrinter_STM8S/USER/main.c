@@ -29,24 +29,12 @@
 #include "simplc_timer.h"
 
 #include "project.h"
-
-static void delay_ms( u32 nTime)
-{
-    uint16_t i,j,k;
-	while(0 >= nTime)
-    {
-        for(i=0;i<2000;i++)
-            for(j=0;j<2000;j++)
-                for(k=0;k<2000;k++);
- 
-	  	nTime--;
-    }
-}
+#include "misc.h"
 
 static void IWDG_Init(void)
 {
     IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable);
-    IWDG_SetPrescaler(IWDG_Prescaler_128);
+    IWDG_SetPrescaler(IWDG_Prescaler_256);
     IWDG_SetReload(0xFF);
     IWDG_WriteAccessCmd(IWDG_WriteAccess_Disable);
     IWDG_Enable();
@@ -59,77 +47,79 @@ static void IWDG_Init(void)
 int main(void)
 {
     uint16_t ledCnt = 0;
-    uint8_t eepromDefaultData;
     
 	/*设置外部时钟24M为主时钟*/ 
 	SystemClock_Init(HSI_Clock);//HSI_Clock  HSE_Clock
     
     SIMPLC_IO_Init();
     SIMPLC_Timer_Init();
-    SIMPLC_Timer_Create(0, 1000, 0);
-    SIMPLC_Timer_Create(1, 100, 0);
-    SIMPLC_Timer_Create(2, 100, 0);
+    SIMPLC_Timer_Create(0, 1000, 0);//ACTIN DELAY
+    SIMPLC_Timer_Create(1, 100, 0);//KEY DELAY FAST SLOW
+    SIMPLC_Timer_Create(2, 100, 0);//KEY BEEP
+    SIMPLC_Timer_Create(3, 100, 0);//OUTPUT FLASH
     
-    enableInterrupts();
-    
-	Uart2_Init(115200);
+    Uart2_Init(115200);
     UART1_printf("\r\nHello PadPrinter!\r\n");
     
-	//Beep_Init(BEEP_FREQUENCY_1KHZ);
+    //Beep_Init(BEEP_FREQUENCY_1KHZ);
 	TIM2_PWM_Init();
+
+    AT24CXX_Init();
     
     TM1638_Init();
     TM1638_SendData(0, "88888");
-    //delay_ms(1500);
-    //TS(0, 1000);
-    //while(!TG(0));//延时1S查看数码管显示是否有损坏
     
-    AT24CXX_Init();
-    eepromDefaultData = AT24CXX_ReadOneByte(EEPROM_ADDR_DEFAULT);
-    if(eepromDefaultData == 0xAA)//初始化程序和数据
+    enableInterrupts();
+
+    //延时1S查看数码管显示是否有损坏
+//    TS(1, 200);
+//    while(!TG(1));
+//    while(1)
+//    {
+//        ledCnt++;
+//        if(ledCnt > 5000)
+//        {
+//            ledCnt = 0;
+//            break;
+//        }
+//    }
+
+    EEPROM_Check();
+
+    MachineState_Check();//已检查机器类型
+    
+    //MachineType_Check();
+    
+    while(ledCnt < 2)
     {
-        ProgramResetDefault();
-        eepromDefaultData = AT24CXX_ReadOneByte(EEPROM_ADDR_DEFAULT);
-    }
-    if(eepromDefaultData != 0x55)
-    {
-        AT24CXX_WriteOneByte(EEPROM_ADDR_DEFAULT, 0x55);
-        eepromDefaultData = AT24CXX_ReadOneByte(EEPROM_ADDR_DEFAULT);
-    }
-    if(eepromDefaultData != 0x55)
-    {
-        AT24CXX_WriteOneByte(EEPROM_ADDR_DEFAULT, 0x55);
-        eepromDefaultData = AT24CXX_ReadOneByte(EEPROM_ADDR_DEFAULT);
-    }
-    if(eepromDefaultData != 0x55)
-    {
-        while(1)
+        if(!GML(M_BEEPER))
         {
-            TM1638_SendData(0, "-----");
-            UART1_printf("EEPROM is error!\r\n");
-            
             TIM2_Cmd(ENABLE);
-//            //delay_ms(30000);
-//            TS(0, 1000);
-//            TS(0, 1000);
-//            while(!TG(0));
-//            TIM2_Cmd(DISABLE);
-//            //delay_ms(30000);
-//            TS(0, 1000);
-//            TS(0, 1000);
-//            while(!TG(0));
+            SML(M_BEEPER, 1);
+            TS(2, 200);
+            //UART1_printf("Beeping Up\r\n");
+        }
+        else if(GML(M_BEEPER) && TG(2))
+        {
+            SML(M_BEEPER, 0);
+            TIM2_Cmd(DISABLE);
+            //UART1_printf("Beeping Down\r\n");
+            
+            ledCnt++;
         }
     }
-
+    
     SML(M_POWERON, 1);
     SML(M_HOME_FINISH, 1);
-    //IWDG_Init();
+    TS(1, 100);
+    
+    IWDG_Init();
     
 	while (1)
 	{
 #if 1
         //喂狗
-        //IWDG_ReloadCounter();
+        IWDG_ReloadCounter();
         
         //刷新按键
         Key_Refresh();
@@ -140,23 +130,33 @@ int main(void)
         //执行工程
         Project_Run();
         
-        ledCnt++;
-        if(ledCnt > 5000)
-        {
-            ledCnt = 0;
-            //if(!GML(M_PROGRAM_AUTO))
-                //UART1_printf("Running\r\n");
-        }
+//        if(GXL(X_SHIFT_L1))
+//            UART1_printf("X_SHIFT_L1\r\n");
+//        if(GXL(X_POS))
+//            UART1_printf("X_POS\r\n");
+
+//        if(GXL(X_SHIFT_L2))
+//            UART1_printf("X_SHIFT_L2\r\n");
+//        if(GXL(X_SHIFT_L1))
+//            UART1_printf("X_SHIFT_L1\r\n");
+//        if(GXL(X_POS))
+//            UART1_printf("X_POS\r\n");
+//        if(GXL(X_SHIFT_O))
+//            UART1_printf("X_SHIFT_O\r\n");
+        
+//        ledCnt++;
+//        if(ledCnt > 5000)
+//        {
+//            ledCnt = 0;
+//            //if(!GML(M_PROGRAM_AUTO))
+//                //UART1_printf("Running\r\n");
+//        }
 //#else       
         UartDataParse();
 #endif
       
     }
 }
-
-
-
-
 
 #ifdef USE_FULL_ASSERT
 
