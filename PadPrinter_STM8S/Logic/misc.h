@@ -9,7 +9,7 @@
 
 #define OUTPUT_FLASH_PERIOD    (1000/2)
 
-#define DELAY_KEY_FILTER_PERIOD    (150)
+#define DELAY_KEY_FILTER_PERIOD    (100)
 
 void MachineSensorsHead_Check(void);
 void MachineSensorsPlatform_Check(void);

@@ -19,5 +19,6 @@ void Push(void);
 void Home(void);
 void PrintHeadHome(void);
 void PushHome(void);
+void Push2Home(void);
 
 #endif

@@ -4,7 +4,7 @@
 
 #include "stm8s.h"
 
-#define PROJECTNUM  10
+#define PROJECTNUM  11
 #define MAX_ACTIONS_PER_PROJECT 40
 
 //时间默认参数
@@ -56,7 +56,8 @@
 #define EEPROM_ADDR_PROGRAM7            EEPROM_ADDR_PROGRAM6+sizeof(process6)
 #define EEPROM_ADDR_PROGRAM8            EEPROM_ADDR_PROGRAM7+sizeof(process7)
 #define EEPROM_ADDR_PROGRAM9            EEPROM_ADDR_PROGRAM8+sizeof(process8)
-#define EEPROM_ADDR_PROGRAM0            EEPROM_ADDR_PROGRAM9+sizeof(process9)+5
+#define EEPROM_ADDR_PROGRAM10           EEPROM_ADDR_PROGRAM9+sizeof(process9)
+#define EEPROM_ADDR_PROGRAM0            EEPROM_ADDR_PROGRAM10+sizeof(process10)+5
 #define EEPROM_ADDR_END                 EEPROM_ADDR_PROGRAM0+MAX_ACTIONS_PER_PROJECT*3
 
 //设备类型
@@ -83,6 +84,7 @@ typedef enum
     PUSH = 11,
     PUSHHOME = 12,
     HOME = 13,
+    PUSH2HOME = 14,
 }ACT_TypeDef;
 
 typedef struct
@@ -169,6 +171,8 @@ typedef struct
     
     uint8_t programSelfPos;
     ACTION_TypeDef *pCurProSelfAction;
+    
+    ACTION_TypeDef *pCurDelayAction;
     
     uint8_t led;
     

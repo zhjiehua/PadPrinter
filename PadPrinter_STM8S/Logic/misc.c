@@ -86,29 +86,61 @@ void MachineState_Check(void)
   
     UART1_printf("Machine state checking...\r\n");
 
-    TM1638_SendData(0, "o----");
+    TM1638_SendData(0, "    ");
 
     while(1)//检测印头
     {
         SIMPLC_IO_Refresh();
+
         
-        if(GXL(X_ABSORB_O))
+//        if(GXL(X_ABSORB_L))
+//            TM1638_SendData(4, "1");
+//        else if(GXL(X_PRINT_O))
+//            TM1638_SendData(4, "3");
+//        else if(GXL(X_PRINT_L))
+//            TM1638_SendData(4, "4");
+//        else
+//            TM1638_SendData(0, "00 20");
+        
+//        if(GXL(X_ABSORB_L))
+//            TM1638_SendData(0, "01");
+//        else if(GXL(X_PRINT_O))
+//            TM1638_SendData(0, "03");
+//        else if(GXL(X_PRINT_L))
+//            TM1638_SendData(0, "04");
+//        else
+//            TM1638_SendData(0, "00");
+        
+        if(GXL(X_ABSORB_O) && !GXL(X_ABSORB_L) && !GXL(X_PRINT_O) && !GXL(X_PRINT_L))
         {
             TM1638_SendData(0, "88888");
             break;
         }
-        
-        if(GXL(X_ABSORB_L))
-            TM1638_SendData(4, "1");
-        else if(GXL(X_PRINT_O))
-            TM1638_SendData(4, "3");
-        else if(GXL(X_PRINT_L))
-            TM1638_SendData(4, "4");
+        else if(!GXL(X_ABSORB_O) && GXL(X_ABSORB_L) && !GXL(X_PRINT_O) && !GXL(X_PRINT_L))
+            TM1638_SendData(0, "01");
+        else if(!GXL(X_ABSORB_O) && !GXL(X_ABSORB_L) && GXL(X_PRINT_O) && !GXL(X_PRINT_L))
+            TM1638_SendData(0, "03");
+        else if(!GXL(X_ABSORB_O) && !GXL(X_ABSORB_L) && !GXL(X_PRINT_O) && GXL(X_PRINT_L))
+            TM1638_SendData(0, "04");
+        else if(GXL(X_ABSORB_O) && GXL(X_ABSORB_L) && !GXL(X_PRINT_O) && !GXL(X_PRINT_L))
+            TM1638_SendData(0, "01");
+        else if(GXL(X_ABSORB_O) && !GXL(X_ABSORB_L) && GXL(X_PRINT_O) && !GXL(X_PRINT_L))
+            TM1638_SendData(0, "03");
+        else if(GXL(X_ABSORB_O) && !GXL(X_ABSORB_L) && !GXL(X_PRINT_O) && GXL(X_PRINT_L))
+            TM1638_SendData(0, "04");
         else
-            TM1638_SendData(0, "o----");
+            TM1638_SendData(0, "00");
+        
+        if(!GXL(X_ABSORB_O))
+        {
+            TM1638_SendData(3, "20");
+        }
+        else
+            TM1638_SendData(3, "00");
+          
     }
     
-    TM1638_SendData(0, "--o--");
+    TM1638_SendData(0, "--A--");
     
     while(1)//检测平台
     {
@@ -116,6 +148,16 @@ void MachineState_Check(void)
         
         if(GXL(X_SHIFT_L1))
             TM1638_SendData(4, "2");
+        else if(GXL(X_POS))
+        {
+                project.machineType = MACHINE_2SENSORS;
+                
+                TM1638_SendData(0, "88888");
+                
+                UART1_printf("++++++++This is a 2 sensors machine!!!!\r\n");
+                
+                break;
+        } 
         else if(GXL(X_SHIFT_O))
         {
             if(GXL(X_SHIFT_L2))
@@ -133,18 +175,8 @@ void MachineState_Check(void)
                 break;
             }
         }
-        else if(GXL(X_POS))
-        {
-                project.machineType = MACHINE_2SENSORS;
-                
-                TM1638_SendData(0, "88888");
-                
-                UART1_printf("++++++++This is a 2 sensors machine!!!!\r\n");
-                
-                break;
-        }
         else
-            TM1638_SendData(0, "--o--");
+            TM1638_SendData(0, "--A--");
     }
     
     UART1_printf("Machine state check finish!\r\n");
@@ -193,7 +225,7 @@ void Segment_Flash(void)
     }
     if(GML(M_SEG_FLASHFLAG) && TG(0))
     {
-        sprintf((char*)project.segStr, "Pro%2d", project.programNum);
+        sprintf((char*)project.segStr, "Pro%02d", project.programNum);
         TM1638_SendData(0, project.segStr);
         
         SML(M_SEG_FLASHFLAG, 0);
@@ -209,7 +241,7 @@ void Segment_Flash(void)
             UART1_printf("PadPrinter is ready...\r\n");
             
             //闪烁完后，显示产量
-            sprintf((char*)project.segStr, "%5d", project.productOutput);
+            sprintf((char*)project.segStr, "%05d", project.productOutput);
             TM1638_SendData(0, project.segStr);
             
             SML(M_OUTPUT_FLASH_FLAG, 1);
@@ -256,11 +288,41 @@ void Output_Flash(void)
     }
     if(!GML(M_OUTPUT_FLASH))
     {
-        sprintf((char*)project.segStr, "%5d", project.productOutput);
+        sprintf((char*)project.segStr, "%05d", project.productOutput);
         TM1638_SendData(0, project.segStr);
+      
+//        if(project.productOutput <= 9)
+//        {
+//            TM1638_SendData(0, "0000");
+//            sprintf((char*)project.segStr, "%1d", project.productOutput);
+//            TM1638_SendData(4, project.segStr);
+//        }
+//        else if(project.productOutput <= 99)
+//        {
+//            TM1638_SendData(0, "000");
+//            sprintf((char*)project.segStr, "%2d", project.productOutput);
+//            TM1638_SendData(3, project.segStr);
+//        }
+//        else if(project.productOutput <= 999)
+//        {
+//            TM1638_SendData(0, "00");
+//            sprintf((char*)project.segStr, "%3d", project.productOutput);
+//            TM1638_SendData(2, project.segStr);
+//        }
+//        else if(project.productOutput <= 9999)
+//        {
+//            TM1638_SendData(0, "0");
+//            sprintf((char*)project.segStr, "%4d", project.productOutput);
+//            TM1638_SendData(1, project.segStr);
+//        }
+//        else
+//        {
+//            sprintf((char*)project.segStr, "%5d", project.productOutput);
+//            TM1638_SendData(0, project.segStr);
+//        }
     }
     else
     {
-        TM1638_SendData(0, "     ");
+        //TM1638_SendData(0, "     ");
     }
 }

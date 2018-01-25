@@ -87,14 +87,14 @@ void TimingDelay_Decrement(void)
  * 返回: 无
  * 说明: 无 
  ******************************************************************************/
-void Delay_ms(u16 nms)
-{
-  	
-	TimingDelay = nms;
-	
-	while(TimingDelay != 0)
-	  	;
-}
+//void Delay_ms(u16 nms)
+//{
+//  	
+//	TimingDelay = nms;
+//	
+//	while(TimingDelay != 0)
+//	  	;
+//}
 
 /*******************************************************************************
  * 名称: TIM2_PWM_Init

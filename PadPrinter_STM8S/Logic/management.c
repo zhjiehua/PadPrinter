@@ -40,12 +40,12 @@ void ProgramSelf(void)
         
         project.programSelfPos = 0;
         
-        sprintf((char*)project.segStr, "%2d-", project.programSelfPos);
+        sprintf((char*)project.segStr, "%02d-", project.programSelfPos);
         TM1638_SendData(0, project.segStr);
         
         project.pCurProSelfAction = project.program + project.programSelfPos;
         
-        sprintf((char*)project.segStr, "%2d", project.pCurProSelfAction->act);
+        sprintf((char*)project.segStr, "%02d", project.pCurProSelfAction->act);
         TM1638_SendData(3, project.segStr);
     }
   
@@ -57,10 +57,10 @@ void ProgramSelf(void)
         
         project.pCurProSelfAction = project.program + project.programSelfPos;
         
-        sprintf((char*)project.segStr, "%2d-", project.programSelfPos);
+        sprintf((char*)project.segStr, "%02d-", project.programSelfPos);
         TM1638_SendData(0, project.segStr);
         
-        sprintf((char*)project.segStr, "%2d", project.pCurProSelfAction->act);
+        sprintf((char*)project.segStr, "%02d", project.pCurProSelfAction->act);
         TM1638_SendData(3, project.segStr);
     }
     else if(GMR(M_KEY_SLOW))//减步骤
@@ -71,10 +71,10 @@ void ProgramSelf(void)
         
         project.pCurProSelfAction = project.program + project.programSelfPos;
         
-        sprintf((char*)project.segStr, "%2d-", project.programSelfPos);
+        sprintf((char*)project.segStr, "%02d-", project.programSelfPos);
         TM1638_SendData(0, project.segStr);
         
-        sprintf((char*)project.segStr, "%2d", project.pCurProSelfAction->act);
+        sprintf((char*)project.segStr, "%02d", project.pCurProSelfAction->act);
         TM1638_SendData(3, project.segStr);
     }
     
@@ -125,10 +125,10 @@ void ProgramSelf(void)
         
         project.pCurProSelfAction = project.program + project.programSelfPos;
         
-        sprintf((char*)project.segStr, "%2d-", project.programSelfPos);
+        sprintf((char*)project.segStr, "%02d-", project.programSelfPos);
         TM1638_SendData(0, project.segStr);
         
-        sprintf((char*)project.segStr, "%2d", project.pCurProSelfAction->act);
+        sprintf((char*)project.segStr, "%02d", project.pCurProSelfAction->act);
         TM1638_SendData(3, project.segStr);
     }
     else if(GMR(M_KEY_FRONTBACK))//减程序
@@ -173,10 +173,10 @@ void ProgramSelf(void)
         
         project.pCurProSelfAction = project.program + project.programSelfPos;
         
-        sprintf((char*)project.segStr, "%2d-", project.programSelfPos);
+        sprintf((char*)project.segStr, "%02d-", project.programSelfPos);
         TM1638_SendData(0, project.segStr);
         
-        sprintf((char*)project.segStr, "%2d", project.pCurProSelfAction->act);
+        sprintf((char*)project.segStr, "%02d", project.pCurProSelfAction->act);
         TM1638_SendData(3, project.segStr);
     }
     
@@ -212,10 +212,10 @@ void ProgramSelf(void)
         
         project.pCurProSelfAction = project.program + project.programSelfPos;
         
-        sprintf((char*)project.segStr, "%2d-", project.programSelfPos);
+        sprintf((char*)project.segStr, "%02d-", project.programSelfPos);
         TM1638_SendData(0, project.segStr);
         
-        sprintf((char*)project.segStr, "%2d", project.pCurProSelfAction->act);
+        sprintf((char*)project.segStr, "%02d", project.pCurProSelfAction->act);
         TM1638_SendData(3, project.segStr);
     }
     
@@ -328,11 +328,11 @@ void ProgramSelect(void)
         project.programNum = AT24CXX_ReadOneByte(EEPROM_ADDR_PROGRAM_NUM);
         
         //刷新数码管
-        sprintf((char*)project.segStr, "Pro%2d", project.programNum);
+        sprintf((char*)project.segStr, "Pro%02d", project.programNum);
         TM1638_SendData(0, project.segStr);
     }
     
-    if(GMR(M_KEY_FAST))//加程序
+    if(GMR(M_KEY_SLOW))//加程序  M_KEY_FAST  M_KEY_SLOW
     {
         if(!GML(M_INTSET))
         {
@@ -342,7 +342,7 @@ void ProgramSelect(void)
                 project.programNum++;
             
             //刷新数码管
-            sprintf((char*)project.segStr, "Pro%2d", project.programNum);
+            sprintf((char*)project.segStr, "Pro%02d", project.programNum);
             TM1638_SendData(0, project.segStr);
         }
         else
@@ -351,11 +351,11 @@ void ProgramSelect(void)
             if(project.intSetPos > 10)
                 project.intSetPos = 0;
             
-            sprintf((char*)project.segStr, "%2d-", project.intSetPos);
+            sprintf((char*)project.segStr, "%02d-", project.intSetPos);
             TM1638_SendData(0, project.segStr);
         }
     }
-    else if(GMR(M_KEY_SLOW))//减程序
+    else if(GMR(M_KEY_FAST))//减程序
     {
         if(!GML(M_INTSET))
         {
@@ -365,7 +365,7 @@ void ProgramSelect(void)
                 project.programNum--;
             
             //刷新数码管
-            sprintf((char*)project.segStr, "Pro%2d", project.programNum);
+            sprintf((char*)project.segStr, "Pro%02d", project.programNum);
             TM1638_SendData(0, project.segStr);
         }
         else
@@ -374,7 +374,7 @@ void ProgramSelect(void)
             if(project.intSetPos >= 255)
                 project.intSetPos = 10;
             
-            sprintf((char*)project.segStr, "%2d-", project.intSetPos);
+            sprintf((char*)project.segStr, "%02d-", project.intSetPos);
             TM1638_SendData(0, project.segStr);
         }
     }
@@ -438,7 +438,7 @@ void ProgramSelect(void)
             project.intSetAuxCnt++;
             if(project.intSetAuxCnt >= 10)
             {
-                sprintf((char*)project.segStr, "%2d-%2d", project.intSetPos, project.intSetVal);
+                sprintf((char*)project.segStr, "%02d-%02d", project.intSetPos, project.intSetVal);
                 TM1638_SendData(0, project.segStr);
                 
                 SML(M_INTSET, 1);
@@ -453,7 +453,7 @@ void ProgramSelect(void)
             if(project.intSetVal > 10)
                 project.intSetVal = 0;
             
-            sprintf((char*)project.segStr, "%2d", project.intSetVal);
+            sprintf((char*)project.segStr, "%02d", project.intSetVal);
             TM1638_SendData(3, project.segStr);
         }
         else if(GMR(M_KEY_FRONTBACK))
@@ -462,7 +462,7 @@ void ProgramSelect(void)
             if(project.intSetVal >= 255)
                 project.intSetVal = 10;
             
-            sprintf((char*)project.segStr, "%2d", project.intSetVal);
+            sprintf((char*)project.segStr, "%02d", project.intSetVal);
             TM1638_SendData(3, project.segStr);
         }
     }
@@ -475,7 +475,7 @@ void Key_Distinguish(void)
     {
         if(TG(1))
         {
-            if(GML(M_KEY_FAST))//快
+            if(GML(M_KEY_SLOW))//快  M_KEY_SLOW  M_KEY_FAST
             {
                 SML(M_OUTPUT_FLASH_FLAG, 0);
                 SML(M_SAVE_DELAY, 1);
@@ -491,7 +491,7 @@ void Key_Distinguish(void)
                 sprintf((char*)project.segStr, "%5d", project.pCurAction->delay);
                 TM1638_SendData(0, project.segStr);
             }
-            else if(GML(M_KEY_SLOW))//慢
+            else if(GML(M_KEY_FAST))//慢
             {
                 SML(M_OUTPUT_FLASH_FLAG, 0);
                 SML(M_SAVE_DELAY, 1);
@@ -577,7 +577,7 @@ void Key_Distinguish(void)
             }
             else
             {
-                sprintf((char*)project.segStr, "%5d", project.productOutput);
+                sprintf((char*)project.segStr, "%05d", project.productOutput);
                 TM1638_SendData(0, project.segStr);
                 
                 AT24CXX_WriteOneByte(project.programAddr+project.actionPos*3+2, project.pCurAction->delay);
@@ -636,10 +636,10 @@ void NextAction(void)
             if(project.actionPos >= project.actionCnt)
             {
                 project.productOutput++;
-                sprintf((char*)project.segStr, "%5d", project.productOutput);
-                TM1638_SendData(0, project.segStr);
+                //sprintf((char*)project.segStr, "%05d", project.productOutput);
+                //TM1638_SendData(0, project.segStr);
                 
-                //AT24CXX_WriteLenByte(EEPROM_ADDR_PRODUCTOUTPUT, project.productOutput, 2);
+                AT24CXX_WriteLenByte(EEPROM_ADDR_PRODUCTOUTPUT, project.productOutput, 2);
                 
                 if(GML(M_PROGRAM_PERIOD))
                 {
@@ -649,19 +649,26 @@ void NextAction(void)
                 
                 //保存修改过的延时参数
                 if(GML(M_SAVE_DELAY))
-                {
-                    for(project.actionPos=0;project.actionPos<project.actionCnt;project.actionPos++)
+                {   
+                    uint8_t i;
+                    //ACTION_TypeDef *pCurDelayAction;
+                  
+                    for(i=0;i<project.actionCnt;i++)
                     {
-                        project.pCurAction = project.program + project.actionPos;
-                        if(project.pCurAction->flag&0x80)
+                        project.pCurDelayAction = project.program + i;
+                        if(project.pCurDelayAction->flag&0x80)
                         {
-                            project.pCurAction->flag &= ~0x80;
+                            project.pCurDelayAction->flag &= ~0x80;
                             
-                            AT24CXX_WriteOneByte(project.programAddr+project.actionPos*3+2, project.pCurAction->delay);
-                            AT24CXX_WriteOneByte(project.programAddr+project.actionPos*3+2, project.pCurAction->delay);
-                            AT24CXX_WriteOneByte(project.programAddr+project.actionPos*3+2, project.pCurAction->delay);
+                            IWDG_ReloadCounter();
                             
-                            UART1_printf("Save the action %d delay : %d\r\n", project.actionPos, project.pCurAction->delay);
+                            AT24CXX_WriteOneByte(project.programAddr+i*3+2, project.pCurDelayAction->delay);
+                            AT24CXX_WriteOneByte(project.programAddr+i*3+2, project.pCurDelayAction->delay);
+                            AT24CXX_WriteOneByte(project.programAddr+i*3+2, project.pCurDelayAction->delay);
+                            
+                            IWDG_ReloadCounter();
+                            
+                            UART1_printf("Save the action %d delay : %d\r\n", i, project.pCurDelayAction->delay);
                         }
                     }
                     SML(M_SAVE_DELAY, 0);
@@ -691,10 +698,10 @@ void NextAction(void)
         if(project.actionPos >= project.actionCnt)
         {
             project.productOutput++;
-            sprintf((char*)project.segStr, "%5d", project.productOutput);
-            TM1638_SendData(0, project.segStr);
+            //sprintf((char*)project.segStr, "%05d", project.productOutput);
+            //TM1638_SendData(0, project.segStr);
             
-            //AT24CXX_WriteLenByte(EEPROM_ADDR_PRODUCTOUTPUT, project.productOutput, 2);
+            AT24CXX_WriteLenByte(EEPROM_ADDR_PRODUCTOUTPUT, project.productOutput, 2);
             
             if(GML(M_PROGRAM_PERIOD))
             {
@@ -705,18 +712,25 @@ void NextAction(void)
             //保存修改过的延时参数
             if(GML(M_SAVE_DELAY))
             {
-                for(project.actionPos=0;project.actionPos<project.actionCnt;project.actionPos++)
+                uint8_t i;
+                //ACTION_TypeDef *pCurDelayAction;
+              
+                for(i=0;i<project.actionCnt;i++)
                 {
-                    project.pCurAction = project.program + project.actionPos;
-                    if(project.pCurAction->flag&0x80)
+                    project.pCurDelayAction = project.program + i;
+                    if(project.pCurDelayAction->flag&0x80)
                     {
-                        project.pCurAction->flag &= ~0x80;
+                        project.pCurDelayAction->flag &= ~0x80;
                         
-                        AT24CXX_WriteOneByte(project.programAddr+project.actionPos*3+2, project.pCurAction->delay);
-                        AT24CXX_WriteOneByte(project.programAddr+project.actionPos*3+2, project.pCurAction->delay);
-                        AT24CXX_WriteOneByte(project.programAddr+project.actionPos*3+2, project.pCurAction->delay);
+                        IWDG_ReloadCounter();
                         
-                        UART1_printf("Save the action %d delay : %d\r\n", project.actionPos, project.pCurAction->delay);
+                        AT24CXX_WriteOneByte(project.programAddr+i*3+2, project.pCurDelayAction->delay);
+                        AT24CXX_WriteOneByte(project.programAddr+i*3+2, project.pCurDelayAction->delay);
+                        AT24CXX_WriteOneByte(project.programAddr+i*3+2, project.pCurDelayAction->delay);
+                        
+                        IWDG_ReloadCounter();
+                        
+                        UART1_printf("Save the action %d delay : %d\r\n", i, project.pCurDelayAction->delay);
                     }
                 }
                 SML(M_SAVE_DELAY, 0);
@@ -843,6 +857,71 @@ void Push_Check(void)
             project.platformState = 0;
             
             UART1_printf("Action----PushHome----Finish\r\n");
+        }
+    }
+}
+
+void Push2_Check(void)
+{
+    if(project.platformState == 1)
+    {
+        if(GXL(X_SHIFT_L1))
+        {
+            SYL(Y_SHIFT, 0);
+            
+            project.platformPos = 1;
+            project.platformState = 2;
+        }
+    }
+    else if(project.platformState == 2)
+    {
+        if(GXL(X_POS))
+        {
+            SYL(Y_POS, 0);  
+          
+            //SML(M_HOME_FINISH, 1);
+            //SML(M_PUSH_CHECK, 0);
+            
+            project.platformPos = 0;
+            
+            project.platformState = 3;
+            
+            //UART1_printf("Action----PushHome----Finish\r\n");
+        }
+    }
+    else if(project.platformState == 3)
+    {
+        SYL(Y_SHIFT, 1);
+        SYL(Y_POS, 1);
+        
+        project.platformState = 4;
+    }
+    else if(project.platformState == 4)
+    {
+        if(GXL(X_SHIFT_L1))
+        {
+            SYL(Y_SHIFT, 0);
+            
+            //SML(M_HOME_FINISH, 1);
+            
+            project.platformPos = 1;
+            project.platformState = 5;
+        }
+    }
+    else if(project.platformState == 5)
+    {
+        if(GXL(X_POS))
+        {
+            SYL(Y_POS, 0);  
+          
+            SML(M_HOME_FINISH, 1);
+            SML(M_PUSH2_CHECK, 0);
+            
+            project.platformPos = 0;
+            
+            project.platformState = 0;
+            
+            UART1_printf("Action----Push2Home----Finish\r\n");
         }
     }
 }

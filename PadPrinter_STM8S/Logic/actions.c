@@ -583,3 +583,31 @@ void PushHome(void)
         break;
     }
 }
+
+void Push2Home(void)
+{
+    switch(project.platformState)
+    {
+        case 0:
+            //if(GXL(X_POS))
+            {
+                SYL(Y_SHIFT, 1);
+                SYL(Y_POS, 1);
+                
+                UART1_printf("Action----Push2Home\r\n");
+                
+                SML(M_PUSH2_CHECK, 1);
+                SML(M_HOME_FINISH, 0);
+                
+                if(GML(M_MODE_AUTO))
+                    NextAction();
+                else if(GML(M_MODE_MANUAL))
+                    SML(M_MAN_AUX, 0);
+                
+                project.platformState = 1;
+            }
+        break;
+        default:
+        break;
+    }
+}

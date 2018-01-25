@@ -137,7 +137,8 @@ typedef struct
 
 #define M_INTSET                56
 
-#define M_PUSH_CHECK            64
+#define M_PUSH_CHECK            63
+#define M_PUSH2_CHECK           64
 
 #define M_HOME_RETURN           65
 #define M_HOME_CHECK            66

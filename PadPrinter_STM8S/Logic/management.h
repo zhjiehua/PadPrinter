@@ -18,6 +18,7 @@ void NextAction(void);
 
 void Home_Check(void);
 void Push_Check(void);
+void Push2_Check(void);
 
 void Project_Run(void);
 

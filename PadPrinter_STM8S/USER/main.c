@@ -72,7 +72,9 @@ int main(void)
     enableInterrupts();
 
     //延时1S查看数码管显示是否有损坏
-//    TS(1, 200);
+    delay_ms(2000);
+    //delay_ms(2000);
+//    TS(1, 1000);
 //    while(!TG(1));
 //    while(1)
 //    {

@@ -25,6 +25,8 @@ const ACTION_TypeDef process7[] = {{1, ABSORB, 0}, {1, FRONT, 0}, {1, PRINT, 0},
 const ACTION_TypeDef process8[] = {{1, ABSORB, 0}, {1, FRONT, 0}, {1, PRINT, 0}, {0, SHIFT, 0}, {0, PRINT,  0}, {0, SHIFT, 0}, {0, PRINT, 0}, {0, SHIFT, 0}, {0, PRINT, 0}, {0, SHIFT, 0}, {0, PRINT, 0}, {0, SHIFT, 0}, {0, PRINT, 0}, {1, HOME, 0}, {0, ACTION_NONE, 0}};
 const ACTION_TypeDef process9[] = {{1, ABSORB, 0}, {1, FRONT, 0}, {1, PRINT_DOWN, 0}, {1, SHIFT, 0}, {1, PRINT_UP,  0}, {1, HOME, 0}, {0, ACTION_NONE, 0}};
 
+const ACTION_TypeDef process10[] = {{1, ABSORB, 0}, {1, FRONT, 0}, {1, PRINT, 0}, {1, PUSH2HOME, 0}, {1, HOME, 0}, {0, ACTION_NONE, 0}};
+
 PROJECT_TypeDef project;
 
 void Program0Read(void)
@@ -229,6 +231,19 @@ void ProgramResetDefault(void)
         AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM9+j+2, process9[i].delay);
         j += 3;
     }
+    for(i=0,j=0;i<SIZEOF(process10);i++)
+    {
+        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM10+j, process10[i].flag);
+        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM10+j, process10[i].flag);
+        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM10+j, process10[i].flag);
+        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM10+j+1, process10[i].act);
+        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM10+j+1, process10[i].act);
+        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM10+j+1, process10[i].act);
+        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM10+j+2, process10[i].delay);
+        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM10+j+2, process10[i].delay);
+        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM10+j+2, process10[i].delay);
+        j += 3;
+    }
     for(i=0,j=0;i<SIZEOF(process0);i++)
     {
         AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM0+j, process0[i].flag);
@@ -273,7 +288,7 @@ void ProgramRead(void)
     IWDG_ReloadCounter();
     
     //刷新数码管
-    sprintf((char*)project.segStr, "Pro%2d", project.programNum);
+    sprintf((char*)project.segStr, "Pro%02d", project.programNum);
     TM1638_SendData(0, project.segStr);
     
 //    UART1_printf("EEPROM_ADDR_PROGRAM0 = %d\r\n", EEPROM_ADDR_PROGRAM0);
@@ -328,6 +343,10 @@ void ProgramRead(void)
         break;
         case 9:
             project.programAddr = EEPROM_ADDR_PROGRAM9;
+            project.platformHomeFlag = 1;
+        break;
+        case 10:
+            project.programAddr = EEPROM_ADDR_PROGRAM10;
             project.platformHomeFlag = 1;
         break;
         default:
@@ -403,7 +422,7 @@ void Project_Run(void)
     if(GMR(M_KEY_CLEAR))
     {
         project.productOutput = 0;
-        sprintf((char*)project.segStr, "%5d", project.productOutput);
+        sprintf((char*)project.segStr, "%05d", project.productOutput);
         TM1638_SendData(0, project.segStr);
         
         //AT24CXX_WriteLenByte(EEPROM_ADDR_PRODUCTOUTPUT, 0, 2);
@@ -474,12 +493,12 @@ void Project_Run(void)
         
         project.programSelfPos = 0;
         
-        sprintf((char*)project.segStr, "%2d-", project.programSelfPos);
+        sprintf((char*)project.segStr, "%02d-", project.programSelfPos);
         TM1638_SendData(0, project.segStr);
         
         project.pCurProSelfAction = project.program + project.programSelfPos;
         
-        sprintf((char*)project.segStr, "%2d", project.pCurProSelfAction->act);
+        sprintf((char*)project.segStr, "%02d", project.pCurProSelfAction->act);
         TM1638_SendData(3, project.segStr);
     }
 
@@ -490,6 +509,8 @@ void Project_Run(void)
     //检查PUSH是否回位到位
     if(GML(M_PUSH_CHECK))
         Push_Check();
+    if(GML(M_PUSH2_CHECK))
+        Push2_Check();
     
     //模式选择
     if(project.mode == PROGRAM_SEL)//选择程序
@@ -591,6 +612,9 @@ void Project_Run(void)
                         break;
                         case HOME://回原点
                             Home();
+                        break;
+                        case PUSH2HOME://回原点
+                            Push2Home();
                         break;
                         default:
                         break;

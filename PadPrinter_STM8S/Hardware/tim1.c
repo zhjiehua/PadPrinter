@@ -54,13 +54,13 @@ void Tim1_Init(void)
  * 返回: 无
  * 说明: 无 
  ******************************************************************************/
-//void delay_ms( u32 nTime)
-//{
-//	TimingDelay = nTime;
-//	
-//	while(0 >= TimingDelay)
-//	  	;
-//}
+void delay_ms( u32 nTime)
+{
+	TimingDelay = nTime;
+	
+	while(0 >= TimingDelay)
+	  	;
+}
 
 //INTERRUPT_HANDLER(TIM1_UPD_OVF_TRG_BRK_IRQHandler, 11)
 //{
