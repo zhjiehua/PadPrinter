@@ -132,10 +132,16 @@ typedef struct
 
 #define M_MAN_UPDOWN            48
 #define M_MAN_FRONTBACK         49
-#define M_MAN_AUX               50
-#define M_MAN_AUX_RETURN        51
+#define M_MAN_FRONTBACK_STOP    50
+#define M_MAN_AUX               51
+#define M_MAN_AUX_RETURN        52
 
-#define M_INTSET                56
+#define M_AUTO_MAN_UPDOWN       53
+#define M_AUTO_MAN_FRONTBACK    54
+#define M_MAN_UPDOWN_FB         55
+#define M_MAN_FRONTBACK_AUTO    56
+
+#define M_INTSET                57
 
 #define M_PUSH_CHECK            63
 #define M_PUSH2_CHECK           64
@@ -151,6 +157,8 @@ typedef struct
 
 #define M_OUTPUT_FLASH          71
 #define M_OUTPUT_FLASH_FLAG     72
+#define M_MACHINE_CHECK         73
+#define M_MACHINE_AUX_FAULT     74
 
 #define M_CAN_CHANGE_DELAY      75
 #define M_SAVE_DELAY            76

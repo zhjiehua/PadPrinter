@@ -48,7 +48,7 @@ void ProgramSelf(void)
         sprintf((char*)project.segStr, "%02d", project.pCurProSelfAction->act);
         TM1638_SendData(3, project.segStr);
     }
-  
+    
     if(GMR(M_KEY_FAST))//加步骤
     {
         project.programSelfPos++;
@@ -330,6 +330,23 @@ void ProgramSelect(void)
         //刷新数码管
         sprintf((char*)project.segStr, "Pro%02d", project.programNum);
         TM1638_SendData(0, project.segStr);
+        
+        project.machineType = (MachineType_TypeDef)AT24CXX_ReadOneByte(EEPROM_ADDR_MACHINETYPE);
+        project.sensorLevel = AT24CXX_ReadOneByte(EEPROM_ADDR_SENSORLEVEL);
+        project.actionUnit = AT24CXX_ReadOneByte(EEPROM_ADDR_ACTIONUNIT);
+        
+        project.internalSetting[INTERNALSETTING_DEFAULT].val = defaultInternalSetting[INTERNALSETTING_DEFAULT].val;
+        project.internalSetting[INTERNALSETTING_DEFAULT].min = defaultInternalSetting[INTERNALSETTING_DEFAULT].min;
+        project.internalSetting[INTERNALSETTING_DEFAULT].max = defaultInternalSetting[INTERNALSETTING_DEFAULT].max;
+        project.internalSetting[INTERNALSETTING_MACHINETYPE].val = project.machineType;
+        project.internalSetting[INTERNALSETTING_MACHINETYPE].min = defaultInternalSetting[INTERNALSETTING_MACHINETYPE].min;
+        project.internalSetting[INTERNALSETTING_MACHINETYPE].max = defaultInternalSetting[INTERNALSETTING_MACHINETYPE].max;
+        project.internalSetting[INTERNALSETTING_SENSORLEVEL].val = project.sensorLevel;
+        project.internalSetting[INTERNALSETTING_SENSORLEVEL].min = defaultInternalSetting[INTERNALSETTING_SENSORLEVEL].min;
+        project.internalSetting[INTERNALSETTING_SENSORLEVEL].max = defaultInternalSetting[INTERNALSETTING_SENSORLEVEL].max;
+        project.internalSetting[INTERNALSETTING_ACTIONUNIT].val = project.actionUnit;
+        project.internalSetting[INTERNALSETTING_ACTIONUNIT].min = defaultInternalSetting[INTERNALSETTING_ACTIONUNIT].min;
+        project.internalSetting[INTERNALSETTING_ACTIONUNIT].max = defaultInternalSetting[INTERNALSETTING_ACTIONUNIT].max;
     }
     
     if(GMR(M_KEY_SLOW))//加程序  M_KEY_FAST  M_KEY_SLOW
@@ -348,10 +365,10 @@ void ProgramSelect(void)
         else
         {
             project.intSetPos++;
-            if(project.intSetPos > 10)
+            if(project.intSetPos > INTERNALSETTING_COUNT-1)
                 project.intSetPos = 0;
             
-            sprintf((char*)project.segStr, "%02d-", project.intSetPos);
+            sprintf((char*)project.segStr, "%02d-%02d", project.intSetPos, project.internalSetting[project.intSetPos].val);
             TM1638_SendData(0, project.segStr);
         }
     }
@@ -372,9 +389,9 @@ void ProgramSelect(void)
         {
             project.intSetPos--;
             if(project.intSetPos >= 255)
-                project.intSetPos = 10;
+                project.intSetPos = INTERNALSETTING_COUNT-1;
             
-            sprintf((char*)project.segStr, "%02d-", project.intSetPos);
+            sprintf((char*)project.segStr, "%02d-%02d", project.intSetPos, project.internalSetting[project.intSetPos].val);
             TM1638_SendData(0, project.segStr);
         }
     }
@@ -401,12 +418,12 @@ void ProgramSelect(void)
         }
         else//-------------------------------------------------------------------------------
         {
-            SML(M_INTSET, 0);
+            //SML(M_INTSET, 0);
             
             switch(project.intSetPos)
             {
-                case 0:
-                    if(project.intSetVal)
+                case 0://恢复出厂设置
+                    if(project.internalSetting[project.intSetPos].val)
                     {
                         AT24CXX_WriteOneByte(EEPROM_ADDR_DEFAULT, 0xAA);
                         UART1_printf("Reset default data!\r\n");
@@ -414,17 +431,43 @@ void ProgramSelect(void)
                     else
                         AT24CXX_WriteOneByte(EEPROM_ADDR_DEFAULT, 0x55);
                 break;
-                case 1:
-                    if(project.intSetVal > 0)
+                case 1://调节动作延时的最小延时单位
+                    if(project.internalSetting[project.intSetPos].val > 0)
                     {
-                        AT24CXX_WriteLenByte(EEPROM_ADDR_ACTIONUNITDELAY, 40*project.intSetVal, 2);
-                        UART1_printf("Change the actionUnitDelay is %d!\r\n", 40*project.intSetVal);
+                        AT24CXX_WriteOneByte(EEPROM_ADDR_ACTIONUNIT, project.internalSetting[project.intSetPos].val);
+                        UART1_printf("Change the actionUnit is %d!\r\n", project.internalSetting[project.intSetPos].val);
                     }
                     else
                     {
-                        AT24CXX_WriteLenByte(EEPROM_ADDR_ACTIONUNITDELAY, 1, 2);
-                        UART1_printf("Change the actionUnitDelay is 1!\r\n");
+                        AT24CXX_WriteOneByte(EEPROM_ADDR_ACTIONUNITDELAY, 1);
+                        UART1_printf("Change the actionUnit is 1!\r\n");
                     }
+                break;
+                case 2://设备识别
+                    if(project.internalSetting[project.intSetPos].val > 0)
+                    {
+                        project.machineType = MACHINE_2SENSORS;
+                        UART1_printf("++++++++This is a 2 sensors machine!!!!\r\n");
+                    }
+                    else
+                    {
+                        project.machineType = MACHINE_4SENSORS;
+                        UART1_printf("++++++++This is a 4 sensors machine!!!!\r\n");
+                    }
+                    AT24CXX_WriteOneByte(EEPROM_ADDR_MACHINETYPE, project.internalSetting[project.intSetPos].val);
+                break;
+                case 3://传感器电平
+                    if(project.internalSetting[project.intSetPos].val > 0)
+                    {
+                        project.sensorLevel = 1;
+                        UART1_printf("++++++++This is a 12V sensors machine!!!!\r\n");
+                    }
+                    else
+                    {
+                        project.sensorLevel = 0;
+                        UART1_printf("++++++++This is a 5V sensors machine!!!!\r\n");
+                    }
+                    AT24CXX_WriteOneByte(EEPROM_ADDR_SENSORLEVEL, project.internalSetting[project.intSetPos].val);
                 break;
                 default:
                 break;
@@ -438,31 +481,46 @@ void ProgramSelect(void)
             project.intSetAuxCnt++;
             if(project.intSetAuxCnt >= 10)
             {
-                sprintf((char*)project.segStr, "%02d-%02d", project.intSetPos, project.intSetVal);
+                sprintf((char*)project.segStr, "%02d-%02d", project.intSetPos, project.internalSetting[project.intSetPos].val);
                 TM1638_SendData(0, project.segStr);
                 
                 SML(M_INTSET, 1);
             }
+        }
+        else
+        {
+            SML(M_INTSET, 0);
+            
+            sprintf((char*)project.segStr, "Pro%02d", project.programNum);
+            TM1638_SendData(0, project.segStr);
         }
     }
     else if(GML(M_INTSET))
     {
         if(GMR(M_KEY_UPDOWN))
         {
-            project.intSetVal++;
-            if(project.intSetVal > 10)
-                project.intSetVal = 0;
+            project.internalSetting[project.intSetPos].val++;
+            if(project.internalSetting[project.intSetPos].val > project.internalSetting[project.intSetPos].max)
+                project.internalSetting[project.intSetPos].val = project.internalSetting[project.intSetPos].min;
             
-            sprintf((char*)project.segStr, "%02d", project.intSetVal);
+            sprintf((char*)project.segStr, "%02d", project.internalSetting[project.intSetPos].val);
             TM1638_SendData(3, project.segStr);
         }
         else if(GMR(M_KEY_FRONTBACK))
         {
-            project.intSetVal--;
-            if(project.intSetVal >= 255)
-                project.intSetVal = 10;
+            project.internalSetting[project.intSetPos].val--;
+            if(project.internalSetting[project.intSetPos].min == 0)
+            {
+                if(project.internalSetting[project.intSetPos].val >= 255)
+                    project.internalSetting[project.intSetPos].val = project.internalSetting[project.intSetPos].max;
+            }
+            else
+            {
+                if(project.internalSetting[project.intSetPos].val < project.internalSetting[project.intSetPos].min)
+                    project.internalSetting[project.intSetPos].val = project.internalSetting[project.intSetPos].max;
+            }
             
-            sprintf((char*)project.segStr, "%02d", project.intSetVal);
+            sprintf((char*)project.segStr, "%02d", project.internalSetting[project.intSetPos].val);
             TM1638_SendData(3, project.segStr);
         }
     }
@@ -526,7 +584,7 @@ void Key_Distinguish(void)
         }
         if(GMR(M_KEY_AUX))//辅助
         {
-            if(!GML(M_PROGRAM_AUX))
+            if(!GML(M_PROGRAM_AUX) && !GML(M_MACHINE_AUX_FAULT))
             {
                 SML(M_PROGRAM_AUX, 1);
                 
@@ -543,14 +601,25 @@ void Key_Distinguish(void)
             
             UART1_printf("Foot---Stop the program.\r\n");
         }
+        
+        if(GMR(M_KEY_UPDOWN))//上下
+        {
+            SML(M_AUTO_MAN_UPDOWN, 1);
+        }
+        if(GMR(M_KEY_FRONTBACK))//前后
+        {
+            SML(M_AUTO_MAN_FRONTBACK, 1);
+        }
     }
     else// if(project.programMode == MANUAL)
     {
         if(GMR(M_KEY_STARTSTOP))//启动停止
         {
-            if(!GML(M_ADJ_DELAY))
+            if(GML(M_FLAG_MANUAL))
             {
-                if(GML(M_FLAG_MANUAL))
+                if(GML(M_MAN_FRONTBACK))//前后动作正在动作，则等到前后动作停止后才启动自动程序
+                    SML(M_MAN_FRONTBACK_AUTO, 1);
+                else
                 {
                     SML(M_FLAG_MANUAL, 0);
                     
@@ -565,37 +634,26 @@ void Key_Distinguish(void)
                     
                     SML(M_RESTORE_HOME, 1);
                 }
-                else
-                {
-                    SML(M_MODE_AUTO, 1);//启动自动程序
-                    
-                    UART1_printf("Start the program...\r\n");
-                }
-                
-                
-                //
             }
             else
             {
-                sprintf((char*)project.segStr, "%05d", project.productOutput);
-                TM1638_SendData(0, project.segStr);
+                SML(M_MODE_AUTO, 1);//启动自动程序
                 
-                AT24CXX_WriteOneByte(project.programAddr+project.actionPos*3+2, project.pCurAction->delay);
-                AT24CXX_WriteOneByte(project.programAddr+project.actionPos*3+2, project.pCurAction->delay);
-                AT24CXX_WriteOneByte(project.programAddr+project.actionPos*3+2, project.pCurAction->delay);
-                
-                SML(M_ADJ_DELAY, 0);
+                UART1_printf("Start the program...\r\n");
             }
             
             SML(M_PROGRAM_FOOT, 1);//表示开机后已按过启动
         }
         if(GMR(M_KEY_AUX))//辅助
         {
-            SML(M_MODE_MANUAL, 1);
-            
-            SML(M_FLAG_MANUAL, 1);
-            
-            SML(M_MAN_AUX, 1);
+            if(!GML(M_MACHINE_AUX_FAULT))
+            {
+                SML(M_MODE_MANUAL, 1);
+                
+                SML(M_FLAG_MANUAL, 1);
+                
+                SML(M_MAN_AUX, 1);
+            }
         }
         if(GMR(M_KEY_UPDOWN))//上下
         {
@@ -611,7 +669,10 @@ void Key_Distinguish(void)
             
             SML(M_FLAG_MANUAL, 1);
             
-            SML(M_MAN_FRONTBACK, 1);
+            if(GML(M_MAN_FRONTBACK) && !GML(M_MAN_FRONTBACK_STOP))
+                SML(M_MAN_FRONTBACK_STOP, 1);
+            else
+                SML(M_MAN_FRONTBACK, 1);
         }
         if(GMR(M_KEY_FOOT))//脚踏
         {
@@ -639,7 +700,7 @@ void NextAction(void)
                 //sprintf((char*)project.segStr, "%05d", project.productOutput);
                 //TM1638_SendData(0, project.segStr);
                 
-                AT24CXX_WriteLenByte(EEPROM_ADDR_PRODUCTOUTPUT, project.productOutput, 2);
+                AT24CXX_WriteLenByte(project.productOutputAddr, project.productOutput, 2);
                 
                 if(GML(M_PROGRAM_PERIOD))
                 {
@@ -701,7 +762,7 @@ void NextAction(void)
             //sprintf((char*)project.segStr, "%05d", project.productOutput);
             //TM1638_SendData(0, project.segStr);
             
-            AT24CXX_WriteLenByte(EEPROM_ADDR_PRODUCTOUTPUT, project.productOutput, 2);
+            AT24CXX_WriteLenByte(project.productOutputAddr, project.productOutput, 2);
             
             if(GML(M_PROGRAM_PERIOD))
             {
@@ -762,6 +823,34 @@ void NextAction(void)
         {
             SML(M_MODE_AUTO, 0);
             SML(M_CHANGEMODE_PAUSE, 0);
+        }
+        
+        if(GML(M_AUTO_MAN_UPDOWN))
+        {
+            SML(M_MODE_AUTO, 0);
+            
+            SML(M_AUTO_MAN_UPDOWN, 0);
+            
+            SML(M_MODE_MANUAL, 1);
+            
+            SML(M_FLAG_MANUAL, 1);
+            
+            SML(M_MAN_UPDOWN, 1);
+        }
+        else if(GML(M_AUTO_MAN_FRONTBACK))
+        {
+            SML(M_MODE_AUTO, 0);
+            
+            SML(M_AUTO_MAN_FRONTBACK, 0);
+            
+            SML(M_MODE_MANUAL, 1);
+            
+            SML(M_FLAG_MANUAL, 1);
+            
+            if(GML(M_MAN_FRONTBACK) && !GML(M_MAN_FRONTBACK_STOP))
+                SML(M_MAN_FRONTBACK_STOP, 1);
+            else
+                SML(M_MAN_FRONTBACK, 1);
         }
     }
     

@@ -7,10 +7,14 @@
 #define PROJECTNUM  11
 #define MAX_ACTIONS_PER_PROJECT 40
 
+#define INTERNALSETTING_COUNT               4
+#define INTERNALSETTING_DEFAULT             0
+#define INTERNALSETTING_ACTIONUNIT          1
+#define INTERNALSETTING_MACHINETYPE         2
+#define INTERNALSETTING_SENSORLEVEL         3
+
+
 //时间默认参数
-#define RETURN_FILTER_TIME      300
-#define RETURN_POS_TIME         200
-#define PUSH_TIME               1000
 #define ACTIONUNIT_DELAY        40 //200
 
 #define MAX_ACTIONUNIT_DELAY    30
@@ -31,23 +35,14 @@
 #define EEPROM_ADDR_BASE                0x0000
 #define EEPROM_ADDR_DEFAULT             EEPROM_ADDR_BASE
 #define EEPROM_ADDR_PROGRAM_NUM         EEPROM_ADDR_DEFAULT+1
-#define EEPROM_ADDR_PRODUCTOUTPUT       EEPROM_ADDR_PROGRAM_NUM+1
 
-#define EEPROM_ADDR_RETURNFILTERTIME    EEPROM_ADDR_PRODUCTOUTPUT+2
-#define EEPROM_ADDR_RETURNPOSTIME       EEPROM_ADDR_RETURNFILTERTIME+2
-#define EEPROM_ADDR_PUSHTIME            EEPROM_ADDR_RETURNPOSTIME+2
-#define EEPROM_ADDR_ACTIONUNITDELAY     EEPROM_ADDR_PUSHTIME+2
+#define EEPROM_ADDR_MACHINETYPE         EEPROM_ADDR_PROGRAM_NUM+1
+#define EEPROM_ADDR_SENSORLEVEL         EEPROM_ADDR_MACHINETYPE+1
+#define EEPROM_ADDR_PRODUCTOUTPUTOFFSET EEPROM_ADDR_SENSORLEVEL+1
+#define EEPROM_ADDR_ACTIONUNIT          EEPROM_ADDR_PRODUCTOUTPUTOFFSET+1
+#define EEPROM_ADDR_ACTIONUNITDELAY     EEPROM_ADDR_ACTIONUNIT+1
 
 #define EEPROM_ADDR_PROGRAM1            EEPROM_ADDR_ACTIONUNITDELAY+20//加大距离
-//#define EEPROM_ADDR_PROGRAM2            EEPROM_ADDR_PROGRAM1+PROCESS1_SIZE*3
-//#define EEPROM_ADDR_PROGRAM3            EEPROM_ADDR_PROGRAM2+PROCESS2_SIZE*3
-//#define EEPROM_ADDR_PROGRAM4            EEPROM_ADDR_PROGRAM3+PROCESS3_SIZE*3
-//#define EEPROM_ADDR_PROGRAM5            EEPROM_ADDR_PROGRAM4+PROCESS4_SIZE*3
-//#define EEPROM_ADDR_PROGRAM6            EEPROM_ADDR_PROGRAM5+PROCESS5_SIZE*3
-//#define EEPROM_ADDR_PROGRAM7            EEPROM_ADDR_PROGRAM6+PROCESS6_SIZE*3
-//#define EEPROM_ADDR_PROGRAM8            EEPROM_ADDR_PROGRAM7+PROCESS7_SIZE*3
-//#define EEPROM_ADDR_PROGRAM9            EEPROM_ADDR_PROGRAM8+PROCESS8_SIZE*3
-//#define EEPROM_ADDR_PROGRAM0            EEPROM_ADDR_PROGRAM9+PROCESS9_SIZE*3
 #define EEPROM_ADDR_PROGRAM2            EEPROM_ADDR_PROGRAM1+sizeof(process1)
 #define EEPROM_ADDR_PROGRAM3            EEPROM_ADDR_PROGRAM2+sizeof(process2)
 #define EEPROM_ADDR_PROGRAM4            EEPROM_ADDR_PROGRAM3+sizeof(process3)
@@ -59,6 +54,17 @@
 #define EEPROM_ADDR_PROGRAM10           EEPROM_ADDR_PROGRAM9+sizeof(process9)
 #define EEPROM_ADDR_PROGRAM0            EEPROM_ADDR_PROGRAM10+sizeof(process10)+5
 #define EEPROM_ADDR_END                 EEPROM_ADDR_PROGRAM0+MAX_ACTIONS_PER_PROJECT*3
+
+#define EEPROM_ADDR_PRODUCTOUTPUT       EEPROM_ADDR_END+1
+
+//设备内部参数设置
+typedef struct
+{
+    uint8_t val;//值
+    
+    uint8_t min;//最小值
+    uint8_t max;//最大值
+}InternalSetting_TypeDef;
 
 //设备类型
 typedef enum
@@ -146,6 +152,8 @@ typedef struct
     
     uint8_t programNum;//选择了第几个程序
     uint16_t productOutput;//产量
+    uint8_t productOutputOffset;//产量保存在EEPROM的产量基地址的偏移
+    uint16_t productOutputAddr;
     
     //平台返回时需要检测平台原点传感器，
     //该传感器在经过中间挡片时会触发程序，
@@ -155,6 +163,7 @@ typedef struct
     uint16_t returnPosTime;//需要延时一小段时间定位气缸才能收回来
     uint16_t pushTime;//PUSH动作的延时时间
     
+    uint8_t actionUnit;
     uint16_t actionUnitDelay;//动作间延时的最小单位
     
     uint8_t intSetAuxCnt;//进入内部设置
@@ -179,9 +188,13 @@ typedef struct
     MachineType_TypeDef machineType;
     uint8_t platformPushFlag;
     
+    uint8_t sensorLevel; //1:12V,金属感应开关 ； 0:5V，光电开关
+    
+    InternalSetting_TypeDef internalSetting[INTERNALSETTING_COUNT];
 }PROJECT_TypeDef;
 
 extern PROJECT_TypeDef project;
+extern const InternalSetting_TypeDef defaultInternalSetting[INTERNALSETTING_COUNT];
 
 void Key_Refresh(void);
 void Program0Save(void);

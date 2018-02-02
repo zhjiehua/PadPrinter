@@ -38,6 +38,7 @@ void EEPROM_Check(void)
     uint8_t eepromDefaultData;
     
     eepromDefaultData = AT24CXX_ReadOneByte(EEPROM_ADDR_DEFAULT);
+    //eepromDefaultData = 0xAA;
     if(eepromDefaultData == 0xAA)//初始化程序和数据
     {
         ProgramResetDefault();
@@ -85,31 +86,12 @@ void MachineState_Check(void)
         return;
   
     UART1_printf("Machine state checking...\r\n");
-
+    
     TM1638_SendData(0, "    ");
 
     while(1)//检测印头
     {
         SIMPLC_IO_Refresh();
-
-        
-//        if(GXL(X_ABSORB_L))
-//            TM1638_SendData(4, "1");
-//        else if(GXL(X_PRINT_O))
-//            TM1638_SendData(4, "3");
-//        else if(GXL(X_PRINT_L))
-//            TM1638_SendData(4, "4");
-//        else
-//            TM1638_SendData(0, "00 20");
-        
-//        if(GXL(X_ABSORB_L))
-//            TM1638_SendData(0, "01");
-//        else if(GXL(X_PRINT_O))
-//            TM1638_SendData(0, "03");
-//        else if(GXL(X_PRINT_L))
-//            TM1638_SendData(0, "04");
-//        else
-//            TM1638_SendData(0, "00");
         
         if(GXL(X_ABSORB_O) && !GXL(X_ABSORB_L) && !GXL(X_PRINT_O) && !GXL(X_PRINT_L))
         {
@@ -132,52 +114,56 @@ void MachineState_Check(void)
             TM1638_SendData(0, "00");
         
         if(!GXL(X_ABSORB_O))
-        {
             TM1638_SendData(3, "20");
-        }
         else
             TM1638_SendData(3, "00");
-          
     }
     
-    TM1638_SendData(0, "--A--");
-    
-    while(1)//检测平台
-    {
-        SIMPLC_IO_Refresh();
-        
-        if(GXL(X_SHIFT_L1))
-            TM1638_SendData(4, "2");
-        else if(GXL(X_POS))
-        {
-                project.machineType = MACHINE_2SENSORS;
-                
-                TM1638_SendData(0, "88888");
-                
-                UART1_printf("++++++++This is a 2 sensors machine!!!!\r\n");
-                
-                break;
-        } 
-        else if(GXL(X_SHIFT_O))
-        {
-            if(GXL(X_SHIFT_L2))
-                TM1638_SendData(4, "1");
-            else if(GXL(X_POS))
-                TM1638_SendData(4, "3");
-            else
-            {
-                project.machineType = MACHINE_4SENSORS;
-                
-                TM1638_SendData(0, "88888");
-                
-                UART1_printf("++++++++This is a 4 sensors machine!!!!\r\n");
-                
-                break;
-            }
-        }
-        else
-            TM1638_SendData(0, "--A--");
-    }
+//    TM1638_SendData(0, "--A--");
+//    
+//    while(1)//检测平台
+//    {
+//        SIMPLC_IO_Refresh();
+//        
+//        UartDataParse();
+//        
+//        if(GXL(X_POS))
+//        {
+//            if(GXL(X_SHIFT_L1))
+//                TM1638_SendData(4, "2");
+//            else
+//            {
+//                project.machineType = MACHINE_2SENSORS;
+//                
+//                TM1638_SendData(0, "88888");
+//                
+//                UART1_printf("++++++++This is a 2 sensors machine!!!!\r\n");
+//                
+//                break;
+//            }
+//        }
+//        else if(GXL(X_SHIFT_O))
+//        {
+//            if(GXL(X_SHIFT_L2))
+//                TM1638_SendData(4, "1");
+//            else if(GXL(X_SHIFT_L1))
+//                TM1638_SendData(4, "2");
+//            else if(GXL(X_POS))
+//                TM1638_SendData(4, "3");
+//            else
+//            {
+//                project.machineType = MACHINE_4SENSORS;
+//                
+//                TM1638_SendData(0, "88888");
+//                
+//                UART1_printf("++++++++This is a 4 sensors machine!!!!\r\n");
+//                
+//                break;
+//            }
+//        }
+//        else
+//            TM1638_SendData(0, "--A--");
+//    }
     
     UART1_printf("Machine state check finish!\r\n");
 }
@@ -186,24 +172,74 @@ void MachineType_Check(void)
 {
     uint16_t cnt = 0;
   
-    while(cnt < 500)
+    TM1638_SendData(0, "--A--");
+    
+    while(cnt++ < 60000)//检测平台
     {
-        cnt++;
         SIMPLC_IO_Refresh();
-    }
-  
-    if(GXL(X_SHIFT_L2) && GXL(X_SHIFT_O) && GXL(X_POS) && !GXL(X_SHIFT_L1))
-    {
-        project.machineType = MACHINE_2SENSORS;
         
-        UART1_printf("++++++++This is a 2 sensors machine!!!!\r\n");
-    }
-    else
-    {
-        project.machineType = MACHINE_4SENSORS;
+        IWDG_ReloadCounter();
         
-        UART1_printf("++++++++This is a 4 sensors machine!!!!\r\n");
+        UartDataParse();
+        
+        if(project.programNum != 2 && project.programNum != 4 && project.programNum != 6 && project.programNum != 8)
+            cnt = 0;
+
+//        if(GXL(X_POS))
+//        {
+//            if(GXL(X_SHIFT_L1))
+//                TM1638_SendData(4, "2");
+//            else
+//            {
+//                project.machineType = MACHINE_2SENSORS;
+//                
+//                TM1638_SendData(0, "88888");
+//                
+//                UART1_printf("++++++++This is a 2 sensors machine!!!!\r\n");
+//                
+//                break;
+//            }
+//        }
+//        else if(GXL(X_SHIFT_O))
+//        {
+//            if(GXL(X_SHIFT_L2))
+//                TM1638_SendData(4, "1");
+//            else if(GXL(X_SHIFT_L1))
+//                TM1638_SendData(4, "2");
+//            else if(GXL(X_POS))
+//                TM1638_SendData(4, "3");
+//            else
+//            {
+//                project.machineType = MACHINE_4SENSORS;
+//                
+//                TM1638_SendData(0, "88888");
+//                
+//                UART1_printf("++++++++This is a 4 sensors machine!!!!\r\n");
+//                
+//                break;
+//            }
+//        }
+//        else
+//            TM1638_SendData(0, "--A--");
+        
+        if(project.machineType == MACHINE_4SENSORS)
+        {
+            if(GXL(X_SHIFT_O) && !GXL(X_POS) && !GXL(X_SHIFT_L1) && !GXL(X_SHIFT_L2))
+                break;
+            else
+                TM1638_SendData(0, "--A--");
+        }
+        else if(project.machineType == MACHINE_2SENSORS)
+        {
+            if(!GXL(X_SHIFT_O) && GXL(X_POS) && !GXL(X_SHIFT_L1) && !GXL(X_SHIFT_L2))
+                break;
+            else
+                TM1638_SendData(0, "--A--");
+        }
     }
+    
+    if(cnt >= 60000)
+        SML(M_MACHINE_AUX_FAULT, 1);
 }
 
 //数码管闪烁
@@ -236,7 +272,8 @@ void Segment_Flash(void)
         {
             SML(M_SEG_FLASH, 0);
             
-            SML(M_PROGRAM_READY, 1);
+            //SML(M_PROGRAM_READY, 1);
+            SML(M_MACHINE_CHECK, 1);
             
             UART1_printf("PadPrinter is ready...\r\n");
             
@@ -290,36 +327,6 @@ void Output_Flash(void)
     {
         sprintf((char*)project.segStr, "%05d", project.productOutput);
         TM1638_SendData(0, project.segStr);
-      
-//        if(project.productOutput <= 9)
-//        {
-//            TM1638_SendData(0, "0000");
-//            sprintf((char*)project.segStr, "%1d", project.productOutput);
-//            TM1638_SendData(4, project.segStr);
-//        }
-//        else if(project.productOutput <= 99)
-//        {
-//            TM1638_SendData(0, "000");
-//            sprintf((char*)project.segStr, "%2d", project.productOutput);
-//            TM1638_SendData(3, project.segStr);
-//        }
-//        else if(project.productOutput <= 999)
-//        {
-//            TM1638_SendData(0, "00");
-//            sprintf((char*)project.segStr, "%3d", project.productOutput);
-//            TM1638_SendData(2, project.segStr);
-//        }
-//        else if(project.productOutput <= 9999)
-//        {
-//            TM1638_SendData(0, "0");
-//            sprintf((char*)project.segStr, "%4d", project.productOutput);
-//            TM1638_SendData(1, project.segStr);
-//        }
-//        else
-//        {
-//            sprintf((char*)project.segStr, "%5d", project.productOutput);
-//            TM1638_SendData(0, project.segStr);
-//        }
     }
     else
     {

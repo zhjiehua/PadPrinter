@@ -14,6 +14,14 @@
 #include "24cxx.h"
 #include "tim5.h"
 
+const InternalSetting_TypeDef defaultInternalSetting[INTERNALSETTING_COUNT] = 
+{
+  {0, 0, 1}, //恢复出厂设置   1:恢复
+  {1, 1, 254}, //调节动作延时的最小延时单位
+  {0, 0, 1}, //设备识别  0：4sensors 1:2sensors
+  {0, 0, 1}, //传感器电平 0:5V 1:12Vs
+};
+
 const ACTION_TypeDef process0[] = {{0, ACTION_NONE, 0}};
 const ACTION_TypeDef process1[] = {{1, ABSORB, 0}, {1, FRONT, 0}, {1, PRINT, 0}, {1, PUSH, 0}, {1, PRINT, 0}, {1, HOME, 0}, {0, ACTION_NONE, 0}};
 const ACTION_TypeDef process2[] = {{1, ABSORB, 0}, {1, FRONT, 0}, {1, PRINT, 0}, {0, PUSH, 0}, {0, PRINT, 0}, {1, HOME, 0}, {0, ACTION_NONE, 0}};
@@ -94,25 +102,35 @@ void ProgramResetDefault(void)
     //uint8_t temp;
     
     UART1_printf("Program reset default data...\r\n");
-
+    
     AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM_NUM, 1);
     AT24CXX_WriteLenByte(EEPROM_ADDR_PRODUCTOUTPUT, 0, 2);//需要保存3次才能成功
     AT24CXX_WriteLenByte(EEPROM_ADDR_PRODUCTOUTPUT, 0, 2);
     AT24CXX_WriteLenByte(EEPROM_ADDR_PRODUCTOUTPUT, 0, 2);
-    //AT24CXX_WriteLenByte(EEPROM_ADDR_RETURNFILTERTIME, RETURN_FILTER_TIME, 2);
-    //AT24CXX_WriteLenByte(EEPROM_ADDR_RETURNPOSTIME, RETURN_POS_TIME, 2);
-    //AT24CXX_WriteLenByte(EEPROM_ADDR_PUSHTIME, PUSH_TIME, 2);
-    AT24CXX_WriteLenByte(EEPROM_ADDR_ACTIONUNITDELAY, ACTIONUNIT_DELAY, 2);
-    AT24CXX_WriteLenByte(EEPROM_ADDR_ACTIONUNITDELAY, ACTIONUNIT_DELAY, 2);
-    AT24CXX_WriteLenByte(EEPROM_ADDR_ACTIONUNITDELAY, ACTIONUNIT_DELAY, 2);
+    AT24CXX_WriteOneByte(EEPROM_ADDR_PRODUCTOUTPUTOFFSET, 0);
+    AT24CXX_WriteOneByte(EEPROM_ADDR_PRODUCTOUTPUTOFFSET, 0);
+    AT24CXX_WriteOneByte(EEPROM_ADDR_PRODUCTOUTPUTOFFSET, 0);
+    AT24CXX_WriteOneByte(EEPROM_ADDR_MACHINETYPE, 0);
+    AT24CXX_WriteOneByte(EEPROM_ADDR_MACHINETYPE, 0);
+    AT24CXX_WriteOneByte(EEPROM_ADDR_MACHINETYPE, 0);
+    AT24CXX_WriteOneByte(EEPROM_ADDR_SENSORLEVEL, 0);
+    AT24CXX_WriteOneByte(EEPROM_ADDR_SENSORLEVEL, 0);
+    AT24CXX_WriteOneByte(EEPROM_ADDR_SENSORLEVEL, 0);
+    AT24CXX_WriteOneByte(EEPROM_ADDR_ACTIONUNIT, ACTIONUNIT_DELAY);
+    AT24CXX_WriteOneByte(EEPROM_ADDR_ACTIONUNIT, ACTIONUNIT_DELAY);
+    AT24CXX_WriteOneByte(EEPROM_ADDR_ACTIONUNIT, ACTIONUNIT_DELAY);
+    AT24CXX_WriteOneByte(EEPROM_ADDR_ACTIONUNITDELAY, 1);
+    AT24CXX_WriteOneByte(EEPROM_ADDR_ACTIONUNITDELAY, 1);
+    AT24CXX_WriteOneByte(EEPROM_ADDR_ACTIONUNITDELAY, 1);
     
     UART1_printf("++++The default data is %d\r\n", AT24CXX_ReadOneByte(EEPROM_ADDR_DEFAULT));
     UART1_printf("++++The prgramNum is %d\r\n", AT24CXX_ReadOneByte(EEPROM_ADDR_PROGRAM_NUM));
     UART1_printf("++++The productOutput is %d\r\n", (uint16_t)AT24CXX_ReadLenByte(EEPROM_ADDR_PRODUCTOUTPUT, 2));
-//    UART1_printf("++++The returnFilterTime is %d\r\n", (uint16_t)AT24CXX_ReadLenByte(EEPROM_ADDR_RETURNFILTERTIME, 2));
-//    UART1_printf("++++The returnPosTime is %d\r\n", (uint16_t)AT24CXX_ReadLenByte(EEPROM_ADDR_RETURNPOSTIME, 2));
-//    UART1_printf("++++The pushTime is %d\r\n", (uint16_t)AT24CXX_ReadLenByte(EEPROM_ADDR_PUSHTIME, 2));
-    UART1_printf("++++The actionUnitDelay is %d\r\n", (uint16_t)AT24CXX_ReadLenByte(EEPROM_ADDR_ACTIONUNITDELAY, 2));
+    UART1_printf("++++The productOutputOffset is %d\r\n", AT24CXX_ReadOneByte(EEPROM_ADDR_PRODUCTOUTPUTOFFSET));
+    UART1_printf("++++The machineType is %d\r\n", AT24CXX_ReadOneByte(EEPROM_ADDR_MACHINETYPE));
+    UART1_printf("++++The sensorLevel is %d\r\n", AT24CXX_ReadOneByte(EEPROM_ADDR_SENSORLEVEL));
+    UART1_printf("++++The sensorLevel is %d\r\n", AT24CXX_ReadOneByte(EEPROM_ADDR_ACTIONUNIT));
+    UART1_printf("++++The actionUnitDelay is %d\r\n", AT24CXX_ReadOneByte(EEPROM_ADDR_ACTIONUNITDELAY));
     
     for(i=0,j=0;i<SIZEOF(process1);i++)
     {
@@ -276,13 +294,30 @@ void ProgramRead(void)
     
     //初始化project结构体
     project.programNum = AT24CXX_ReadOneByte(EEPROM_ADDR_PROGRAM_NUM);//读取程序序号
-    project.productOutput =  (uint16_t)AT24CXX_ReadLenByte(EEPROM_ADDR_PRODUCTOUTPUT, 2);
-    project.returnFilterTime = (uint16_t)AT24CXX_ReadLenByte(EEPROM_ADDR_RETURNFILTERTIME, 2);
-    project.returnPosTime = (uint16_t)AT24CXX_ReadLenByte(EEPROM_ADDR_RETURNPOSTIME, 2);
-    project.pushTime = (uint16_t)AT24CXX_ReadLenByte(EEPROM_ADDR_PUSHTIME, 2); 
-    project.actionUnitDelay = (uint16_t)AT24CXX_ReadLenByte(EEPROM_ADDR_ACTIONUNITDELAY, 2);
+    project.productOutputOffset = AT24CXX_ReadOneByte(EEPROM_ADDR_PRODUCTOUTPUTOFFSET);
+    project.productOutputAddr = EEPROM_ADDR_PRODUCTOUTPUT + project.productOutputOffset;
+    project.productOutput =  (uint16_t)AT24CXX_ReadLenByte(project.productOutputAddr, 2);
     
-    //project.returnPosTime = RETURN_POS_TIME;
+    IWDG_ReloadCounter();
+    
+    project.machineType = (MachineType_TypeDef)AT24CXX_ReadOneByte(EEPROM_ADDR_MACHINETYPE);
+    project.sensorLevel = AT24CXX_ReadOneByte(EEPROM_ADDR_SENSORLEVEL);
+    project.actionUnit = AT24CXX_ReadOneByte(EEPROM_ADDR_ACTIONUNIT);
+    project.actionUnitDelay = ((uint16_t)AT24CXX_ReadOneByte(EEPROM_ADDR_ACTIONUNITDELAY))*((uint16_t)project.actionUnit);
+    
+    project.internalSetting[INTERNALSETTING_DEFAULT].val = defaultInternalSetting[INTERNALSETTING_DEFAULT].val;
+    project.internalSetting[INTERNALSETTING_DEFAULT].min = defaultInternalSetting[INTERNALSETTING_DEFAULT].min;
+    project.internalSetting[INTERNALSETTING_DEFAULT].max = defaultInternalSetting[INTERNALSETTING_DEFAULT].max;
+    project.internalSetting[INTERNALSETTING_MACHINETYPE].val = project.machineType;
+    project.internalSetting[INTERNALSETTING_MACHINETYPE].min = defaultInternalSetting[INTERNALSETTING_MACHINETYPE].min;
+    project.internalSetting[INTERNALSETTING_MACHINETYPE].max = defaultInternalSetting[INTERNALSETTING_MACHINETYPE].max;
+    project.internalSetting[INTERNALSETTING_SENSORLEVEL].val = project.sensorLevel;
+    project.internalSetting[INTERNALSETTING_SENSORLEVEL].min = defaultInternalSetting[INTERNALSETTING_SENSORLEVEL].min;
+    project.internalSetting[INTERNALSETTING_SENSORLEVEL].max = defaultInternalSetting[INTERNALSETTING_SENSORLEVEL].max;
+    project.internalSetting[INTERNALSETTING_ACTIONUNIT].val = project.actionUnit;
+    project.internalSetting[INTERNALSETTING_ACTIONUNIT].min = defaultInternalSetting[INTERNALSETTING_ACTIONUNIT].min;
+    project.internalSetting[INTERNALSETTING_ACTIONUNIT].max = defaultInternalSetting[INTERNALSETTING_ACTIONUNIT].max;
+    
     //project.actionUnitDelay = 1;
      
     IWDG_ReloadCounter();
@@ -405,13 +440,25 @@ void ProgramRead(void)
 
     IWDG_ReloadCounter();
     
+    UART1_printf("EEPROM_ADDR_END = %d\r\n", EEPROM_ADDR_END);
+    
     UART1_printf("----The productOutput is %d\r\n", project.productOutput);
-//    UART1_printf("----The returnFilterTime is %d\r\n", project.returnFilterTime);
-//    UART1_printf("----The returnPosTime is %d\r\n", project.returnPosTime);
-//    UART1_printf("----The pushTime is %d\r\n", project.pushTime);
+    UART1_printf("----The productOutputOffset is %d\r\n", project.productOutputOffset);
+    UART1_printf("----The productOutputAddr is %d\r\n", project.productOutputAddr);
+    UART1_printf("----The actionUnit is %d\r\n", project.actionUnit);
     UART1_printf("----The actionUnitDelay is %d\r\n", project.actionUnitDelay);
     
-    UART1_printf("EEPROM_ADDR_END = %d\r\n", EEPROM_ADDR_END);
+    IWDG_ReloadCounter();
+    
+    if(project.sensorLevel)
+        UART1_printf("++++++++This is a 12V sensors machine!!!!\r\n");
+    else
+        UART1_printf("++++++++This is a 5V sensors machine!!!!\r\n");
+    
+    if(project.machineType)
+        UART1_printf("++++++++This is a 2 sensors machine!!!!\r\n");
+    else
+        UART1_printf("++++++++This is a 4 sensors machine!!!!\r\n");
     
     IWDG_ReloadCounter();
 }
@@ -425,8 +472,9 @@ void Project_Run(void)
         sprintf((char*)project.segStr, "%05d", project.productOutput);
         TM1638_SendData(0, project.segStr);
         
-        //AT24CXX_WriteLenByte(EEPROM_ADDR_PRODUCTOUTPUT, 0, 2);
-        //AT24CXX_WriteLenByte(EEPROM_ADDR_PRODUCTOUTPUT, 0, 2);
+        AT24CXX_WriteLenByte(project.productOutputAddr, 0, 2);
+        AT24CXX_WriteLenByte(project.productOutputAddr, 0, 2);
+        AT24CXX_WriteLenByte(project.productOutputAddr, 0, 2);
     }
     
     //按键声音
@@ -537,6 +585,13 @@ void Project_Run(void)
         if(GML(M_SEG_FLASH))
             Segment_Flash();
         
+        if(GML(M_MACHINE_CHECK))
+        {
+            MachineType_Check();
+            SML(M_MACHINE_CHECK, 0);
+            SML(M_PROGRAM_READY, 1);
+        }
+        
         //按键识别
         if(GML(M_PROGRAM_READY))
             Key_Distinguish();
@@ -628,33 +683,43 @@ void Project_Run(void)
         {
             if(GML(M_MAN_UPDOWN))
             {
-                if(project.programNum == 9)
+                if(!GML(M_MAN_FRONTBACK))
                 {
-                    if(project.printHeadPos&FRONTBACK_MASK)
+                    if(project.programNum == 9)
                     {
-                        if(project.printHeadPos&UPDOWN_MASK)
-                            PrintUp();
+                        if(project.printHeadPos&FRONTBACK_MASK)
+                        {
+                            if(project.printHeadPos&UPDOWN_MASK)
+                                PrintUp();
+                            else
+                                PrintDown();
+                        }
                         else
-                            PrintDown();
+                            Absorb();
                     }
                     else
-                        Absorb();
+                    {
+                        if(project.printHeadPos&FRONTBACK_MASK)
+                            Print();
+                        else
+                            Absorb();
+                    }
                 }
                 else
                 {
-                    if(project.printHeadPos&FRONTBACK_MASK)
-                        Print();
-                    else
-                        Absorb();
+                    SML(M_MAN_UPDOWN, 0);
+                    
+                    SML(M_MAN_UPDOWN_FB, 1);
                 }
             }
-            if(GML(M_MAN_FRONTBACK))
+            if(GML(M_MAN_FRONTBACK) && !GML(M_MAN_UPDOWN))
             {
                 if(project.printHeadPos&FRONTBACK_MASK)
                     Back();
                 else
                     Front();
             }
+            
             if(GML(M_MAN_AUX))
             {
                 if(project.machineType == MACHINE_2SENSORS)

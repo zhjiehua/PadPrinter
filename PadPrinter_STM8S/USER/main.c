@@ -58,12 +58,14 @@ int main(void)
     SIMPLC_Timer_Create(2, 100, 0);//KEY BEEP
     SIMPLC_Timer_Create(3, 100, 0);//OUTPUT FLASH
     
+    //project.sensorLevel = !!GPIO_ReadInputPin(IN_SENSOR_LEVEL_PORT, IN_SENSOR_LEVEL_PIN);
+    
     Uart2_Init(115200);
     UART1_printf("\r\nHello PadPrinter!\r\n");
     
     //Beep_Init(BEEP_FREQUENCY_1KHZ);
 	TIM2_PWM_Init();
-
+    
     AT24CXX_Init();
     
     TM1638_Init();

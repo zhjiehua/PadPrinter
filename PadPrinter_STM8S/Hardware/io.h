@@ -38,6 +38,9 @@
 //#define IN_SHIFT_L2_PORT    GPIOD     //移位极限位2
 //#define IN_SHIFT_L2_PIN     GPIO_PIN_3
 
+#define IN_SENSOR_LEVEL_PORT    GPIOD     //移位极限位2
+#define IN_SENSOR_LEVEL_PIN     GPIO_PIN_7
+
 //该输入点与上面的输入点共用，所以不用修改
 #define IN_FRONT_O_PORT     IN_ABSORB_O_PORT    //前后原始位
 #define IN_FRONT_O_PIN      IN_ABSORB_O_PIN

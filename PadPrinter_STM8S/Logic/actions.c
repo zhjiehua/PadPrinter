@@ -143,7 +143,38 @@ void Front(void)
                 if(GML(M_MODE_AUTO))
                     NextAction();
                 else if(GML(M_MODE_MANUAL))
-                    SML(M_MAN_FRONTBACK, 0);
+                {
+                    if(GML(M_MAN_FRONTBACK_STOP))
+                    {
+                        SML(M_MAN_FRONTBACK_STOP, 0);
+                        SML(M_MAN_FRONTBACK, 0);
+                    }
+                    else if(GML(M_MAN_UPDOWN_FB))
+                    {
+                        SML(M_MAN_UPDOWN_FB, 0);
+                        SML(M_MAN_FRONTBACK, 0);
+                        
+                        SML(M_MAN_UPDOWN, 1);
+                    }
+                    else if(GML(M_MAN_FRONTBACK_AUTO))
+                    {
+                        SML(M_MAN_FRONTBACK_AUTO, 0);
+                        SML(M_MAN_FRONTBACK, 0);
+                        
+                        SML(M_FLAG_MANUAL, 0);
+                    
+                        UART1_printf("\r\nRestore the initial status.\r\n");
+                        
+                        SML(M_MODE_RESTORE, 1);
+                        
+                        //SML(M_PROGRAM_AUX, 0);
+                        
+                        if(project.printHeadPos&UPDOWN_MASK)
+                            SML(M_RESTORE_UP, 1);
+                        
+                        SML(M_RESTORE_HOME, 1);
+                    }
+                }
                 
                 project.printHeadState = 0;
             }
@@ -173,7 +204,38 @@ void Back(void)
                 if(GML(M_MODE_AUTO))
                     NextAction();
                 else if(GML(M_MODE_MANUAL))
-                    SML(M_MAN_FRONTBACK, 0);
+                {
+                    if(GML(M_MAN_FRONTBACK_STOP))
+                    {
+                        SML(M_MAN_FRONTBACK_STOP, 0);
+                        SML(M_MAN_FRONTBACK, 0);
+                    }
+                    else if(GML(M_MAN_UPDOWN_FB))
+                    {
+                        SML(M_MAN_UPDOWN_FB, 0);
+                        SML(M_MAN_FRONTBACK, 0);
+                        
+                        SML(M_MAN_UPDOWN, 1);
+                    }
+                    else if(GML(M_MAN_FRONTBACK_AUTO))
+                    {
+                        SML(M_MAN_FRONTBACK_AUTO, 0);
+                        SML(M_MAN_FRONTBACK, 0);
+                        
+                        SML(M_FLAG_MANUAL, 0);
+                    
+                        UART1_printf("\r\nRestore the initial status.\r\n");
+                        
+                        SML(M_MODE_RESTORE, 1);
+                        
+                        //SML(M_PROGRAM_AUX, 0);
+                        
+                        if(project.printHeadPos&UPDOWN_MASK)
+                            SML(M_RESTORE_UP, 1);
+                        
+                        SML(M_RESTORE_HOME, 1);
+                    }
+                }
                 else if(GML(M_MODE_RESTORE))
                     SML(M_RESTORE_HOME, 0);
 

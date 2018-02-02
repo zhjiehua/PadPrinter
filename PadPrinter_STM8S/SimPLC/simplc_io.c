@@ -1,5 +1,6 @@
 #include "simplc_io.h"
 #include "io.h"
+#include "project.h"
 
 uint8_t IN_State[IN_NUM];//输入点滤波用
 /*
@@ -86,10 +87,20 @@ void SIMPLC_IO_Refresh(void)
 	_GetX(X1, 1);
 	_GetX(X2, 2);
 	_GetX(X3, 3);
-	_GetX(X4, 4);
-	_GetX(X5, 5);
-	_GetX(X6, 6);
-	_GetX(X7, 7);
+    if(project.sensorLevel)//金属感应开关
+    {
+        _GetX(!X4, 4);
+        _GetX(!X5, 5);
+        _GetX(!X6, 6);
+        _GetX(!X7, 7);
+    }
+    else//光电开关
+    {
+        _GetX(X4, 4);
+        _GetX(X5, 5);
+        _GetX(X6, 6);
+        _GetX(X7, 7);        
+    }
 	
 	for(i=0;i<(IN_NUM+7)/8;i++)
 	{

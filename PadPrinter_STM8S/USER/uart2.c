@@ -327,27 +327,38 @@ void UartDataParse(void)
                 {
                     case '0':
                         UART1_printf("X0 = %d\r\n", X0);
+                        UART1_printf("GXL(X0) = %d\r\n", GXL(X_ABSORB_O));
                     break;
                     case '1':
                         UART1_printf("X1 = %d\r\n", X1);
+                        UART1_printf("GXL(X1) = %d\r\n", GXL(X_ABSORB_L));
                     break;
                     case '2':
                         UART1_printf("X2 = %d\r\n", X2);
+                        UART1_printf("GXL(X2) = %d\r\n", GXL(X_PRINT_O));
                     break;
                     case '3':
                         UART1_printf("X3 = %d\r\n", X3);
+                        UART1_printf("GXL(X3) = %d\r\n", GXL(X_PRINT_L));
                     break;
                     case '4':
                         UART1_printf("X4 = %d\r\n", X4);
+                        UART1_printf("GXL(X4) = %d\r\n", GXL(X_SHIFT_O));
                     break;
                     case '5':
                         UART1_printf("X5 = %d\r\n", X5);
+                        UART1_printf("GXL(X5) = %d\r\n", GXL(X_POS));
                     break;
                     case '6':
                         UART1_printf("X6 = %d\r\n", X6);
+                        UART1_printf("GXL(X6) = %d\r\n", GXL(X_SHIFT_L1));
                     break;
                     case '7':
                         UART1_printf("X7 = %d\r\n", X7);
+                        UART1_printf("GXL(X7) = %d\r\n", GXL(X_SHIFT_L2));
+                    break;
+                    case '8':
+                        UART1_printf("X8 = %d\r\n", GPIO_ReadInputPin(IN_SENSOR_LEVEL_PORT, IN_SENSOR_LEVEL_PIN));
                     break;
                     default:
                     break;
