@@ -1,5 +1,5 @@
-# PadPrinter
+﻿# PadPrinter
 
 移印机
 
-基于STM8S005K6，开发环境IAR.
+基于STC8F2K32，开发环境KEIL4.
