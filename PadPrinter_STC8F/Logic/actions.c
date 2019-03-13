@@ -27,6 +27,8 @@ void AbsorbDown(void)
                 man.headState = 1;
 
                 SML(M_ABSORBDOWN_FINISH, 0);
+
+                SML(M_AUTO_FLAG_OIL, 1);
             }                      
         break;
         case 1:
@@ -85,6 +87,8 @@ void Absorb(void)
             printf("Action----Absorb\r\n");
 
             SML(M_ABSORB_FINISH, 0);
+
+            SML(M_AUTO_FLAG_OIL, 1);
         break;
         case 1:
             if(GXL(X_ABSORB_L))//动作到位
@@ -120,6 +124,8 @@ void PrintDown(void)
             printf("Action----Print Down\r\n");
 
             SML(M_PRINTDOWN_FINISH, 0);
+
+            SML(M_AUTO_FLAG_OIL, 0);
         break;
         case 1:
             if(GXL(X_PRINT_L))//动作到位
@@ -177,6 +183,8 @@ void Print(void)
             printf("Action----Print\r\n");
 
             SML(M_PRINT_FINISH, 0);
+
+            SML(M_AUTO_FLAG_OIL, 0);
         break;
         case 1:
             if(GXL(X_PRINT_L))//动作到位
@@ -340,7 +348,7 @@ void Shift3Sensors(void)
                     SYL(Y_SHIFT2, 0);
                     SYL(Y_SHIFT, 0);
                     
-                    printf("Action----Shift3Sensors----man.returnPosDelay----%d\r\n", (int)man.returnPosDelay);
+                    //printf("Action----Shift3Sensors----man.returnPosDelay----%d\r\n", (int)man.returnPosDelay);
                     
                     man.platformState = 2;
                 }
@@ -361,7 +369,7 @@ void Shift3Sensors(void)
                     SYL(Y_SHIFT2, 0);
                     SYL(Y_SHIFT, 1);
                     
-                    printf("Action----Shift3Sensors----man.returnNoneDelay----%d\r\n", (int)man.returnNoneDelay);
+                    //printf("Action----Shift3Sensors----man.returnNoneDelay----%d\r\n", (int)man.returnNoneDelay);
 
                     man.platformState = 4;
                 }
@@ -386,7 +394,7 @@ void Shift3Sensors(void)
                     cnt = 0;
                     SYL(Y_POS, 1);
                     
-                    printf("Action----Shift3Sensors----man.shiftPosDelay----%d\r\n", (int)man.shiftPosDelay);
+                    //printf("Action----Shift3Sensors----man.shiftPosDelay----%d\r\n", (int)man.shiftPosDelay);
 
                     man.platformState = 6;
                 }
@@ -412,7 +420,7 @@ void Shift3Sensors(void)
                     SYL(Y_SHIFT2, 0);
                     SYL(Y_SHIFT, 1);
 
-                    printf("Action----Shift3Sensors----man.shiftStopDelay----%d\r\n", (int)man.shiftStopDelay);
+                    //printf("Action----Shift3Sensors----man.shiftStopDelay----%d\r\n", (int)man.shiftStopDelay);
 
                     man.platformState = 8;
                 }    

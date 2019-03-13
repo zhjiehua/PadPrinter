@@ -148,14 +148,21 @@ void Key_Normal(void)
         && (man.keyPress != KEY_STARTSTOP && man.keyPress != KEY_FRONTBACK && man.keyPress != KEY_FOOT))//这3个键可重复按2次
     {
         man.keyPress = KEY_NONE;
-        printf("man.keyPress = KEY_NONE\r\n");
+        //printf("man.keyPress = KEY_NONE\r\n");
     } 
 
 //    if(man.keyPressLast == man.keyPress && man.keyPressLast != KEY_NONE)
 //        printf("man.keyPressLast == man.keyPress\r\n");
     
     //KeyLogicBetweenDelay();
-    KeyLogic();
+//    KeyLogic();
+
+
+
+
+
+
+
 
     //========================手动：前后不断切换=============================== 
     //if(!GML(M_MODE_AUTO) && GML(M_MAN_FRONTBACK) && ((GMR(M_ACTIONHEAD_FINISH) && !GML(M_CHANGEDELAY)) || GMF(M_CHANGEDELAY)))
@@ -187,8 +194,12 @@ void Key_Normal(void)
 
     //===========================自动============================
     if(GML(M_MODE_AUTO) && !GML(M_MODE_RESTORE) && (GMR(M_ACTIONHEAD_FINISH) || (GMR(M_ACTIONPLATFORM_FINISH) && !GML(M_MODE_RESTORE_QUIT))))
+    //if(GML(M_MODE_AUTO) && !GML(M_MODE_RESTORE) && GMR(M_ACTIONHEAD_FINISH))
     {
-        //if()
+//        if(GMR(M_ACTIONHEAD_FINISH))
+//            printf("Action next GMR(M_ACTIONHEAD_FINISH)");
+//        else
+//            printf("Action next GMR(M_ACTIONPLATFORM_FINISH)");
 
         if(!GML(M_AUTO_FLAG_AUX))
         {
@@ -252,7 +263,7 @@ void Key_Normal(void)
             man.pCurAction = man.program + man.actionPos;
             man.actionPos++;
 
-            //printf("Action next!\r\n");
+            printf("Action next!\r\n");
                 
         }//if(!GML(M_AUTO_FLAG_AUX))
         
@@ -286,9 +297,22 @@ void Key_Normal(void)
 
             //不需要延时
             case ABSORB_UP:
+                SML(M_ABSORBUP_FINISH, 0);
+                man.actHead = man.pCurAction->act;
+                SML(M_ACTIONHEAD_FINISH, 0);
+            break;
             case FRONT:
+                SML(M_FRONT_FINISH, 0);
+                man.actHead = man.pCurAction->act;
+                SML(M_ACTIONHEAD_FINISH, 0);
+            break;
             case BACK:
+                SML(M_BACK_FINISH, 0);
+                man.actHead = man.pCurAction->act;
+                SML(M_ACTIONHEAD_FINISH, 0);
+            break;
             case PRINT_UP:
+                SML(M_PRINTUP_FINISH, 0);
                 man.actHead = man.pCurAction->act;
                 SML(M_ACTIONHEAD_FINISH, 0);
             break;
@@ -428,6 +452,8 @@ void Key_Normal(void)
         }
     }
 
+
+    KeyLogic();
 }
 
 void Normal(void)
@@ -549,7 +575,7 @@ void Normal(void)
         }
         else
         {
-            //前后动作特殊对待
+            //吸油和印油动作特殊对待
             switch(man.actHead)
             {
                 case ABSORB_DOWN:
@@ -641,22 +667,25 @@ void Normal(void)
     //=============================穿梭平台动作=============================
     if(!GML(M_MACHINE_AUX_FAULT))//穿梭可以用
     {
-        switch(man.actPlatform)
+        //if(GML(M_PRINT_FINISH) && GML(M_PRINTDOWN_FINISH))
         {
-            case SHIFT:
-                man.Shift();
-            break;
-            case RETURN:
-                man.Return();
-            break;
-            case SHIFTRETURN:
-                man.ShiftReturn();
-            break;
-            case SHIFTRETURN2:
-                man.ShiftReturn2();
-            break;
-            default:
-            break;
+            switch(man.actPlatform)
+            {
+                case SHIFT:
+                    man.Shift();
+                break;
+                case RETURN:
+                    man.Return();
+                break;
+                case SHIFTRETURN:
+                    man.ShiftReturn();
+                break;
+                case SHIFTRETURN2:
+                    man.ShiftReturn2();
+                break;
+                default:
+                break;
+            }
         }
     }
 //    else

@@ -54,7 +54,7 @@ void KeyLogic(void)
                         if(!(man.headPos&UPDOWN_MASK)) //暂停时不能压
                         {
                             SML(M_MODE_AUTO, 0);
-                            SML(M_MODE_RESTORE, 0);
+                            //SML(M_MODE_RESTORE, 0);
 
                             printf("Stop the program!\r\n");
                         }
@@ -66,7 +66,9 @@ void KeyLogic(void)
                         if(GML(M_MAN_FRONTBACK))//停止手动前后
                             SML(M_MAN_FRONTBACK, 0);
 
-                        if(!GML(M_FLAG_MANUAL))
+                        //if(!GML(M_FLAG_MANUAL))
+                        //if(!GML(M_FLAG_MANUAL) || (!(man.headPos&FRONTBACK_MASK) && !(man.headPos&UPDOWN_MASK))) //如果在前面停下来则先Restore
+                        if(!GML(M_FLAG_MANUAL) && !GML(M_MODE_RESTORE))
                         {
                             SML(M_MODE_AUTO, 1);
                             SML(M_MODE_RESTORE, 0);
@@ -84,10 +86,9 @@ void KeyLogic(void)
                             SML(M_MODE_AUTO, 1);
                             SML(M_MODE_RESTORE, 1);
 
-
-                            SML(M_ACTIONHEAD_FINISH, 0);
                             SML(M_ACTION_FINISH, 0);
 
+                            SML(M_ACTIONHEAD_FINISH, 0);
                             if(GML(M_AUTO_FLAG_AUX))
                                 SML(M_ACTIONPLATFORM_FINISH, 0);
 
@@ -109,21 +110,27 @@ void KeyLogic(void)
                             //改正为平台不在原始位置，则平台回位
                             if(man.platformPos)
                             {
-//                                SML(M_MODE_AUTO, 1);
-//                                SML(M_MODE_RESTORE, 1);
-//        
-//                                SML(M_ACTION_FINISH, 0);
-//                                SML(M_ACTIONHEAD_FINISH, 0);
-//                                SML(M_ACTIONPLATFORM_FINISH, 0);
-//        
-//                                printf("Restore the machine!\r\n");
-                                    
-                                man.actPlatform = RETURN;
-                                SML(M_RETURN_FINISH, 0);
-                                
-                                SML(M_MODE_RESTORE_QUIT, 1);
-
-                                printf("Key  Restore====Return!\r\n");
+                                if(!GML(M_AUTO_FLAG_OIL))//如果印过了，则印头和平台都重新回位
+                                {
+                                    SML(M_MODE_AUTO, 1);
+                                    SML(M_MODE_RESTORE, 1);
+            
+                                    SML(M_ACTION_FINISH, 0);
+                                    SML(M_ACTIONHEAD_FINISH, 0);
+                                    SML(M_ACTIONPLATFORM_FINISH, 0);
+            
+                                    printf("Key  Restore the machine!\r\n");
+                                }
+                                else//如果没印过，则只回平台
+                                {    
+                                    man.actPlatform = RETURN;
+                                    SML(M_RETURN_FINISH, 0);
+                                    SML(M_ACTIONPLATFORM_FINISH, 0);
+    
+                                    SML(M_MODE_RESTORE_QUIT, 1);
+    
+                                    printf("Key  Restore====Return!\r\n");
+                                }
                             }
                         }    
                     }
@@ -164,8 +171,16 @@ void KeyLogic(void)
                         if(man.programNum == 2 || man.programNum == 4 || man.programNum == 6 || man.programNum == 8)
                             SML(M_AUTO_FLAG_AUX, 0);
                     }
-                    else if(GML(M_MAN_FRONTBACK))//停止前后动作
-                        SML(M_MAN_FRONTBACK, 0);
+                    else 
+                    {
+                        if(GML(M_MODE_RESTORE)) //在恢复时暂停， M_MODE_RESTORE还是1，这时应该清0，进入手动模式
+                        {
+                            SML(M_MODE_RESTORE, 0);
+                        }
+
+                        if(GML(M_MAN_FRONTBACK))//停止前后动作
+                            SML(M_MAN_FRONTBACK, 0);
+                    }
 
                     SML(M_FLAG_MANUAL, 1);
 
@@ -204,6 +219,10 @@ void KeyLogic(void)
                         if(man.programNum == 2 || man.programNum == 4 || man.programNum == 6 || man.programNum == 8)
                             SML(M_AUTO_FLAG_AUX, 0);
                     }
+                    else if(GML(M_MODE_RESTORE)) //在恢复时暂停， M_MODE_RESTORE还是1，这时应该清0，进入手动模式
+                    {
+                        SML(M_MODE_RESTORE, 0);
+                    }
 
                     SML(M_FLAG_MANUAL, 1);
 
@@ -235,10 +254,11 @@ void KeyLogic(void)
 
                     if(GML(M_MODE_AUTO))//如果正在执行自动程序，则暂停
                     {
-                        if(!(man.headPos&UPDOWN_MASK))
+                        if(!(man.headPos&UPDOWN_MASK)) //注意：可能会在前面停下来
+                        //if(!(man.headPos&UPDOWN_MASK) && !(man.headPos&FRONTBACK_MASK))
                         {
                             SML(M_MODE_AUTO, 0);
-                            SML(M_MODE_RESTORE, 0);
+                            //SML(M_MODE_RESTORE, 0);
 
                             printf("Stop the program!\r\n");
                         }
@@ -248,7 +268,8 @@ void KeyLogic(void)
                         if(GML(M_MAN_FRONTBACK))
                             SML(M_MAN_FRONTBACK, 0);
 
-                        if(!GML(M_FLAG_MANUAL))
+                        //if(!GML(M_FLAG_MANUAL) || (!(man.headPos&FRONTBACK_MASK) && !(man.headPos&UPDOWN_MASK))) //如果在前面停下来则先Restore
+                        if(!GML(M_FLAG_MANUAL) && !GML(M_MODE_RESTORE))
                         {
                             SML(M_MODE_AUTO, 1);
                             SML(M_MODE_RESTORE, 0);
@@ -256,8 +277,10 @@ void KeyLogic(void)
                             printf("Start the program!\r\n");
 
                             SML(M_ACTION_FINISH, 0);
-                            SML(M_ACTIONHEAD_FINISH, 0);
-                            SML(M_ACTIONPLATFORM_FINISH, 0);
+                            //if(man.pCurAction->act <= PRINT)
+                                SML(M_ACTIONHEAD_FINISH, 0);
+                            //else
+                                SML(M_ACTIONPLATFORM_FINISH, 0);
                         }
                         else
                         {
@@ -265,8 +288,8 @@ void KeyLogic(void)
                             SML(M_MODE_RESTORE, 1);
 
                             SML(M_ACTION_FINISH, 0);
-                            SML(M_ACTIONHEAD_FINISH, 0);
 
+                            SML(M_ACTIONHEAD_FINISH, 0);
                             if(GML(M_AUTO_FLAG_AUX))
                                 SML(M_ACTIONPLATFORM_FINISH, 0);
 

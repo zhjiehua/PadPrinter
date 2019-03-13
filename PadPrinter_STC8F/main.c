@@ -99,6 +99,21 @@ int main(void)
 
         WDT_CONTR = 0x3C;
 
+        //²âÊÔÓÃ
+//        if(man.mode == PM_NORMAL)
+//        {
+//            static uint8_t i = 0;
+//            i++;
+//            if(i > 5)
+//            {
+//                i = 0;
+//                if(GML(M_KEY_FOOT))
+//                    SML(M_KEY_FOOT, 0);
+//                else
+//                    SML(M_KEY_FOOT, 1);
+//            }
+//        }
+
         //Ë¢ÐÂIOµã
 		SIMPLC_IO_Refresh();
         
