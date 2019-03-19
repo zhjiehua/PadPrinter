@@ -221,6 +221,12 @@ void UartDataParse(void)
                     case '3':
                         Y3(USART_RX_BUF[2]-0x30);
                     break;
+                    case '4':
+                        Y4(USART_RX_BUF[2]-0x30);
+                    break;
+                    case '5':
+                        Y5(USART_RX_BUF[2]-0x30);
+                    break;
                     default:
                     break;
                 }
@@ -251,6 +257,10 @@ void UartDataParse(void)
                     case '1':
                         AT24CXX_WriteOneByte(EEPROM_ADDR_DEFAULT, 0xAA);
                         printf("Reset default data!\r\n");
+                    break;
+
+                    case 's':
+                         while(1);
                     break;
                     default:
                     break;
@@ -346,6 +356,39 @@ void UartDataParse(void)
                             }
                             printf("\r\n");
                         }                       
+                    break;
+
+
+                    case '3': //写加密过的ID进EEPROM
+                        {
+                            uint8_t i;
+
+                            for(i=0;i<7;i++)
+                                man.eepromMcuID[i] = USART_RX_BUF[2+i];
+
+                            for(i=0;i<7;i++)
+                            {
+                                AT24CXX_WriteOneByte(EEPROM_ADDR_MCUID+i, man.eepromMcuID[i]);    
+                            }
+
+                            printf("Write McuID sucess!\r\n");
+                        }
+                    break;
+                    case '4': //发送mcuID给上位机
+                        {
+                            uint8_t i;
+
+                            man.mcuID = (char code *)0x7ff9;
+
+                            Uart_SendData(0xA5); //帧头
+                            Uart_SendData(0x5A);
+                            Uart_SendData(0x08); //长度 8个字节
+
+                            Uart_SendData(0xE4); //命令
+
+                            for(i=0;i<7;i++)
+                                Uart_SendData(man.mcuID[i]);
+                        }
                     break;
                     default:
                     break;

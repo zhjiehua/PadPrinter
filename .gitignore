@@ -39,3 +39,13 @@
 /PadPrinter_STC8F/LIST
 /PadPrinter_STC8F/OBJ
 /PadPrinter_STC8F/PadPrinter.uvopt
+/PadPrinter_STC8F/PadPrinter_uvopt.bak
+
+/Tool/.vs
+/Tool/Debug
+/Tool/x64
+/Tool/FATool.VC.VC.opendb
+/Tool/FATool/GeneratedFiles
+/Tool/FATool/Resources
+/Tool/FATool/x64
+

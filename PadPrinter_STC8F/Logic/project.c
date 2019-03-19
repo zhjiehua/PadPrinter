@@ -135,109 +135,109 @@ void ProgramResetDefault0(void)
     WDT_CONTR = 0x3C;
 }
 
-void ProgramResetDefault1(void)
-{
-    uint16_t i, j;
- 
-    ProgramResetDefault0();
-
-    for(i=0,j=0;i<SIZEOF(process1);i++)
-    {
-        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM1+j, process1[i].flag);
-        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM1+j+1, process1[i].act);
-        j += sizeof(ACTION_TypeDef);
-
-        WDT_CONTR = 0x3C;
-    }
-    for(i=0,j=0;i<SIZEOF(process2);i++)
-    {
-        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM2+j, process2[i].flag);
-        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM2+j+1, process2[i].act);
-        j += sizeof(ACTION_TypeDef);
-
-        WDT_CONTR = 0x3C;
-    }
-    for(i=0,j=0;i<SIZEOF(process3);i++)
-    {
-        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM3+j, process3[i].flag);
-        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM3+j+1, process3[i].act);
-        j += sizeof(ACTION_TypeDef);
-
-        WDT_CONTR = 0x3C;
-    }
-    for(i=0,j=0;i<SIZEOF(process4);i++)
-    {
-        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM4+j, process4[i].flag);
-        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM4+j+1, process4[i].act);
-        j += sizeof(ACTION_TypeDef);
-
-        WDT_CONTR = 0x3C;
-    }
-    for(i=0,j=0;i<SIZEOF(process5);i++)
-    {
-        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM5+j, process5[i].flag);
-        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM5+j+1, process5[i].act);
-        j += sizeof(ACTION_TypeDef);
-
-        WDT_CONTR = 0x3C;
-    }
-    for(i=0,j=0;i<SIZEOF(process6);i++)
-    {
-        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM6+j, process6[i].flag);
-        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM6+j+1, process6[i].act);
-        j += sizeof(ACTION_TypeDef);
-
-        WDT_CONTR = 0x3C;
-    }
-}
+//void ProgramResetDefault1(void)
+//{
+//    uint16_t i, j;
+// 
+//    ProgramResetDefault0();
+//
+//    for(i=0,j=0;i<SIZEOF(process1);i++)
+//    {
+//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM1+j, process1[i].flag);
+//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM1+j+1, process1[i].act);
+//        j += sizeof(ACTION_TypeDef);
+//
+//        WDT_CONTR = 0x3C;
+//    }
+//    for(i=0,j=0;i<SIZEOF(process2);i++)
+//    {
+//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM2+j, process2[i].flag);
+//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM2+j+1, process2[i].act);
+//        j += sizeof(ACTION_TypeDef);
+//
+//        WDT_CONTR = 0x3C;
+//    }
+//    for(i=0,j=0;i<SIZEOF(process3);i++)
+//    {
+//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM3+j, process3[i].flag);
+//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM3+j+1, process3[i].act);
+//        j += sizeof(ACTION_TypeDef);
+//
+//        WDT_CONTR = 0x3C;
+//    }
+//    for(i=0,j=0;i<SIZEOF(process4);i++)
+//    {
+//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM4+j, process4[i].flag);
+//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM4+j+1, process4[i].act);
+//        j += sizeof(ACTION_TypeDef);
+//
+//        WDT_CONTR = 0x3C;
+//    }
+//    for(i=0,j=0;i<SIZEOF(process5);i++)
+//    {
+//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM5+j, process5[i].flag);
+//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM5+j+1, process5[i].act);
+//        j += sizeof(ACTION_TypeDef);
+//
+//        WDT_CONTR = 0x3C;
+//    }
+//    for(i=0,j=0;i<SIZEOF(process6);i++)
+//    {
+//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM6+j, process6[i].flag);
+//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM6+j+1, process6[i].act);
+//        j += sizeof(ACTION_TypeDef);
+//
+//        WDT_CONTR = 0x3C;
+//    }
+//}
 
 void ProgramResetDefault(void)
 {
     uint16_t i,j;
     
     ProgramResetDefault0();
-    ProgramResetDefault1();
+//    ProgramResetDefault1();
 
-    for(i=0,j=0;i<SIZEOF(process7);i++)
-    {
-        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM7+j, process7[i].flag);
-        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM7+j+1, process7[i].act);
-        j += sizeof(ACTION_TypeDef);
-
-        WDT_CONTR = 0x3C;
-    }
-    for(i=0,j=0;i<SIZEOF(process8);i++)
-    {
-        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM8+j, process8[i].flag);
-        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM8+j+1, process8[i].act);
-        j += sizeof(ACTION_TypeDef);
-
-        WDT_CONTR = 0x3C;
-    }
-    for(i=0,j=0;i<SIZEOF(process9);i++)
-    {
-        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM9+j, process9[i].flag);
-        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM9+j+1, process9[i].act);
-        j += sizeof(ACTION_TypeDef);
-
-        WDT_CONTR = 0x3C;
-    }
-    for(i=0,j=0;i<SIZEOF(process10);i++)
-    {
-        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM10+j, process10[i].flag);
-        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM10+j+1, process10[i].act);
-        j += sizeof(ACTION_TypeDef);
-
-        WDT_CONTR = 0x3C;
-    }
-    for(i=0,j=0;i<SIZEOF(process11);i++)
-    {
-        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM11+j, process11[i].flag);
-        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM11+j+1, process11[i].act);
-        j += sizeof(ACTION_TypeDef);
-
-        WDT_CONTR = 0x3C;
-    }
+//    for(i=0,j=0;i<SIZEOF(process7);i++)
+//    {
+//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM7+j, process7[i].flag);
+//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM7+j+1, process7[i].act);
+//        j += sizeof(ACTION_TypeDef);
+//
+//        WDT_CONTR = 0x3C;
+//    }
+//    for(i=0,j=0;i<SIZEOF(process8);i++)
+//    {
+//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM8+j, process8[i].flag);
+//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM8+j+1, process8[i].act);
+//        j += sizeof(ACTION_TypeDef);
+//
+//        WDT_CONTR = 0x3C;
+//    }
+//    for(i=0,j=0;i<SIZEOF(process9);i++)
+//    {
+//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM9+j, process9[i].flag);
+//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM9+j+1, process9[i].act);
+//        j += sizeof(ACTION_TypeDef);
+//
+//        WDT_CONTR = 0x3C;
+//    }
+//    for(i=0,j=0;i<SIZEOF(process10);i++)
+//    {
+//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM10+j, process10[i].flag);
+//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM10+j+1, process10[i].act);
+//        j += sizeof(ACTION_TypeDef);
+//
+//        WDT_CONTR = 0x3C;
+//    }
+//    for(i=0,j=0;i<SIZEOF(process11);i++)
+//    {
+//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM11+j, process11[i].flag);
+//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM11+j+1, process11[i].act);
+//        j += sizeof(ACTION_TypeDef);
+//
+//        WDT_CONTR = 0x3C;
+//    }
     for(i=0,j=0;i<SIZEOF(process0);i++)
     {
         AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM0+j, process0[i].flag);
@@ -250,6 +250,54 @@ void ProgramResetDefault(void)
     AT24CXX_WriteOneByte(EEPROM_ADDR_DEFAULT, 0x55);//二进制85，这句要放到最后
     
     printf("Program reset default data finish!\r\n");
+}
+
+//普通程序读取，即程序1~11读取
+void NormalProgramRead(const ACTION_TypeDef *process)
+{
+    uint8_t j = 0;
+    man.program[j].flag = process[j].flag;
+    man.program[j].act = process[j].act;
+    man.actionCnt = 1;
+    
+    WDT_CONTR = 0x3C;
+    
+    while(man.program[j].act != ACTION_NONE)
+    {
+        j++;
+        if(j >= 40) break;
+        man.program[j].flag = process[j].flag;
+        man.program[j].act = process[j].act;
+        man.actionCnt++;
+        
+        WDT_CONTR = 0x3C;
+    }
+
+    man.actionCnt--;
+}
+
+void NormalProgram0Read(uint16_t addr)
+{
+    uint8_t i = 0;
+    uint8_t j = 0;
+    man.program[j].flag = AT24CXX_ReadOneByte(addr+i);
+    man.program[j].act = (ACT_TypeDef)AT24CXX_ReadOneByte(addr+i+1);
+    man.actionCnt = 1;
+    
+    WDT_CONTR = 0x3C;
+    
+    while(man.program[j].act != ACTION_NONE)
+    {
+        i += sizeof(ACTION_TypeDef);
+        j++;
+        if(j >= 40) break;
+        man.program[j].flag = AT24CXX_ReadOneByte(addr+i);
+        man.program[j].act = (ACT_TypeDef)AT24CXX_ReadOneByte(addr+i+1);
+        man.actionCnt++;
+        
+        WDT_CONTR = 0x3C;
+    }    
+    man.actionCnt--;    
 }
 
 //读取程序
@@ -322,86 +370,80 @@ void ProgramRead(void)
     {
         case 0:
             man.programAddr = EEPROM_ADDR_PROGRAM0;
+            NormalProgram0Read(man.programAddr);
             SML(M_AUTO_FLAG_AUX, 1);
         break;
         case 1:
-            man.programAddr = EEPROM_ADDR_PROGRAM1;
+            //man.programAddr = EEPROM_ADDR_PROGRAM1;
+            NormalProgramRead(process1);
             SML(M_AUTO_FLAG_AUX, 1);
         break;
         case 2:
-            man.programAddr = EEPROM_ADDR_PROGRAM2;
+            //man.programAddr = EEPROM_ADDR_PROGRAM2;
+            NormalProgramRead(process2);
             SML(M_AUTO_FLAG_AUX, 0);
         break;
         case 3:
-            man.programAddr = EEPROM_ADDR_PROGRAM3;
+            //man.programAddr = EEPROM_ADDR_PROGRAM3;
+            NormalProgramRead(process3);
             SML(M_AUTO_FLAG_AUX, 1);
         break;
         case 4:
-            man.programAddr = EEPROM_ADDR_PROGRAM4;
+            //man.programAddr = EEPROM_ADDR_PROGRAM4;
+            NormalProgramRead(process4);
             SML(M_AUTO_FLAG_AUX, 0);
         break;
         case 5:
-            man.programAddr = EEPROM_ADDR_PROGRAM5;
+            //man.programAddr = EEPROM_ADDR_PROGRAM5;
+            NormalProgramRead(process5);
             SML(M_AUTO_FLAG_AUX, 1);
         break;
         case 6:
-            man.programAddr = EEPROM_ADDR_PROGRAM6;
+            //man.programAddr = EEPROM_ADDR_PROGRAM6;
+            NormalProgramRead(process6);
             SML(M_AUTO_FLAG_AUX, 0);
         break;
         case 7:
-            man.programAddr = EEPROM_ADDR_PROGRAM7;
+            //man.programAddr = EEPROM_ADDR_PROGRAM7;
+            NormalProgramRead(process7);
             SML(M_AUTO_FLAG_AUX, 1);
         break;
         case 8:
-            man.programAddr = EEPROM_ADDR_PROGRAM8;
+            //man.programAddr = EEPROM_ADDR_PROGRAM8;
+            NormalProgramRead(process8);
             SML(M_AUTO_FLAG_AUX, 0);
         break;
         case 9:
-            man.programAddr = EEPROM_ADDR_PROGRAM9;
+            //man.programAddr = EEPROM_ADDR_PROGRAM9;
+            NormalProgramRead(process9);
             SML(M_AUTO_FLAG_AUX, 1);
         break;
         case 10:
-            man.programAddr = EEPROM_ADDR_PROGRAM10;
+            //man.programAddr = EEPROM_ADDR_PROGRAM10;
+            NormalProgramRead(process10);
             SML(M_AUTO_FLAG_AUX, 1);
         break;
         case 11:
-            man.programAddr = EEPROM_ADDR_PROGRAM11;
+            //man.programAddr = EEPROM_ADDR_PROGRAM11;
+            NormalProgramRead(process11);
             SML(M_AUTO_FLAG_AUX, 1);
         break;
         default:
-            man.programAddr = EEPROM_ADDR_PROGRAM2;
+            //man.programAddr = EEPROM_ADDR_PROGRAM2;
+            NormalProgramRead(process2);
             SML(M_AUTO_FLAG_AUX, 0);
         break;
     }
 
-    i = 0;
-    j = 0;
-    man.program[j].flag = AT24CXX_ReadOneByte(man.programAddr+i);
-    man.program[j].act = (ACT_TypeDef)AT24CXX_ReadOneByte(man.programAddr+i+1);
-    printf("----man.program[%d].flag = %d\r\n", (int)j, (int)(man.program[j].flag));
-    printf("----man.program[%d].act = %d\r\n", (int)j, (int)(man.program[j].act));
-    man.actionCnt = 1;
-    
-    WDT_CONTR = 0x3C;
-    
-    while(man.program[j].act != ACTION_NONE)
-    {
-        i += sizeof(ACTION_TypeDef);
-        j++;
-        if(j >= 40) break;
-        man.program[j].flag = AT24CXX_ReadOneByte(man.programAddr+i);
-        man.program[j].act = (ACT_TypeDef)AT24CXX_ReadOneByte(man.programAddr+i+1);
-        printf("----man.program[%d].flag = %d\r\n", (int)j, (int)(man.program[j].flag));
-        printf("----man.program[%d].act = %d\r\n", (int)j, (int)(man.program[j].act));
-        man.actionCnt++;
-        
-        WDT_CONTR = 0x3C;
-    }
-    
-    man.actionCnt--;
     man.actionPos = 0;
     man.pCurAction = man.program;
 
+
+    for(j=0;j<man.actionCnt;j++)
+    {
+        printf("----man.program[%d].flag = %d\r\n", (int)j, (int)(man.program[j].flag));
+        printf("----man.program[%d].act = %d\r\n", (int)j, (int)(man.program[j].act));        
+    }
 
     if(man.machineType == MACHINE_4SENSORS)
     {
@@ -410,11 +452,6 @@ void ProgramRead(void)
     }
     else if(man.machineType == MACHINE_2SENSORS)
     {
-//        if((man.programNum == 3) || (man.programNum == 4))
-//            man.Shift = ShiftReturn2Sensors;
-//        else
-//            man.Shift = Shift2Sensors;
-
         man.Shift = Shift2Sensors;
         man.Return = Return2Sensors;
         man.ShiftReturn = ShiftReturn2Sensors;

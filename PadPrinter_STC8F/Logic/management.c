@@ -98,22 +98,8 @@ void Key_Refresh(void)
 void NextPeroid(void)
 {
     man.productOutput++;
-    //sprintf((char*)man.segStr, "%05d", (int)(man.productOutput));
-    //TM1638_SendData(0, man.segStr);
-    
+
     AT24CXX_WriteLenByte(man.productOutputAddr, man.productOutput, 2);
-    
-//    if(GML(M_PROGRAM_PERIOD))
-//    {
-//        SML(M_MODE_AUTO, 0);
-//        SML(M_MODE_RESTORE, 0);
-//        SML(M_PROGRAM_PERIOD, 0);
-//    }
-//    else
-//    {
-//        SML(M_MODE_AUTO, 1);
-//        SML(M_MODE_RESTORE, 1);
-//    }
     
     //保存修改过的延时参数
     if(GML(M_SAVE_DELAY))

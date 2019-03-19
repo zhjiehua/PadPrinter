@@ -105,18 +105,21 @@ typedef enum
 
 #define EEPROM_ADDR_MCUID               EEPROM_ADDR_DELAY+15    //恢复出厂设置不更新
 
-#define EEPROM_ADDR_PROGRAM1            EEPROM_ADDR_MCUID+10//加大距离
-#define EEPROM_ADDR_PROGRAM2            EEPROM_ADDR_PROGRAM1+sizeof(process1)
-#define EEPROM_ADDR_PROGRAM3            EEPROM_ADDR_PROGRAM2+sizeof(process2)
-#define EEPROM_ADDR_PROGRAM4            EEPROM_ADDR_PROGRAM3+sizeof(process3)
-#define EEPROM_ADDR_PROGRAM5            EEPROM_ADDR_PROGRAM4+sizeof(process4)
-#define EEPROM_ADDR_PROGRAM6            EEPROM_ADDR_PROGRAM5+sizeof(process5)
-#define EEPROM_ADDR_PROGRAM7            EEPROM_ADDR_PROGRAM6+sizeof(process6)
-#define EEPROM_ADDR_PROGRAM8            EEPROM_ADDR_PROGRAM7+sizeof(process7)
-#define EEPROM_ADDR_PROGRAM9            EEPROM_ADDR_PROGRAM8+sizeof(process8)
-#define EEPROM_ADDR_PROGRAM10           EEPROM_ADDR_PROGRAM9+sizeof(process9)
-#define EEPROM_ADDR_PROGRAM11           EEPROM_ADDR_PROGRAM10+sizeof(process10)
-#define EEPROM_ADDR_PROGRAM0            EEPROM_ADDR_PROGRAM11+sizeof(process11)+5
+//#define EEPROM_ADDR_PROGRAM1            EEPROM_ADDR_MCUID+10//加大距离
+//#define EEPROM_ADDR_PROGRAM2            EEPROM_ADDR_PROGRAM1+sizeof(process1)
+//#define EEPROM_ADDR_PROGRAM3            EEPROM_ADDR_PROGRAM2+sizeof(process2)
+//#define EEPROM_ADDR_PROGRAM4            EEPROM_ADDR_PROGRAM3+sizeof(process3)
+//#define EEPROM_ADDR_PROGRAM5            EEPROM_ADDR_PROGRAM4+sizeof(process4)
+//#define EEPROM_ADDR_PROGRAM6            EEPROM_ADDR_PROGRAM5+sizeof(process5)
+//#define EEPROM_ADDR_PROGRAM7            EEPROM_ADDR_PROGRAM6+sizeof(process6)
+//#define EEPROM_ADDR_PROGRAM8            EEPROM_ADDR_PROGRAM7+sizeof(process7)
+//#define EEPROM_ADDR_PROGRAM9            EEPROM_ADDR_PROGRAM8+sizeof(process8)
+//#define EEPROM_ADDR_PROGRAM10           EEPROM_ADDR_PROGRAM9+sizeof(process9)
+//#define EEPROM_ADDR_PROGRAM11           EEPROM_ADDR_PROGRAM10+sizeof(process10)
+//#define EEPROM_ADDR_PROGRAM0            EEPROM_ADDR_PROGRAM11+sizeof(process11)+5
+//#define EEPROM_ADDR_END                 EEPROM_ADDR_PROGRAM0+MAX_ACTIONS_PER_PROJECT*sizeof(ACTION_TypeDef)
+
+#define EEPROM_ADDR_PROGRAM0            EEPROM_ADDR_MCUID+10
 #define EEPROM_ADDR_END                 EEPROM_ADDR_PROGRAM0+MAX_ACTIONS_PER_PROJECT*sizeof(ACTION_TypeDef)
 
 #define EEPROM_ADDR_PRODUCTOUTPUT       EEPROM_ADDR_END+1

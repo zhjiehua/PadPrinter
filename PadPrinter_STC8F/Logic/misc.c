@@ -331,12 +331,30 @@ void Output_Flash(void)
         TS(3, OUTPUT_FLASH_PERIOD);
 }
 
+#define ACTIVEMASK 0x4A
+
 void MCUID_Check(void)
 {
     uint8_t i;
+    int8_t j;
+    uint8_t temp[7];
+
     for(i=0;i<7;i++)
     {
-        if(man.mcuID[i] != man.eepromMcuID[i])
+        temp[i] = 0;
+
+        for(j=0;j<8;j++)
+        {
+            if(man.mcuID[i] & (0x01<<j))
+                temp[i] |= (0x80>>j);
+        } 
+    }
+
+    for(i=0;i<7;i++)
+    {
+        temp[i] = temp[i] ^ ACTIVEMASK;
+
+        if(temp[i] != man.eepromMcuID[i])
         {
             printf("Error:mcuID is wrong!\r\n");
             while(1)
