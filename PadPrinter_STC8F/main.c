@@ -36,6 +36,7 @@ int main(void)
     SIMPLC_Timer_Create(2, 100, 0);//KEY BEEP
     SIMPLC_Timer_Create(3, 100, 0);//OUTPUT FLASH
     SIMPLC_Timer_Create(4, 100, 0);//ACTION SHIFT
+    SIMPLC_Timer_Create(5, 100, 0);//KEY FOOT FILTER
 
     Uart_Init();//串口初始化
   
@@ -87,7 +88,7 @@ int main(void)
     SYL(Y_SHIFT, 0);
 
     WDT_CONTR = 0x3C;//开看门狗，溢出时间1.1377s
-    
+
 	while (1)
 	{
         //喂狗

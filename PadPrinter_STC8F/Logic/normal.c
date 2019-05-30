@@ -102,7 +102,7 @@ void Key_Normal(void)
         man.keyPress = KEY_UPDOWN;
     else if(GMR(M_KEY_FRONTBACK))
         man.keyPress = KEY_FRONTBACK;
-    else if(GMR(M_KEY_FOOT))
+    else if(GMR(M_KEY_FOOT_AFTERFILTER)) //M_KEY_FOOT_AFTERFILTER  M_KEY_FOOT
         man.keyPress = KEY_FOOT;  
     else if(!GML(M_MODE_AUTO) && GML(M_KEY_UPDOWN) && (GML(M_ABSORB_FINISH) || GML(M_PRINT_FINISH)))
         man.keyPress = KEY_UPDOWN;
@@ -174,8 +174,7 @@ void Key_Normal(void)
         {
             //SML(M_ACTIONHEAD_FINISH, 0);
             man.actHead = BACK;
-            //man.delay = man.delayPrint[man.platformPos];
-            man.delay = 8;           
+            man.delay = man.frontBackDelay; //8          
             SML(M_BACK_FINISH, 0);
 
             //printf("Manual====Back!\r\n");
@@ -184,8 +183,7 @@ void Key_Normal(void)
         {
             //SML(M_ACTIONHEAD_FINISH, 0);
             man.actHead = FRONT;
-            //man.delay = man.delayAbsorb;
-            man.delay = 8;
+            man.delay = man.frontBackDelay; //8
             SML(M_FRONT_FINISH, 0);
 
             //printf("Manual====Front!\r\n");
@@ -431,6 +429,8 @@ void Key_Normal(void)
 
                         printf("M_PROGRAM_PERIOD\r\n");
                     }
+
+                    KeyLogic(1);
                 }
             }
         }
@@ -453,7 +453,44 @@ void Key_Normal(void)
     }
 
 
-    KeyLogic();
+    KeyLogic(0);
+
+    if(GML(M_RESTORE_DELAY))
+    {
+        SML(M_MODE_AUTO, 0);
+        SML(M_MODE_RESTORE, 0);
+
+        if(man.delay)
+        {
+            if(!GML(M_ACTION_DELAY))
+            {
+                TS(0, man.delayUnit);//动作延时最小单位
+                SML(M_ACTION_DELAY, 1);
+            }
+            else if(TG(0))
+            {
+                man.delay--;
+                SML(M_ACTION_DELAY, 0);
+
+                //printf("Wait++++man.delay = %d\r\n", (int)man.delay);
+            }
+        }
+        else
+        {
+            SML(M_MODE_AUTO, 1);
+            SML(M_MODE_RESTORE, 1);
+
+            SML(M_ACTION_FINISH, 0);
+
+            SML(M_ACTIONHEAD_FINISH, 0);
+            if(GML(M_AUTO_FLAG_AUX))
+                SML(M_ACTIONPLATFORM_FINISH, 0);
+
+            printf("Restore the machine!\r\n");
+
+            SML(M_RESTORE_DELAY, 0);
+        }
+    }
 }
 
 void Normal(void)
@@ -475,10 +512,10 @@ void Normal(void)
     if(GMR(M_KEY_CLEAR))
     {
         man.productOutput = 0;
-        sprintf((char*)man.segStr, "%05d", (int)(man.productOutput));
+        sprintf((char*)man.segStr, "%05ld", (int32_t)(man.productOutput));
         TM1638_SendData(0, man.segStr);
         
-        AT24CXX_WriteLenByte(man.productOutputAddr, 0, 2);
+        AT24CXX_WriteLenByte(man.productOutputAddr, 0, 4);
 
         WDT_CONTR = 0x3C;
     }
@@ -503,7 +540,7 @@ void Normal(void)
                 man.delay--;
                 SML(M_ACTION_DELAY, 0);
     
-                printf("+++++Manual+++++Delay = %d!\r\n", (int)man.delay);
+                //printf("+++++Manual+++++Delay = %d!\r\n", (int)man.delay);
     
                 
             }

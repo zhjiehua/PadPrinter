@@ -346,7 +346,19 @@ uint8_t TM1638_ReadKey(uint8_t mode)
     K_ROW1 = 1;
     K_ROW2 = 1;
     Delay10us();
-    if(K_ROW1 == 0) return KEY_AUX;
+    if(K_ROW1 == 0)
+    {
+//        K_COL1 = 1;
+//        K_COL2 = 1;
+//        K_COL3 = 1;
+//        K_COL4 = 0;
+//        K_ROW1 = 1;
+//        K_ROW2 = 1;
+//        Delay10us();
+//        if(K_ROW2 == 0) return KEY_SW8_AUX;
+//        else 
+            return KEY_AUX;
+    }
     else if(K_ROW2 == 0) return KEY_STARTSTOP;
 
     K_COL1 = 1;
@@ -367,6 +379,7 @@ uint8_t TM1638_ReadKey(uint8_t mode)
     K_ROW2 = 1;
     Delay10us();
     if(K_ROW1 == 0) return KEY_FOOT;
+//    else if(K_ROW2 == 0) return KEY_SW8;
 
 #endif
 
@@ -405,6 +418,38 @@ void TM1638_LED(uint8_t i, uint8_t *str){
         if(*str=='\0')break;
     }
 }  
+
+void TM1638_LEDIndependentControl(uint8_t i, uint16_t str)
+  {  
+    int j=0,k=0;
+    unsigned char chr;  
+    for(;i<8;i++){  
+        k=0;  
+//        for(j=0;j<sizeof(tm_led_dat)/2;j++){  
+//            if(*str==tm_led_dat[0][j]){  
+//                chr=tm_led_dat[1][j];  
+				chr=str; 
+                k=1;  
+//                break;  
+//            }  
+//        }  
+          
+        if(k==0){  
+            chr=0x00;  
+        }  
+
+//        if(*(str+1)=='.'){  
+//            chr|=0x80;  
+//            Write_Dat(i*2,chr);  
+//            str++;  
+//        }else{  
+            Write_Dat(i*2,chr);  
+//        }
+        
+        str++;  
+//        if(*str=='\0')break;
+    }
+} 
 
 /*********************************************************************************************** 
 *Function Name: TM1638_SendData      

@@ -12,13 +12,15 @@
 
 
 
-void KeyLogic(void)
+void KeyLogic(uint8_t flag)
 {
     if(man.keyPress != KEY_NONE)
     {
         //printf("The man.keyPress = %d\r\n", (int)man.keyPress);
 
-        if(man.delay)
+        if(man.delay
+         && (GML(M_MODE_AUTO) || (!GML(M_MODE_AUTO) && !(man.headPos&FRONTBACK_MASK))))
+        //if(man.delay)
         {
             man.delay = 0;
             SML(M_ACTION_DELAY, 0);
@@ -26,7 +28,8 @@ void KeyLogic(void)
 
         //if(GML(M_ACTIONHEAD_FINISH) && GML(M_ACTIONPLATFORM_FINISH))//等到上一动作执行完
         //if(GML(M_ACTION_FINISH) || GMF(M_ACTION_DELAY))
-        if(GML(M_ACTION_FINISH))
+        //if(GML(M_ACTION_FINISH))
+        if(GML(M_ACTION_FINISH) || flag) //强制执行
         {
             //printf("The man.keyPress = %d\r\n", (int)man.keyPress);
 
@@ -63,9 +66,6 @@ void KeyLogic(void)
                     }
                     else
                     {
-                        if(GML(M_MAN_FRONTBACK))//停止手动前后
-                            SML(M_MAN_FRONTBACK, 0);
-
                         //if(!GML(M_FLAG_MANUAL))
                         //if(!GML(M_FLAG_MANUAL) || (!(man.headPos&FRONTBACK_MASK) && !(man.headPos&UPDOWN_MASK))) //如果在前面停下来则先Restore
                         if(!GML(M_FLAG_MANUAL) && !GML(M_MODE_RESTORE))
@@ -83,17 +83,30 @@ void KeyLogic(void)
                         }
                         else
                         {
-                            SML(M_MODE_AUTO, 1);
-                            SML(M_MODE_RESTORE, 1);
+                            if(GML(M_MAN_FRONTBACK) && (man.headPos&FRONTBACK_MASK))
+                            {
+                                SML(M_RESTORE_DELAY, 1);
+                                man.delay = man.restoreDelay;
 
-                            SML(M_ACTION_FINISH, 0);
+                                printf("Wait sometime to Restore the machine!\r\n");
+                            }
+                            else
+                            {
+                                SML(M_MODE_AUTO, 1);
+                                SML(M_MODE_RESTORE, 1);
+    
+                                SML(M_ACTION_FINISH, 0);
+    
+                                SML(M_ACTIONHEAD_FINISH, 0);
+                                if(GML(M_AUTO_FLAG_AUX))
+                                    SML(M_ACTIONPLATFORM_FINISH, 0);
 
-                            SML(M_ACTIONHEAD_FINISH, 0);
-                            if(GML(M_AUTO_FLAG_AUX))
-                                SML(M_ACTIONPLATFORM_FINISH, 0);
-
-                            printf("Restore the machine!\r\n");
+                                printf("Restore the machine!\r\n");
+                            }
                         }
+
+                        if(GML(M_MAN_FRONTBACK))//停止手动前后
+                            SML(M_MAN_FRONTBACK, 0);
                     }
                 break;
                 case KEY_AUX:

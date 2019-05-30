@@ -40,6 +40,7 @@
 /PadPrinter_STC8F/OBJ
 /PadPrinter_STC8F/PadPrinter.uvopt
 /PadPrinter_STC8F/PadPrinter_uvopt.bak
+/PadPrinter_STC8F/PadPrinter_uvproj.bak
 
 /Tool/.vs
 /Tool/Debug
@@ -49,3 +50,4 @@
 /Tool/FATool/Resources
 /Tool/FATool/x64
 
+*.rar

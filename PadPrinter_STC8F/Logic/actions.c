@@ -727,8 +727,6 @@ void Return2Sensors(void)
             {
                 man.platformPos = 0;
                 
-                man.platformPushFlag = 0;
-                
                 printf("Action----Return2Sensors----Finish----%d\r\n", (int)man.platformPos);
                 
                 SML(M_RETURN_FINISH, 1);

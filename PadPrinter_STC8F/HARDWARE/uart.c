@@ -157,8 +157,8 @@ char putchar(char c)
 
 void UartDataParse(void)
 {
-    uint8_t c[2];
-    
+    uint8_t c[2];   
+
     if(USART_RX_STA&0x8000)
     {					   
         switch(USART_RX_BUF[0])
@@ -167,88 +167,69 @@ void UartDataParse(void)
                 switch(USART_RX_BUF[1])
                 {
                     case '0':
-                        printf("X0 = %d\r\n", (int)X0);
-                        printf("GXL(X0) = %d\r\n", (int)GXL(X_ABSORB_O));
+                        printf("X0 = %d, GXL(X0) = %d\r\n", (int)X0, (int)GXL(X_ABSORB_O));
+                        printf("X1 = %d, GXL(X1) = %d\r\n", (int)X1, (int)GXL(X_ABSORB_L));
+                        printf("X2 = %d, GXL(X2) = %d\r\n", (int)X2, (int)GXL(X_PRINT_O));
+                        printf("X3 = %d, GXL(X3) = %d\r\n", (int)X3, (int)GXL(X_PRINT_L));
+                        printf("X8 = %d, GXL(X8) = %d\r\n", (int)X8, (int)GXL(X_SCRAPER));
                     break;
                     case '1':
-                        printf("X1 = %d\r\n", (int)X1);
-                        printf("GXL(X1) = %d\r\n", (int)GXL(X_ABSORB_L));
+                        printf("X4 = %d, GXL(X4) = %d\r\n", (int)X4, (int)GXL(X_SHIFT_O));
+                        printf("X5 = %d, GXL(X5) = %d\r\n", (int)X5, (int)GXL(X_POS));
+                        printf("X6 = %d, GXL(X6) = %d\r\n", (int)X6, (int)GXL(X_SHIFT_L1));
+                        printf("X7 = %d, GXL(X7) = %d\r\n", (int)X7, (int)GXL(X_SHIFT_L2));
                     break;
                     case '2':
-                        printf("X2 = %d\r\n", (int)X2);
-                        printf("GXL(X2) = %d\r\n", (int)GXL(X_PRINT_O));
-                    break;
-                    case '3':
-                        printf("X3 = %d\r\n", (int)X3);
-                        printf("GXL(X3) = %d\r\n", (int)GXL(X_PRINT_L));
-                    break;
-                    case '4':
-                        printf("X4 = %d\r\n", (int)X4);
-                        printf("GXL(X4) = %d\r\n", (int)GXL(X_SHIFT_O));
-                    break;
-                    case '5':
-                        printf("X5 = %d\r\n", (int)X5);
-                        printf("GXL(X5) = %d\r\n", (int)GXL(X_POS));
-                    break;
-                    case '6':
-                        printf("X6 = %d\r\n", (int)X6);
-                        printf("GXL(X6) = %d\r\n", (int)GXL(X_SHIFT_L1));
-                    break;
-                    case '7':
-                        printf("X7 = %d\r\n", (int)X7);
-                        printf("GXL(X7) = %d\r\n", (int)GXL(X_SHIFT_L2));
-                    break;
-                    case '8':
-                        //printf("X8 = %d\r\n", (int)INT_PD);
+                        printf("INT_SW8 = %d\r\n", (int)INT_SW8);
                     break;
                     default:
                     break;
                 }
             break;
-            case 'Y':
-                switch(USART_RX_BUF[1])
-                {
-                    case '0':
-                        Y0(USART_RX_BUF[2]-0x30);
-                        //MOUT2 = !!(USART_RX_BUF[2]-0x30);
-                    break;
-                    case '1':
-                        Y1(USART_RX_BUF[2]-0x30);
-                    break;
-                    case '2':
-                        Y2(USART_RX_BUF[2]-0x30);
-                    break;
-                    case '3':
-                        Y3(USART_RX_BUF[2]-0x30);
-                    break;
-                    case '4':
-                        Y4(USART_RX_BUF[2]-0x30);
-                    break;
-                    case '5':
-                        Y5(USART_RX_BUF[2]-0x30);
-                    break;
-                    default:
-                    break;
-                }
-            break;
-            case 'B':
-                switch(USART_RX_BUF[1])
-                {
-                    case '0':
-                        Timer3_Cmd(0);
-                    break;
-                    case '1':
-                        Timer3_Cmd(1);//ENABLE
-                    break;
-                    default:
-                    break;
-                }
-            break;
-            case 'T':
-                sprintf((char*)c, "%d", USART_RX_BUF[1]-0x30);
-                TM1638_LED(5, c);
-            break;
-            case 'R':
+//            case 'Y':
+//                switch(USART_RX_BUF[1])
+//                {
+//                    case '0':
+//                        Y0(USART_RX_BUF[2]-0x30);
+//                        //MOUT2 = !!(USART_RX_BUF[2]-0x30);
+//                    break;
+//                    case '1':
+//                        Y1(USART_RX_BUF[2]-0x30);
+//                    break;
+//                    case '2':
+//                        Y2(USART_RX_BUF[2]-0x30);
+//                    break;
+//                    case '3':
+//                        Y3(USART_RX_BUF[2]-0x30);
+//                    break;
+//                    case '4':
+//                        Y4(USART_RX_BUF[2]-0x30);
+//                    break;
+//                    case '5':
+//                        Y5(USART_RX_BUF[2]-0x30);
+//                    break;
+//                    default:
+//                    break;
+//                }
+//            break;
+//            case 'B':
+//                switch(USART_RX_BUF[1])
+//                {
+//                    case '0':
+//                        Timer3_Cmd(0);
+//                    break;
+//                    case '1':
+//                        Timer3_Cmd(1);//ENABLE
+//                    break;
+//                    default:
+//                    break;
+//                }
+//            break;
+//            case 'T':
+//                sprintf((char*)c, "%d", USART_RX_BUF[1]-0x30);
+//                TM1638_LED(5, c);
+//            break;
+            case 'R':   //0x52
                 switch(USART_RX_BUF[1])
                 {
                     case '0':
@@ -266,7 +247,7 @@ void UartDataParse(void)
                     break;
                 }
             break;
-            case 'S':
+            case 'S':   //0x53
                 switch(USART_RX_BUF[1])
                 {
                     case '0':   //2传感器5V
@@ -288,36 +269,37 @@ void UartDataParse(void)
                     break;
                 }
             break;
-            case 'G':
+            case 'G':  //0x47
                 switch(USART_RX_BUF[1])
                 {
                     case '0':
                         printf("man.actHead = %d\r\n", (int)man.actHead);
+                        printf("man.actPlatform = %d\r\n", (int)man.actPlatform);
                     break;
                     case '1':
-                        printf("man.actPlatform = %d\r\n", (int)man.actPlatform); 
-                    break;
-                    case '2':
                         printf("GML(M_MODE_AUTO) = %d, GML(M_MODE_RESTORE) = %d\r\n", (int)GML(M_MODE_AUTO), (int)GML(M_MODE_RESTORE));
-                    break;
-                    case '3':
                         printf("GML(M_ACTIONHEAD_FINISH) = %d, GML(M_ACTIONPLATFORM_FINISH) = %d\r\n", (int)GML(M_ACTIONHEAD_FINISH), (int)GML(M_ACTIONPLATFORM_FINISH));
                     break;
-                    case '4':
+                    case '2':
                         printf("GML(M_ABSORB_FINISH) = %d, GML(M_PRINT_FINISH) = %d\r\n", (int)GML(M_ABSORB_FINISH), (int)GML(M_PRINT_FINISH));
-                    break;
-                    case '5':
                         printf("GML(M_FRONT_FINISH) = %d, GML(M_BACK_FINISH) = %d\r\n", (int)GML(M_FRONT_FINISH), (int)GML(M_BACK_FINISH));
-                    break;
-                    case '6':
                         printf("GML(M_SHIFT_FINISH) = %d, GML(M_RETURN_FINISH) = %d\r\n", (int)GML(M_SHIFT_FINISH), (int)GML(M_RETURN_FINISH));
+                    break;
+                    case '3':
+                        printf("man.headState = %d\r\n", (int)man.headState);
+                        printf("man.platformState = %d\r\n", (int)man.platformState);
+                        printf("man.headPos = %d\r\n", (int)man.headPos);
+                        printf("man.platformPos = %d\r\n", (int)man.platformPos);  
+                    break;
+                    case '4':
+                        printf("man.keyPress = %d\r\n", (int)man.keyPress);
                     break;
                     default:
                     break;
                 }
                 
             break;
-            case 'E':
+            case 'E':  //0x45
                 switch(USART_RX_BUF[1])
                 {
                     case '0':  //从RAM中读ID          
@@ -389,6 +371,47 @@ void UartDataParse(void)
                             for(i=0;i<7;i++)
                                 Uart_SendData(man.mcuID[i]);
                         }
+                    break;
+                    default:
+                    break;
+                }
+            break;
+            case 'P':  //0x50, 读写eeprom
+                switch(USART_RX_BUF[1])
+                {
+                    case '0':  //读
+                    {         
+                        uint16_t addr = (uint16_t)USART_RX_BUF[2]<<8|(uint16_t)USART_RX_BUF[3];
+                        uint8_t len = USART_RX_BUF[4];
+                        uint8_t i, temp;
+
+                        printf("eeprom %d = ", addr);
+                        for(i=0;i<len;i++)
+                        {
+                           temp = AT24CXX_ReadOneByte(addr+i);
+                           printf("0x%0x, ", (int)temp); 
+                        }
+                        printf("\r\n");
+                    }                      
+                    break;
+                    case '1': //写      
+                    {         
+                        uint16_t addr = (uint16_t)USART_RX_BUF[2]<<8|(uint16_t)USART_RX_BUF[3];
+                        uint8_t len = USART_RX_BUF[4];
+                        uint8_t i;
+
+                        for(i=0;i<len;i++)
+                        {
+                           AT24CXX_WriteOneByte(addr+i, USART_RX_BUF[5+i]); 
+                        }
+                        printf("eeprom write success!\r\n");
+                    }                       
+                    break;
+                    case '2':
+                        printf("The Hardware Version is %s\r\n", HARDWARE_VERSION);
+                    break;
+                    case '3':
+                        printf("The Software Version is %s\r\n", SOFTWARE_VERSION);
                     break;
                     default:
                     break;

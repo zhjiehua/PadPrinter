@@ -10,7 +10,7 @@
 #include "uart.h"
 #include "tm1638.h"
 #include "24cxx.h"
-
+#include "FactoryMode.h"
 
 const ACTION_TypeDef process0[] = {{0, ACTION_NONE}};
 const ACTION_TypeDef process1[] = {{1, ABSORB}, {1, FRONT}, {1, PRINT}, {1, SHIFT}, {1, PRINT}, {0, ACTION_NONE}};
@@ -85,18 +85,19 @@ void ProgramResetDefault0(void)
     
     WDT_CONTR = 0x3C;
 
-    AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM_NUM, 4);
-    //AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM_NUM, 1);
-    //AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM_NUM, 1);
+    AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM_NUM, 4); //保存程序编号
 
-    AT24CXX_WriteLenByte(EEPROM_ADDR_PRODUCTOUTPUT, 0, 2);//需要保存3次才能成功
-    AT24CXX_WriteOneByte(EEPROM_ADDR_PRODUCTOUTPUTOFFSET, 0);
+    //这2个参数也不恢复出厂设置
+    AT24CXX_WriteLenByte(EEPROM_ADDR_PRODUCTOUTPUT, 0, 4);  //productOutput
+    AT24CXX_WriteOneByte(EEPROM_ADDR_PRODUCTOUTPUTOFFSET, 0); //productOutputAbsoluteSum
+    AT24CXX_WriteLenByte(EEPROM_ADDR_PRODUCTOUTPUT+4, 0, 2);  //productOutputAbsoluteSum
 
     temp = AT24CXX_ReadOneByte(EEPROM_ADDR_MACHINETYPE_DEFAULT);
     AT24CXX_WriteOneByte(EEPROM_ADDR_MACHINETYPE, temp);
     temp = AT24CXX_ReadOneByte(EEPROM_ADDR_SENSORLEVEL_DEFAULT);
     AT24CXX_WriteOneByte(EEPROM_ADDR_SENSORLEVEL, temp);
 
+    //不恢复默认出厂设置
 //    AT24CXX_WriteOneByte(EEPROM_ADDR_MACHINETYPE, defaultInternalSetting[INTERNALSETTING_MACHINETYPE].val);
 //    AT24CXX_WriteOneByte(EEPROM_ADDR_SENSORLEVEL, defaultInternalSetting[INTERNALSETTING_SENSORLEVEL].val);
 
@@ -105,6 +106,8 @@ void ProgramResetDefault0(void)
     AT24CXX_WriteOneByte(EEPROM_ADDR_SHIFTPOSDELAYFACTOR, defaultInternalSetting[INTERNALSETTING_SHIFTPOSDELAYFACTOR].val);
     AT24CXX_WriteOneByte(EEPROM_ADDR_RETURNNONEDELAYFACTOR, defaultInternalSetting[INTERNALSETTING_RETURNNONEDELAYFACTOR].val);
     AT24CXX_WriteOneByte(EEPROM_ADDR_SHIFTSTOPDELAYFACTOR, defaultInternalSetting[INTERNALSETTING_SHIFTSTOPDELAYFACTOR].val);
+    AT24CXX_WriteOneByte(EEPROM_ADDR_RESTOREDELAY, defaultInternalSetting[INTERNALSETTING_RESTOREDALAY].val);
+    AT24CXX_WriteOneByte(EEPROM_ADDR_FRONTBACKDELAY, defaultInternalSetting[INTERNALSETTING_FRONTBACKDALAY].val);
 
     WDT_CONTR = 0x3C;
 
@@ -125,6 +128,8 @@ void ProgramResetDefault0(void)
     printf("++++The shiftPosDelayFactor is %d\r\n", (int)(man.shiftPosDelayFactor));
     printf("++++The returnNoneDelayFactor is %d\r\n", (int)(man.returnNoneDelayFactor));
     printf("++++The shiftStopDelayFactor is %d\r\n", (int)(man.shiftStopDelayFactor));
+    printf("++++The restoreDelay is %d\r\n", (int)(man.restoreDelay));
+    printf("++++The frontBackDelay is %d\r\n", (int)(man.frontBackDelay));
 
     WDT_CONTR = 0x3C;
 
@@ -135,109 +140,12 @@ void ProgramResetDefault0(void)
     WDT_CONTR = 0x3C;
 }
 
-//void ProgramResetDefault1(void)
-//{
-//    uint16_t i, j;
-// 
-//    ProgramResetDefault0();
-//
-//    for(i=0,j=0;i<SIZEOF(process1);i++)
-//    {
-//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM1+j, process1[i].flag);
-//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM1+j+1, process1[i].act);
-//        j += sizeof(ACTION_TypeDef);
-//
-//        WDT_CONTR = 0x3C;
-//    }
-//    for(i=0,j=0;i<SIZEOF(process2);i++)
-//    {
-//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM2+j, process2[i].flag);
-//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM2+j+1, process2[i].act);
-//        j += sizeof(ACTION_TypeDef);
-//
-//        WDT_CONTR = 0x3C;
-//    }
-//    for(i=0,j=0;i<SIZEOF(process3);i++)
-//    {
-//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM3+j, process3[i].flag);
-//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM3+j+1, process3[i].act);
-//        j += sizeof(ACTION_TypeDef);
-//
-//        WDT_CONTR = 0x3C;
-//    }
-//    for(i=0,j=0;i<SIZEOF(process4);i++)
-//    {
-//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM4+j, process4[i].flag);
-//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM4+j+1, process4[i].act);
-//        j += sizeof(ACTION_TypeDef);
-//
-//        WDT_CONTR = 0x3C;
-//    }
-//    for(i=0,j=0;i<SIZEOF(process5);i++)
-//    {
-//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM5+j, process5[i].flag);
-//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM5+j+1, process5[i].act);
-//        j += sizeof(ACTION_TypeDef);
-//
-//        WDT_CONTR = 0x3C;
-//    }
-//    for(i=0,j=0;i<SIZEOF(process6);i++)
-//    {
-//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM6+j, process6[i].flag);
-//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM6+j+1, process6[i].act);
-//        j += sizeof(ACTION_TypeDef);
-//
-//        WDT_CONTR = 0x3C;
-//    }
-//}
-
 void ProgramResetDefault(void)
 {
     uint16_t i,j;
     
     ProgramResetDefault0();
-//    ProgramResetDefault1();
 
-//    for(i=0,j=0;i<SIZEOF(process7);i++)
-//    {
-//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM7+j, process7[i].flag);
-//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM7+j+1, process7[i].act);
-//        j += sizeof(ACTION_TypeDef);
-//
-//        WDT_CONTR = 0x3C;
-//    }
-//    for(i=0,j=0;i<SIZEOF(process8);i++)
-//    {
-//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM8+j, process8[i].flag);
-//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM8+j+1, process8[i].act);
-//        j += sizeof(ACTION_TypeDef);
-//
-//        WDT_CONTR = 0x3C;
-//    }
-//    for(i=0,j=0;i<SIZEOF(process9);i++)
-//    {
-//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM9+j, process9[i].flag);
-//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM9+j+1, process9[i].act);
-//        j += sizeof(ACTION_TypeDef);
-//
-//        WDT_CONTR = 0x3C;
-//    }
-//    for(i=0,j=0;i<SIZEOF(process10);i++)
-//    {
-//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM10+j, process10[i].flag);
-//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM10+j+1, process10[i].act);
-//        j += sizeof(ACTION_TypeDef);
-//
-//        WDT_CONTR = 0x3C;
-//    }
-//    for(i=0,j=0;i<SIZEOF(process11);i++)
-//    {
-//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM11+j, process11[i].flag);
-//        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM11+j+1, process11[i].act);
-//        j += sizeof(ACTION_TypeDef);
-//
-//        WDT_CONTR = 0x3C;
-//    }
     for(i=0,j=0;i<SIZEOF(process0);i++)
     {
         AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM0+j, process0[i].flag);
@@ -312,9 +220,14 @@ void ProgramRead(void)
     //初始化project结构体
     man.programNum = AT24CXX_ReadOneByte(EEPROM_ADDR_PROGRAM_NUM);//读取程序序号
     man.productOutputOffset = AT24CXX_ReadOneByte(EEPROM_ADDR_PRODUCTOUTPUTOFFSET);
-    man.productOutputAddr = EEPROM_ADDR_PRODUCTOUTPUT + man.productOutputOffset;
-    man.productOutput = (uint16_t)AT24CXX_ReadLenByte(man.productOutputAddr, 2);
-    
+    if(man.productOutputOffset >= (EE_TYPE-EEPROM_ADDR_PRODUCTOUTPUT)/6-1)  //(511-118)/6-1 = 64次
+            man.productOutputOffset = 0;
+    man.productOutputAddr = EEPROM_ADDR_PRODUCTOUTPUT + man.productOutputOffset*6;
+    man.productOutput = (uint32_t)AT24CXX_ReadLenByte(man.productOutputAddr, 4);
+    man.productOutputAbsoluteSum = (uint16_t)AT24CXX_ReadLenByte(man.productOutputAddr+4, 2);
+
+    //man.productOutputAbsoluteSum = 995;
+
     WDT_CONTR = 0x3C;
 
 #if !MACHINE_FIX    
@@ -336,6 +249,9 @@ void ProgramRead(void)
     man.returnNoneDelay = ((uint16_t)man.delayUnit)*((uint16_t)man.returnNoneDelayFactor);
     man.shiftStopDelay = ((uint16_t)man.delayUnit)*((uint16_t)man.shiftStopDelayFactor);
     
+    man.restoreDelay = AT24CXX_ReadOneByte(EEPROM_ADDR_RESTOREDELAY);
+    man.frontBackDelay = AT24CXX_ReadOneByte(EEPROM_ADDR_FRONTBACKDELAY);
+
     WDT_CONTR = 0x3C;
     
     man.delayAbsorb = AT24CXX_ReadOneByte(EEPROM_ADDR_DELAY);
@@ -348,17 +264,7 @@ void ProgramRead(void)
     sprintf((char*)man.segStr, "Pro%02d", (int)(man.programNum));
     TM1638_SendData(0, man.segStr);
     
-//    printf("EEPROM_ADDR_PROGRAM0 = %d\r\n", (int)EEPROM_ADDR_PROGRAM0);
-//    printf("EEPROM_ADDR_PROGRAM1 = %d\r\n", (int)EEPROM_ADDR_PROGRAM1);
-//    printf("EEPROM_ADDR_PROGRAM2 = %d\r\n", (int)EEPROM_ADDR_PROGRAM2);
-//    printf("EEPROM_ADDR_PROGRAM3 = %d\r\n", (int)EEPROM_ADDR_PROGRAM3);
-//    printf("EEPROM_ADDR_PROGRAM4 = %d\r\n", (int)EEPROM_ADDR_PROGRAM4);
-//    printf("EEPROM_ADDR_PROGRAM5 = %d\r\n", (int)EEPROM_ADDR_PROGRAM5);
-//    printf("EEPROM_ADDR_PROGRAM6 = %d\r\n", (int)EEPROM_ADDR_PROGRAM6);
-//    printf("EEPROM_ADDR_PROGRAM7 = %d\r\n", (int)EEPROM_ADDR_PROGRAM7);
-//    printf("EEPROM_ADDR_PROGRAM8 = %d\r\n", (int)EEPROM_ADDR_PROGRAM8);
-//    printf("EEPROM_ADDR_PROGRAM9 = %d\r\n", (int)EEPROM_ADDR_PROGRAM9);
-    
+    //读取MCUID
     man.mcuID = (char idata *)0xf1;
     for(i=0;i<7;i++)
         man.eepromMcuID[i] = AT24CXX_ReadOneByte(EEPROM_ADDR_MCUID+i);
@@ -374,62 +280,50 @@ void ProgramRead(void)
             SML(M_AUTO_FLAG_AUX, 1);
         break;
         case 1:
-            //man.programAddr = EEPROM_ADDR_PROGRAM1;
             NormalProgramRead(process1);
             SML(M_AUTO_FLAG_AUX, 1);
         break;
         case 2:
-            //man.programAddr = EEPROM_ADDR_PROGRAM2;
             NormalProgramRead(process2);
             SML(M_AUTO_FLAG_AUX, 0);
         break;
         case 3:
-            //man.programAddr = EEPROM_ADDR_PROGRAM3;
             NormalProgramRead(process3);
             SML(M_AUTO_FLAG_AUX, 1);
         break;
         case 4:
-            //man.programAddr = EEPROM_ADDR_PROGRAM4;
             NormalProgramRead(process4);
             SML(M_AUTO_FLAG_AUX, 0);
         break;
         case 5:
-            //man.programAddr = EEPROM_ADDR_PROGRAM5;
             NormalProgramRead(process5);
             SML(M_AUTO_FLAG_AUX, 1);
         break;
         case 6:
-            //man.programAddr = EEPROM_ADDR_PROGRAM6;
             NormalProgramRead(process6);
             SML(M_AUTO_FLAG_AUX, 0);
         break;
         case 7:
-            //man.programAddr = EEPROM_ADDR_PROGRAM7;
             NormalProgramRead(process7);
             SML(M_AUTO_FLAG_AUX, 1);
         break;
         case 8:
-            //man.programAddr = EEPROM_ADDR_PROGRAM8;
             NormalProgramRead(process8);
             SML(M_AUTO_FLAG_AUX, 0);
         break;
         case 9:
-            //man.programAddr = EEPROM_ADDR_PROGRAM9;
             NormalProgramRead(process9);
             SML(M_AUTO_FLAG_AUX, 1);
         break;
         case 10:
-            //man.programAddr = EEPROM_ADDR_PROGRAM10;
             NormalProgramRead(process10);
             SML(M_AUTO_FLAG_AUX, 1);
         break;
         case 11:
-            //man.programAddr = EEPROM_ADDR_PROGRAM11;
             NormalProgramRead(process11);
             SML(M_AUTO_FLAG_AUX, 1);
         break;
         default:
-            //man.programAddr = EEPROM_ADDR_PROGRAM2;
             NormalProgramRead(process2);
             SML(M_AUTO_FLAG_AUX, 0);
         break;
@@ -449,6 +343,9 @@ void ProgramRead(void)
     {
         man.Shift = Shift4Sensors;
         man.Return = Return4Sensors;
+
+        man.ShiftReturn = ShiftReturn2Sensors;
+        man.ShiftReturn2 = ShiftReturnShiftReturn2Sensors;
     }
     else if(man.machineType == MACHINE_2SENSORS)
     {
@@ -479,11 +376,13 @@ void ProgramRead(void)
 
     WDT_CONTR = 0x3C;
     
-    printf("EEPROM_ADDR_END = %d\r\n", EEPROM_ADDR_END);
+    printf("EEPROM_ADDR_END = %d\r\n", (int)EEPROM_ADDR_END);
     
-    printf("----The productOutput is %d\r\n", (int)(man.productOutput));
+    printf("----The productOutput is %ld\r\n", (int32_t)(man.productOutput));
     printf("----The productOutputOffset is %d\r\n", (int)(man.productOutputOffset));
     printf("----The productOutputAddr is %d\r\n", (int)(man.productOutputAddr));
+    printf("----The productOutputAbsoluteSum is %d\r\n", (int)(man.productOutputAbsoluteSum));
+
     printf("----The delayUnit is %d\r\n", (int)(man.delayUnit));
     printf("----The returnPosDelayFactor is %d\r\n", (int)(man.returnPosDelayFactor));
     printf("----The returnPosDelay is %d\r\n", (int)(man.returnPosDelay));
@@ -493,6 +392,8 @@ void ProgramRead(void)
     printf("----The returnNoneDelay is %d\r\n", (int)(man.returnNoneDelay));
     printf("----The shiftStopDelayFactor is %d\r\n", (int)(man.shiftStopDelayFactor));
     printf("----The shiftStopDelay is %d\r\n", (int)(man.shiftStopDelay));
+    printf("----The restoreDelay is %d\r\n", (int)man.restoreDelay);
+    printf("----The frontBackDelay is %d\r\n", (int)(man.frontBackDelay));
 
     printf("\r\n----The absorb delay is %d\r\n", (int)AT24CXX_ReadOneByte(EEPROM_ADDR_DELAY));
     for(i=0;i<DELAY_PRINT_COUNT;i++)
@@ -595,8 +496,9 @@ void Project_Run(void)
 
             TS(3, OUTPUT_FLASH_PERIOD);
             SML(M_OUTPUT_FLASH, 1);
-            sprintf((char*)man.segStr, "%05d", (int)(man.productOutput));
-            TM1638_SendData(0, man.segStr); 
+            sprintf((char*)man.segStr, "%05ld", (int32_t)(man.productOutput));
+            TM1638_SendData(0, man.segStr);
+             
         }
     }
     
@@ -619,6 +521,9 @@ void Project_Run(void)
         break;
         case PM_PARAMETER_SET:  //参数设置
             ParameterSet();
+        break;
+        case PM_FACTORY:    //工厂模式
+            FactoryMode();
         break;
         default:
         break;

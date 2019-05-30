@@ -388,6 +388,11 @@
                 </File51>
               </FileOption>
             </File>
+            <File>
+              <FileName>readme.txt</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\readme.txt</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -527,6 +532,11 @@
               <FileName>KeyLogic.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Logic\KeyLogic.c</FilePath>
+            </File>
+            <File>
+              <FileName>FactoryMode.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Logic\FactoryMode.c</FilePath>
             </File>
           </Files>
         </Group>

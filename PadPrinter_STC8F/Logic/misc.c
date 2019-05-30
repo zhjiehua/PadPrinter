@@ -1,6 +1,7 @@
 #include "management.h"
 #include "man.h"
 #include "misc.h"
+#include "stdlib.h"
 
 #include "simplc_io.h"
 #include "simplc_timer.h"
@@ -302,7 +303,7 @@ void LED_RedGreen(void)
 void Key_Sound(void)
 {
     if(GML(M_KEY_FAST) || GML(M_KEY_SLOW) || GML(M_KEY_AUX) || GML(M_KEY_UPDOWN) || GML(M_KEY_FRONTBACK)
-       || GML(M_KEY_STARTSTOP) || GML(M_KEY_FOOT) || GML(M_KEY_CLEAR))
+       || GML(M_KEY_STARTSTOP) || GML(M_KEY_FOOT) || GML(M_KEY_CLEAR))  //M_KEY_FOOT_AFTERFILTER        M_KEY_FOOT
     {
         Timer3_Cmd(1);
         SML(M_BEEPER, 1);
@@ -323,7 +324,9 @@ void Output_Flash(void)
         {
             TS(3, OUTPUT_FLASH_PERIOD);
 
-            sprintf((char*)man.segStr, "%05d", (int)(man.productOutput));
+            //man.productOutput = 65530;//
+
+            sprintf((char*)man.segStr, "%05ld", (int32_t)(man.productOutput));
             TM1638_SendData(0, man.segStr);
         }
     }

@@ -2,6 +2,7 @@
 #include "man.h"
 #include "misc.h"
 #include "actions.h"
+#include "project.h"
 
 #include "simplc_io.h"
 #include "simplc_timer.h"
@@ -18,55 +19,38 @@ MAN_TypeDef man;
 //固定设备类型
 #define MACHINE_FIX  0
 
-//设备类型
-//#define MACHINE_TYPE_3SENSORS_12V
-#define MACHINE_TYPE_2SENSORS_5V
-//#define MACHINE_TYPE_2SENSORS_12V
+//设备类型，只能选择一种设备类型
+#define MACHINE_TYPE_3SENSORS_12V   0
+#define MACHINE_TYPE_4SENSORS_5V    0
+#define MACHINE_TYPE_2SENSORS_5V    1
+#define MACHINE_TYPE_2SENSORS_12V   0
 
-#ifdef MACHINE_TYPE_3SENSORS_12V
-
-const InternalSetting_TypeDef defaultInternalSetting[INTERNALSETTING_COUNT] = 
+const __InternalSetting_TypeDef defaultInternalSetting[INTERNALSETTING_COUNT] = 
 {
   {0, 0, 1}, //恢复出厂设置   1:恢复
   {40, 1, 99}, //调节动作延时的最小延时单位
+
+#if MACHINE_TYPE_3SENSORS_12V
   {2, 0, 2}, //设备识别  0:4sensors 1:2sensors 2:3sensors
-  {1, 0, 1}, //传感器电平 0:5V 1:12Vs
-  {0, 0, 30}, //穿梭returnPosDelay延时
-  {0, 0, 50}, //穿梭shiftPosDelay延时
-  {0, 0, 30}, //穿梭returnNoneDelay延时
-  {1, 0, 50}, //穿梭shiftStopDelay延时
-};
-
-#endif
-#ifdef MACHINE_TYPE_2SENSORS_5V
-
-const InternalSetting_TypeDef defaultInternalSetting[INTERNALSETTING_COUNT] = 
-{
-  {0, 0, 1}, //恢复出厂设置   1:恢复
-  {40, 1, 99}, //调节动作延时的最小延时单位
+  {1, 0, 1}, //传感器电平 0:5V 1:12V
+#elif MACHINE_TYPE_4SENSORS_5V
+  {0, 0, 2}, //设备识别  0:4sensors 1:2sensors 2:3sensors
+  {0, 0, 1}, //传感器电平 0:5V 1:12V
+#elif MACHINE_TYPE_2SENSORS_5V
   {1, 0, 2}, //设备识别  0:4sensors 1:2sensors 2:3sensors
-  {0, 0, 1}, //传感器电平 0:5V 1:12Vs
-  {0, 0, 30}, //穿梭returnPosDelay延时
-  {0, 0, 50}, //穿梭shiftPosDelay延时
-  {0, 0, 30}, //穿梭returnNoneDelay延时
-  {1, 0, 50}, //穿梭shiftStopDelay延时
-};
-
-#endif
-#ifdef MACHINE_TYPE_2SENSORS_12V
-
-const InternalSetting_TypeDef defaultInternalSetting[INTERNALSETTING_COUNT] = 
-{
-  {0, 0, 1}, //恢复出厂设置   1:恢复
-  {40, 1, 99}, //调节动作延时的最小延时单位
+  {0, 0, 1}, //传感器电平 0:5V 1:12V
+#elif MACHINE_TYPE_2SENSORS_12V  
   {1, 0, 2}, //设备识别  0:4sensors 1:2sensors 2:3sensors
-  {1, 0, 1}, //传感器电平 0:5V 1:12Vs
+  {1, 0, 1}, //传感器电平 0:5V 1:12V
+#endif
+
   {0, 0, 30}, //穿梭returnPosDelay延时
   {0, 0, 50}, //穿梭shiftPosDelay延时
   {0, 0, 30}, //穿梭returnNoneDelay延时
   {1, 0, 50}, //穿梭shiftStopDelay延时
+  {8, 0, 30}, //手动前后动作时，在前的过程中按开始，延时一段时间再RESTORE
+  {8, 0, 30}, //手动前后动作的延时
 };
-#endif
 
 
 //按键刷新
@@ -74,9 +58,11 @@ void Key_Refresh(void)
 {
     uint8_t key = TM1638_ReadKey(0);
     uint8_t i;
+    static uint8_t FootKeyPressFlag = 0;
 
-    for(i=0;i<8;i++)
+    for(i=0;i<9;i++)
         SML(i, 0);
+    SML(M_KEY_FOOT_AFTERFILTER, 0);
 
     if(key)
     {
@@ -86,21 +72,87 @@ void Key_Refresh(void)
         key = TM1638_ReadKey(0);
         if(key)
         {
-            SML(key-1, 1);
-            //SML(TM1638_ReadKey(0)-1, 1);
+            if(key <= KEY_SW8)
+            {
+                SML(key-1, 1);
+
+//                if(GML(M_KEY_FOOT))
+//                    SML(M_KEY_FOOT_AFTERFILTER, 1);
+
+                if(!FootKeyPressFlag && GMR(M_KEY_FOOT))
+				{
+					//TS(5, 10);
+                    TS(5, 50);
+					FootKeyPressFlag = 1;				
+				}
+				
+				if(FootKeyPressFlag && TG(5))
+				{
+					if(GML(M_KEY_FOOT))
+					{
+						SML(M_KEY_FOOT_AFTERFILTER, 1);	
+					}
+					
+					SIMPLC_Timer_ResetTimeOutFlag(5);
+					SIMPLC_Timer_Stop(5);
+					FootKeyPressFlag = 0;					
+				}	
+            }
+            else
+            {
+                SML(M_KEY_AUX, 1);
+                SML(M_KEY_SW8, 1);
+            }
         }
-//        sprintf((char*)man.segStr, "%02d", (int)key);
-//        TM1638_SendData(0, man.segStr);
-//        printf("key = %02d\r\n", (int)key);
     }
+    else if(FootKeyPressFlag && TG(5))
+	{
+		FootKeyPressFlag = 0;
+		SIMPLC_Timer_ResetTimeOutFlag(5);	
+	}
+
+    K_COL1 = 1;
+    K_COL2 = 1;
+    K_COL3 = 1;
+    K_COL4 = 0;
+    K_ROW1 = 1;
+    K_ROW2 = 1;
+    Delay10us();
+    if(K_ROW2 == 0) SML(M_KEY_SW8, 1);
+    else SML(M_KEY_SW8, 0);
 }
 
 void NextPeroid(void)
 {
-    man.productOutput++;
+    uint32_t temp;
 
-    AT24CXX_WriteLenByte(man.productOutputAddr, man.productOutput, 2);
-    
+    man.productOutput++;
+    man.productOutputAbsoluteSum++;
+
+    //显示只有5个数码管
+    if(man.productOutput > 99999)
+    {
+        man.productOutput = 0;
+        //printf("\r\n>>>>>>>>>>man.productOutput is overflow!!!!\r\n\r\n");
+    }
+
+    if(man.productOutputAbsoluteSum >= 1000)
+    {
+        man.productOutputAbsoluteSum = 0;
+
+        printf("\r\n>>>>>>>>>>man.productOutputAbsoluteSum is overflow!!!!\r\n\r\n");
+
+        man.productOutputOffset++;
+        if(man.productOutputOffset >= (EE_TYPE-EEPROM_ADDR_PRODUCTOUTPUT)/6-1)  //(511-118)/6-1 = 64次
+            man.productOutputOffset = 0;
+        man.productOutputAddr = EEPROM_ADDR_PRODUCTOUTPUT + man.productOutputOffset*6; 
+
+        AT24CXX_WriteOneByte(EEPROM_ADDR_PRODUCTOUTPUTOFFSET, man.productOutputOffset);         
+    }
+
+    AT24CXX_WriteLenByte(man.productOutputAddr, man.productOutput, 4);
+    AT24CXX_WriteLenByte(man.productOutputAddr+4, man.productOutputAbsoluteSum, 2);
+
     //保存修改过的延时参数
     if(GML(M_SAVE_DELAY))
     {   

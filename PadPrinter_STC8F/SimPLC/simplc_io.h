@@ -87,7 +87,7 @@ typedef struct
 #define M_KEY_STARTSTOP         5
 #define M_KEY_FOOT              6
 #define M_KEY_CLEAR             7
-
+#define M_KEY_SW8               8
 
 #define M_ONCE                  9
 #define M_BEEPER                10
@@ -151,7 +151,7 @@ typedef struct
 #define M_INTSET                57
 
 #define M_KEY_FOOT_PRESSED      63
-#define M_PUSH2_CHECK           64
+#define M_KEY_FOOT_AFTERFILTER  64
 
 #define M_HOME_RETURN           65
 #define M_HOME_CHECK            66
@@ -203,6 +203,9 @@ typedef struct
 #define M_CHANGEDELAY           97
 
 #define M_CANNOTSTOP            98
+
+#define M_RESTORE_DELAY         99
+
 
 //X
 #define X_ABSORB_O        0

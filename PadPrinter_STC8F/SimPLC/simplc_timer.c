@@ -5,6 +5,10 @@
 #include "uart.h"
 #include "tm1638.h"
 
+#include "management.h"
+#include "project.h"
+#include "24cxx.h"
+
 Timer_TypeDef Timer[TIMER_NUM];//定时器资源
 Timer_TypeDef *hTimer = NULL;//定时器链表头指针
 
@@ -79,7 +83,8 @@ void TM4_Isr() interrupt 20 using 3
 		pTimer = pTimer->Next;
 	}
 #endif    
-	AUXINTIF &= ~T4IF;                          //清中断标志  
+	AUXINTIF &= ~T4IF;                          //清中断标志 
+
 }
 #endif
 

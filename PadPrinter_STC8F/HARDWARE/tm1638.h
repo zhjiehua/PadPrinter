@@ -21,10 +21,14 @@
 #define KEY_STARTSTOP   6
 #define KEY_FOOT        7
 #define KEY_CLEAR       8
+#define KEY_SW8         9
+#define KEY_SW8_AUX     10
 
 uint8_t TM1638_ReadKey(uint8_t mode);
 void TM1638_LED(uint8_t i, uint8_t *str);
 void TM1638_SendData(uint8_t i, uint8_t *str);
 void TM1638_Init(void);
+
+void TM1638_LEDIndependentControl(uint8_t i, uint16_t str);
 
 #endif

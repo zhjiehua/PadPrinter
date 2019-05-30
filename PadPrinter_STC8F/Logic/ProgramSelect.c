@@ -47,6 +47,7 @@ void ProgramSelect(void)
     else if(GMR(M_KEY_AUX))//按10下进入内部参数设置程序
     {
         if(!INT_SW8)
+        //if(GML(M_KEY_SW8))
         {
             man.intSetAuxCnt++;
             if(man.intSetAuxCnt >= 10)
@@ -66,7 +67,9 @@ void ProgramSelect(void)
                 man.shiftPosDelayFactor = AT24CXX_ReadOneByte(EEPROM_ADDR_SHIFTPOSDELAYFACTOR);
                 man.returnNoneDelayFactor = AT24CXX_ReadOneByte(EEPROM_ADDR_RETURNNONEDELAYFACTOR);
                 man.shiftStopDelayFactor = AT24CXX_ReadOneByte(EEPROM_ADDR_SHIFTSTOPDELAYFACTOR);
-        
+                man.restoreDelay = AT24CXX_ReadOneByte(EEPROM_ADDR_RESTOREDELAY);
+                man.frontBackDelay = AT24CXX_ReadOneByte(EEPROM_ADDR_FRONTBACKDELAY);
+
                 printf("++++++++The return pos delay factor is %d\r\n", (int)man.returnPosDelayFactor);
                 printf("++++++++The machine type is %d\r\n", (int)man.machineType);
                 printf("++++++++The sensor level is %d\r\n", (int)man.sensorLevel);
@@ -75,34 +78,37 @@ void ProgramSelect(void)
                 printf("++++++++The shift pos delay factor is %d\r\n", (int)man.shiftPosDelayFactor);
                 printf("++++++++The return none delay factor is %d\r\n", (int)man.returnNoneDelayFactor);
                 printf("++++++++The shift stop delay factor is %d\r\n", (int)man.shiftStopDelayFactor);
+                printf("++++++++The restore delay is %d\r\n", (int)man.restoreDelay);
+                printf("++++++++The front back delay is %d\r\n", (int)man.frontBackDelay);
 
                 man.internalSetting[INTERNALSETTING_DEFAULT].val = defaultInternalSetting[INTERNALSETTING_DEFAULT].val;
-                man.internalSetting[INTERNALSETTING_DEFAULT].min = defaultInternalSetting[INTERNALSETTING_DEFAULT].min;
-                man.internalSetting[INTERNALSETTING_DEFAULT].max = defaultInternalSetting[INTERNALSETTING_DEFAULT].max;
                 man.internalSetting[INTERNALSETTING_MACHINETYPE].val = man.machineType;
-                man.internalSetting[INTERNALSETTING_MACHINETYPE].min = defaultInternalSetting[INTERNALSETTING_MACHINETYPE].min;
-                man.internalSetting[INTERNALSETTING_MACHINETYPE].max = defaultInternalSetting[INTERNALSETTING_MACHINETYPE].max;
                 man.internalSetting[INTERNALSETTING_SENSORLEVEL].val = man.sensorLevel;
-                man.internalSetting[INTERNALSETTING_SENSORLEVEL].min = defaultInternalSetting[INTERNALSETTING_SENSORLEVEL].min;
-                man.internalSetting[INTERNALSETTING_SENSORLEVEL].max = defaultInternalSetting[INTERNALSETTING_SENSORLEVEL].max;
                 man.internalSetting[INTERNALSETTING_DELAYUNIT].val = man.delayUnit;
-                man.internalSetting[INTERNALSETTING_DELAYUNIT].min = defaultInternalSetting[INTERNALSETTING_DELAYUNIT].min;
-                man.internalSetting[INTERNALSETTING_DELAYUNIT].max = defaultInternalSetting[INTERNALSETTING_DELAYUNIT].max;
-        
+
                 man.internalSetting[INTERNALSETTING_RETURNPOSDELAYFACTOR].val = man.returnPosDelayFactor;
-                man.internalSetting[INTERNALSETTING_RETURNPOSDELAYFACTOR].min = defaultInternalSetting[INTERNALSETTING_RETURNPOSDELAYFACTOR].min;
-                man.internalSetting[INTERNALSETTING_RETURNPOSDELAYFACTOR].max = defaultInternalSetting[INTERNALSETTING_RETURNPOSDELAYFACTOR].max;
                 man.internalSetting[INTERNALSETTING_SHIFTPOSDELAYFACTOR].val = man.shiftPosDelayFactor;
-                man.internalSetting[INTERNALSETTING_SHIFTPOSDELAYFACTOR].min = defaultInternalSetting[INTERNALSETTING_SHIFTPOSDELAYFACTOR].min;
-                man.internalSetting[INTERNALSETTING_SHIFTPOSDELAYFACTOR].max = defaultInternalSetting[INTERNALSETTING_SHIFTPOSDELAYFACTOR].max;
                 man.internalSetting[INTERNALSETTING_RETURNNONEDELAYFACTOR].val = man.returnNoneDelayFactor;
-                man.internalSetting[INTERNALSETTING_RETURNNONEDELAYFACTOR].min = defaultInternalSetting[INTERNALSETTING_RETURNNONEDELAYFACTOR].min;
-                man.internalSetting[INTERNALSETTING_RETURNNONEDELAYFACTOR].max = defaultInternalSetting[INTERNALSETTING_RETURNNONEDELAYFACTOR].max;
                 man.internalSetting[INTERNALSETTING_SHIFTSTOPDELAYFACTOR].val = man.shiftStopDelayFactor;
-                man.internalSetting[INTERNALSETTING_SHIFTSTOPDELAYFACTOR].min = defaultInternalSetting[INTERNALSETTING_SHIFTSTOPDELAYFACTOR].min;
-                man.internalSetting[INTERNALSETTING_SHIFTSTOPDELAYFACTOR].max = defaultInternalSetting[INTERNALSETTING_SHIFTSTOPDELAYFACTOR].max; 
+
+                man.internalSetting[INTERNALSETTING_RESTOREDALAY].val = man.restoreDelay;
+                man.internalSetting[INTERNALSETTING_FRONTBACKDALAY].val = man.frontBackDelay;
             }
         }
+    }
+    else if(GMR(M_KEY_UPDOWN))
+    {
+         if(!INT_SW8)
+         //if(GML(M_KEY_SW8))
+         {
+            man.factoryModeCnt++;
+            if(man.factoryModeCnt >= 10)
+            {
+                man.mode = PM_FACTORY;
+            
+                printf("Bootloader : Factory Mode...\r\n");
+            }
+         }
     }
 }
 
@@ -129,9 +135,10 @@ void ParameterSet(void)
     }
     else if(GMR(M_KEY_UPDOWN))
     {
-        man.internalSetting[man.intSetPos].val++;
-        if(man.internalSetting[man.intSetPos].val > man.internalSetting[man.intSetPos].max)
-            man.internalSetting[man.intSetPos].val = man.internalSetting[man.intSetPos].min;
+        man.internalSetting[man.intSetPos].val++; 
+               
+        if(man.internalSetting[man.intSetPos].val > defaultInternalSetting[man.intSetPos].max)
+            man.internalSetting[man.intSetPos].val = defaultInternalSetting[man.intSetPos].min;
         
         sprintf((char*)man.segStr, "%02d", (int)(man.internalSetting[man.intSetPos].val));
         TM1638_SendData(3, man.segStr);
@@ -139,17 +146,18 @@ void ParameterSet(void)
     else if(GMR(M_KEY_FRONTBACK))
     {
         man.internalSetting[man.intSetPos].val--;
-        if(man.internalSetting[man.intSetPos].min == 0)
+
+        if(defaultInternalSetting[man.intSetPos].min == 0)
         {
             if(man.internalSetting[man.intSetPos].val >= 255)
-                man.internalSetting[man.intSetPos].val = man.internalSetting[man.intSetPos].max;
+                man.internalSetting[man.intSetPos].val = defaultInternalSetting[man.intSetPos].max;
         }
         else
         {
-            if(man.internalSetting[man.intSetPos].val < man.internalSetting[man.intSetPos].min)
-                man.internalSetting[man.intSetPos].val = man.internalSetting[man.intSetPos].max;
+            if(man.internalSetting[man.intSetPos].val < defaultInternalSetting[man.intSetPos].min)
+                man.internalSetting[man.intSetPos].val = defaultInternalSetting[man.intSetPos].max;
         }
-        
+
         sprintf((char*)man.segStr, "%02d", (int)(man.internalSetting[man.intSetPos].val));
         TM1638_SendData(3, man.segStr);
     }
@@ -224,6 +232,14 @@ void ParameterSet(void)
             case INTERNALSETTING_SHIFTSTOPDELAYFACTOR://
                 AT24CXX_WriteOneByte(EEPROM_ADDR_SHIFTSTOPDELAYFACTOR, man.internalSetting[man.intSetPos].val);
                 printf("++++++++The shift stop delay factor is %d\r\n", (int)man.internalSetting[man.intSetPos].val);
+            break;
+            case INTERNALSETTING_RESTOREDALAY://
+                AT24CXX_WriteOneByte(EEPROM_ADDR_RESTOREDELAY, man.internalSetting[man.intSetPos].val);
+                printf("++++++++The restore delay is %d\r\n", (int)man.internalSetting[man.intSetPos].val);
+            break;
+            case INTERNALSETTING_FRONTBACKDALAY://
+                AT24CXX_WriteOneByte(EEPROM_ADDR_FRONTBACKDELAY, man.internalSetting[man.intSetPos].val);
+                printf("++++++++The front back delay is %d\r\n", (int)man.internalSetting[man.intSetPos].val);
             break;
             default:
             break;

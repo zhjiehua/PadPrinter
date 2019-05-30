@@ -8,6 +8,9 @@
 
 #include "misc.h"
 #include "management.h"
+#include "project.h"
+#include "tm1638.h"
+#include "24cxx.h"
 
 //IO初始化
 //输出口需要配置成推挽模式
@@ -102,4 +105,5 @@ void IO_Init(void)
 //    //CLKDIV = 0x0A;                             //SYSclk = MCLK/10   //不能正常工作
 //    IRC24MCR = 0x00;                            //关闭内部24MHz时钟
 //    P_SW2 = 0x00;
+
 }

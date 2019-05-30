@@ -4,6 +4,9 @@
 
 #include "project.h"
 
+#define HARDWARE_VERSION    "YYJ24A-V1.03-B1902"
+#define SOFTWARE_VERSION    "V1.4.1"
+
 //如果用12V3传感器设备测试2传感器设备，则该宏设为1，否则设为0
 #define MACHINE3SENSOR_SIM_2SENSOR 1
 
@@ -35,7 +38,7 @@ void Push2_Check(void);
 
 void Project_Run(void);
 
-void KeyLogic(void);
+void KeyLogic(uint8_t flag);
 void KeyLogicBetweenDelay(void);
 
 
@@ -49,6 +52,7 @@ typedef enum
     PM_HEAD_CHECK,
     PM_PLATFORM_CHECK,
     PM_PARAMETER_SET,
+    PM_FACTORY, //工厂模式
 }PROJECTMODE_TypeDef;
 
 
@@ -86,9 +90,12 @@ typedef struct
 
     uint8_t programNum;//选择了第几个程序
     uint16_t programAddr;//程序在EEPROM中的地址
-    uint16_t productOutput;//产量
+    uint32_t productOutput;//产量
     uint8_t productOutputOffset;//产量保存在EEPROM的产量基地址的偏移
     uint16_t productOutputAddr;
+    uint16_t productOutputAbsoluteSum;//统计绝对产量，当产量超出1000次后，保存产量的EEPROM地址变化一次，以防止EEPROM总是写同一个地址，写死写坏
+
+    uint8_t powerDownFlag;//断电保存产量标志位
 
     ACTION_TypeDef program[MAX_ACTIONS_PER_PROJECT];//程序流程
 
@@ -107,7 +114,8 @@ typedef struct
     uint8_t intSetAuxCnt;//进入内部设置
     uint8_t intSetPos;
 
-
+    //工厂模式
+    uint8_t factoryModeCnt; //计数到10次进入工厂模式
 
 
 
@@ -122,12 +130,10 @@ typedef struct
     uint8_t shiftPosDelayFactor;
     uint8_t shiftStopDelayFactor;
 
+    uint8_t restoreDelay; //手动前后动作时，在前的过程中按开始，延时一段时间再RESTORE
+    uint8_t frontBackDelay; //手动前后动作的延时
+
     uint8_t delayUnit; //延时最小单位
-    
-    uint8_t platformHomeFlag;
-
-    uint8_t platformPushFlag;  //记录是否推了平台
-
 
     //自动或手动时，按键缓冲区
     uint8_t keyPress;
@@ -146,7 +152,7 @@ typedef struct
 }MAN_TypeDef;
 
 extern MAN_TypeDef man;
-extern const InternalSetting_TypeDef defaultInternalSetting[INTERNALSETTING_COUNT];
+extern const __InternalSetting_TypeDef defaultInternalSetting[INTERNALSETTING_COUNT];
 
 void NextPeroid(void);
 
