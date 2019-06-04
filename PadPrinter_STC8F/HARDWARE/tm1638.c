@@ -9,6 +9,7 @@
 #include "tm1638.h"
 #include "uart.h"
 #include "project.h"
+#include "management.h"
 
 #include <stdio.h>
 
@@ -289,45 +290,6 @@ uint8_t TM1638_ReadKey(uint8_t mode)
 
 uint8_t TM1638_ReadKey(uint8_t mode)
 {
-#if 0
-    K_ROW1 = 1;
-    K_ROW2 = 1;
-    K_COL1 = 0;
-    K_COL2 = 1;
-    K_COL3 = 1;
-    K_COL4 = 1;
-    if(K_ROW1 == 0 && K_ROW2 == 0) return KEY_CLEAR;    
-    
-    K_COL1 = 1;
-    K_COL2 = 1;
-    K_COL3 = 1;
-    K_COL4 = 1;
-    K_ROW1 = 1;
-    K_ROW2 = 0;
-
-    K_COL1 = 1;
-    K_COL2 = 1;
-    K_COL3 = 1;
-    K_COL4 = 1;
-    K_ROW1 = 1;
-    K_ROW2 = 0;
-    //Delay10us(); //必须加一点延时，否则KEY_SLOW和KEY_FAST识别不出来，不明白
-    if(K_COL1 == 0) return KEY_SLOW;
-    else if(K_COL2 == 0) return KEY_STARTSTOP;
-    else if(K_COL3 == 0) return KEY_FRONTBACK;
-
-    K_COL1 = 1;
-    K_COL2 = 1;
-    K_COL3 = 1;
-    K_COL4 = 1;
-    K_ROW1 = 0;
-    K_ROW2 = 1;
-    if(K_COL1 == 0) return KEY_FAST;
-    else if(K_COL2 == 0) return KEY_AUX;
-    else if(K_COL3 == 0) return KEY_UPDOWN;
-    else if(K_COL4 == 0) return KEY_FOOT;
-#else
-
     K_COL1 = 0;
     K_COL2 = 1;
     K_COL3 = 1;
@@ -380,8 +342,6 @@ uint8_t TM1638_ReadKey(uint8_t mode)
     Delay10us();
     if(K_ROW1 == 0) return KEY_FOOT;
 //    else if(K_ROW2 == 0) return KEY_SW8;
-
-#endif
 
 
     return KEY_NONE;

@@ -20,28 +20,47 @@ MAN_TypeDef man;
 #define MACHINE_FIX  0
 
 //设备类型，只能选择一种设备类型
-#define MACHINE_TYPE_3SENSORS_12V   0
-#define MACHINE_TYPE_4SENSORS_5V    0
-#define MACHINE_TYPE_2SENSORS_5V    1
-#define MACHINE_TYPE_2SENSORS_12V   0
+#define MACHINETYPE_0SENSORS   0
+#define MACHINETYPE_2SENSORS   1
+#define MACHINETYPE_3SENSORS   0
+#define MACHINETYPE_4SENSORS   0
+
+//印头传感器类型
+#define HEADSENSORSTYPE_NORMALCLOSE   1 //常闭，5V
+#define HEADSENSORSTYPE_NORMALOPEN    0 //常开，12V
+
+//平台传感器类型
+#define PLATFORMSENSORSTYPE_NORMALCLOSE   1 //常闭，5V
+#define PLATFORMSENSORSTYPE_NORMALOPEN    0 //常开，12V
 
 const __InternalSetting_TypeDef defaultInternalSetting[INTERNALSETTING_COUNT] = 
 {
   {0, 0, 1}, //恢复出厂设置   1:恢复
   {40, 1, 99}, //调节动作延时的最小延时单位
 
-#if MACHINE_TYPE_3SENSORS_12V
-  {2, 0, 2}, //设备识别  0:4sensors 1:2sensors 2:3sensors
-  {1, 0, 1}, //传感器电平 0:5V 1:12V
-#elif MACHINE_TYPE_4SENSORS_5V
-  {0, 0, 2}, //设备识别  0:4sensors 1:2sensors 2:3sensors
-  {0, 0, 1}, //传感器电平 0:5V 1:12V
-#elif MACHINE_TYPE_2SENSORS_5V
-  {1, 0, 2}, //设备识别  0:4sensors 1:2sensors 2:3sensors
-  {0, 0, 1}, //传感器电平 0:5V 1:12V
-#elif MACHINE_TYPE_2SENSORS_12V  
-  {1, 0, 2}, //设备识别  0:4sensors 1:2sensors 2:3sensors
-  {1, 0, 1}, //传感器电平 0:5V 1:12V
+//设备识别  0:4sensors 1:2sensors 2:3sensors 3:0sensors
+#if MACHINETYPE_0SENSORS
+    {3, 0, 3},
+#elif MACHINETYPE_2SENSORS
+    {1, 0, 3},
+#elif MACHINETYPE_3SENSORS
+    {2, 0, 3},
+#elif MACHINETYPE_4SENSORS
+    {0, 0, 3},
+#endif
+
+    //平台传感器电平 0:5V 1:12V
+#if PLATFORMSENSORSTYPE_NORMALCLOSE
+    {0, 0, 1},
+#elif PLATFORMSENSORSTYPE_NORMALOPEN
+    {1, 0, 1},
+#endif
+
+    //印头传感器电平 0:5V 1:12V
+#if HEADSENSORSTYPE_NORMALCLOSE
+    {0, 0, 1},
+#elif HEADSENSORSTYPE_NORMALOPEN
+    {1, 0, 1},
 #endif
 
   {0, 0, 30}, //穿梭returnPosDelay延时

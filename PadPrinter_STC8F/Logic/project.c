@@ -94,12 +94,15 @@ void ProgramResetDefault0(void)
 
     temp = AT24CXX_ReadOneByte(EEPROM_ADDR_MACHINETYPE_DEFAULT);
     AT24CXX_WriteOneByte(EEPROM_ADDR_MACHINETYPE, temp);
-    temp = AT24CXX_ReadOneByte(EEPROM_ADDR_SENSORLEVEL_DEFAULT);
-    AT24CXX_WriteOneByte(EEPROM_ADDR_SENSORLEVEL, temp);
+    temp = AT24CXX_ReadOneByte(EEPROM_ADDR_PLATFORMSENSORLEVEL_DEFAULT);
+    AT24CXX_WriteOneByte(EEPROM_ADDR_PLATFORMSENSORLEVEL, temp);
+    temp = AT24CXX_ReadOneByte(EEPROM_ADDR_HEADSENSORLEVEL_DEFAULT);
+    AT24CXX_WriteOneByte(EEPROM_ADDR_HEADSENSORLEVEL, temp);
 
     //不恢复默认出厂设置
 //    AT24CXX_WriteOneByte(EEPROM_ADDR_MACHINETYPE, defaultInternalSetting[INTERNALSETTING_MACHINETYPE].val);
-//    AT24CXX_WriteOneByte(EEPROM_ADDR_SENSORLEVEL, defaultInternalSetting[INTERNALSETTING_SENSORLEVEL].val);
+//    AT24CXX_WriteOneByte(EEPROM_ADDR_PLATFORMSENSORLEVEL, defaultInternalSetting[INTERNALSETTING_PLATFORMSENSORLEVEL].val);
+//    AT24CXX_WriteOneByte(EEPROM_ADDR_HEADSENSORLEVEL, defaultInternalSetting[INTERNALSETTING_HEADSENSORLEVEL].val);
 
     AT24CXX_WriteOneByte(EEPROM_ADDR_DELAYUNIT, defaultInternalSetting[INTERNALSETTING_DELAYUNIT].val);
     AT24CXX_WriteOneByte(EEPROM_ADDR_RETURNPOSDELAYFACTOR, defaultInternalSetting[INTERNALSETTING_RETURNPOSDELAYFACTOR].val);
@@ -122,7 +125,8 @@ void ProgramResetDefault0(void)
     printf("++++The productOutput is %d\r\n", (int)AT24CXX_ReadLenByte(EEPROM_ADDR_PRODUCTOUTPUT, 2));
     printf("++++The productOutputOffset is %d\r\n", (int)AT24CXX_ReadOneByte(EEPROM_ADDR_PRODUCTOUTPUTOFFSET));
     printf("++++The machineType is %d\r\n", (int)AT24CXX_ReadOneByte(EEPROM_ADDR_MACHINETYPE));
-    printf("++++The sensorLevel is %d\r\n", (int)AT24CXX_ReadOneByte(EEPROM_ADDR_SENSORLEVEL));
+    printf("++++The platfromSensorLevel is %d\r\n", (int)AT24CXX_ReadOneByte(EEPROM_ADDR_PLATFORMSENSORLEVEL));
+    printf("++++The headSensorLevel is %d\r\n", (int)AT24CXX_ReadOneByte(EEPROM_ADDR_HEADSENSORLEVEL));
     printf("++++The delayUnit is %d\r\n", (int)AT24CXX_ReadOneByte(EEPROM_ADDR_DELAYUNIT));
     printf("++++The returnPosDelayFactor is %d\r\n", (int)(man.returnPosDelayFactor));
     printf("++++The shiftPosDelayFactor is %d\r\n", (int)(man.shiftPosDelayFactor));
@@ -232,10 +236,12 @@ void ProgramRead(void)
 
 #if !MACHINE_FIX    
     man.machineType = (MachineType_TypeDef)AT24CXX_ReadOneByte(EEPROM_ADDR_MACHINETYPE);
-    man.sensorLevel = AT24CXX_ReadOneByte(EEPROM_ADDR_SENSORLEVEL);
+    man.platformSensorLevel = AT24CXX_ReadOneByte(EEPROM_ADDR_PLATFORMSENSORLEVEL);
+    man.headSensorLevel = AT24CXX_ReadOneByte(EEPROM_ADDR_HEADSENSORLEVEL);
 #else
     man.machineType = defaultInternalSetting[INTERNALSETTING_MACHINETYPE].val;
-    man.sensorLevel = defaultInternalSetting[INTERNALSETTING_SENSORLEVEL].val;
+    man.platformSensorLevel = defaultInternalSetting[INTERNALSETTING_PLATFORMSENSORLEVEL].val;
+    man.headSensorLevel = defaultInternalSetting[INTERNALSETTING_HEADSENSORLEVEL].val;
 #endif
 
     man.delayUnit = AT24CXX_ReadOneByte(EEPROM_ADDR_DELAYUNIT);
@@ -362,6 +368,13 @@ void ProgramRead(void)
         man.ShiftReturn = ShiftReturn2Sensors;
         man.ShiftReturn2 = ShiftReturnShiftReturn2Sensors;
     }
+    else//单色或其他设备默认用2传感器函数
+    {
+        man.Shift = Shift2Sensors;
+        man.Return = Return2Sensors;
+        man.ShiftReturn = ShiftReturn2Sensors;
+        man.ShiftReturn2 = ShiftReturnShiftReturn2Sensors; 
+    }
     
     if(man.programNum == 11)
     {
@@ -401,18 +414,25 @@ void ProgramRead(void)
 
     WDT_CONTR = 0x3C;
     
-    if(man.sensorLevel) //1
-        printf("++++++++This is a 12V sensors machine!!!!\r\n");
+    if(man.headSensorLevel) //1
+        printf("++++++++This is a 12V sensors machine--Head!!!!\r\n");
     else  //0
-        printf("++++++++This is a 5V sensors machine!!!!\r\n");
+        printf("++++++++This is a 5V sensors machine--Head!!!!\r\n");
+
+    if(man.platformSensorLevel) //1
+        printf("++++++++This is a 12V sensors machine--Platform!!!!\r\n");
+    else  //0
+        printf("++++++++This is a 5V sensors machine--Platform!!!!\r\n");
     
     if(man.machineType == MACHINE_2SENSORS) //1
         printf("++++++++This is a 2 sensors machine!!!!\r\n");
     else if(man.machineType == MACHINE_3SENSORS)  //2
         printf("++++++++This is a 3 sensors machine!!!!\r\n");
-    else  //0
+    else if(man.machineType == MACHINE_4SENSORS)  //0
         printf("++++++++This is a 4 sensors machine!!!!\r\n");
-    
+    else if(man.machineType == MACHINE_0SENSORS)  //3
+        printf("++++++++This is a 0 sensors machine!!!!\r\n");
+
     WDT_CONTR = 0x3C;
 }
 
@@ -461,12 +481,28 @@ void Project_Run(void)
         {
             man.mode = PM_HEAD_CHECK;
             
+            #if !MACHINE_FIX    
+                man.headSensorLevel = AT24CXX_ReadOneByte(EEPROM_ADDR_HEADSENSORLEVEL);
+                man.platformSensorLevel = AT24CXX_ReadOneByte(EEPROM_ADDR_PLATFORMSENSORLEVEL);
+            #else
+                man.headSensorLevel = defaultInternalSetting[INTERNALSETTING_HEADSENSORLEVEL].val;
+                man.platformSensorLevel = defaultInternalSetting[INTERNALSETTING_PLATFORMSENSORLEVEL].val;
+            #endif
+
             printf("Bootloader : Machine sensors head check...\r\n");
         }
         else if(GML(M_KEY_SLOW)) //平台检查
         {
             man.mode = PM_PLATFORM_CHECK;
             
+            #if !MACHINE_FIX    
+                man.headSensorLevel = AT24CXX_ReadOneByte(EEPROM_ADDR_HEADSENSORLEVEL);
+                man.platformSensorLevel = AT24CXX_ReadOneByte(EEPROM_ADDR_PLATFORMSENSORLEVEL);
+            #else
+                man.headSensorLevel = defaultInternalSetting[INTERNALSETTING_HEADSENSORLEVEL].val;
+                man.platformSensorLevel = defaultInternalSetting[INTERNALSETTING_PLATFORMSENSORLEVEL].val;
+            #endif
+
             printf("Bootloader : Machine sensors platform check...\r\n");
         }
         else//正常启动

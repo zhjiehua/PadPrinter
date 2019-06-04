@@ -117,12 +117,26 @@ void SIMPLC_IO_Refresh(void)
 		IN_Last[i] = IN[i];
 
 	//读取输入点
-	_GetX(X0, X_ABSORB_O);
-	_GetX(X1, X_ABSORB_L);
-	_GetX(X2, X_PRINT_O);
-	_GetX(X3, X_PRINT_L);
-    _GetX(X8, X_SCRAPER);
-    if(man.sensorLevel)//金属感应开关
+    //印头
+    if(man.headSensorLevel)//金属感应开关，常开
+    {
+        _GetX(!X0, X_ABSORB_O);
+        _GetX(!X1, X_ABSORB_L);
+        _GetX(!X2, X_PRINT_O);
+        _GetX(!X3, X_PRINT_L);
+        _GetX(!X8, X_SCRAPER);
+    }
+    else  //光电开关，常闭
+    {
+        _GetX(X0, X_ABSORB_O);
+        _GetX(X1, X_ABSORB_L);
+        _GetX(X2, X_PRINT_O);
+        _GetX(X3, X_PRINT_L);
+        _GetX(X8, X_SCRAPER);
+    }
+
+    //平台
+    if(man.platformSensorLevel)//金属感应开关
     {
         _GetX(!X4, X_SHIFT_O);
         _GetX(!X5, X_POS);

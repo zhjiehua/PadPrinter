@@ -35,6 +35,10 @@ public slots:
 	void bgRcvButtonsClicked(int id);
 	void bgSendButtonsClicked(int id);
 	void bgMachineTypeButtonsClicked(int id);
+	void bgHeadSensorsTypeButtonsClicked(int id);
+	void bgPlatformSensorsTypeButtonsClicked(int id);
+
+	void cmbCurrentProgramNumIndexChanged(int index);
 
 	void ReadComDataSlot();   //
 	void UartDataParse();
@@ -49,7 +53,9 @@ private:
 	QButtonGroup *bgRcv;
 	QButtonGroup *bgSend;
 	QButtonGroup *bgMachineType;
-	
+	QButtonGroup *bgHeadSensorsType;
+	QButtonGroup *bgPlatformSensorsType;
+
 	QSerialPort *serialPort;
 	QTimer *timer;
 	QTimer *mainTimer;

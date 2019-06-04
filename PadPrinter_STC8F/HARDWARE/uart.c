@@ -250,20 +250,34 @@ void UartDataParse(void)
             case 'S':   //0x53
                 switch(USART_RX_BUF[1])
                 {
-                    case '0':   //2传感器5V
-                        AT24CXX_WriteOneByte(EEPROM_ADDR_MACHINETYPE_DEFAULT, 1);
-                        AT24CXX_WriteOneByte(EEPROM_ADDR_SENSORLEVEL_DEFAULT, 0);
-                        printf("Reset default data is 2 sensors 5V!\r\n");
+                    case '0':   //设备类型
+                        AT24CXX_WriteOneByte(EEPROM_ADDR_MACHINETYPE_DEFAULT, USART_RX_BUF[2]-0x30);
+                        printf("Reset default data--machinetype is %d!\r\n", (int)(USART_RX_BUF[2]-0x30));
                     break;
-                    case '1':  //3传感器12V
-                        AT24CXX_WriteOneByte(EEPROM_ADDR_MACHINETYPE_DEFAULT, 2);
-                        AT24CXX_WriteOneByte(EEPROM_ADDR_SENSORLEVEL_DEFAULT, 1);
-                        printf("Reset default data is 3 sensors 12V!\r\n");
+                    case '1':  //印头传感器电平
+                        AT24CXX_WriteOneByte(EEPROM_ADDR_HEADSENSORLEVEL_DEFAULT, USART_RX_BUF[2]-0x30);
+                        printf("Reset default data--headsensorlevel is %d!\r\n", (int)(USART_RX_BUF[2]-0x30));
                     break;
-                    case '2':  //2传感器12V
-                        AT24CXX_WriteOneByte(EEPROM_ADDR_MACHINETYPE_DEFAULT, 1);
-                        AT24CXX_WriteOneByte(EEPROM_ADDR_SENSORLEVEL_DEFAULT, 1);
-                        printf("Reset default data is 2 sensors 12V!\r\n");
+                    case '2':  //平台传感器电平
+                        AT24CXX_WriteOneByte(EEPROM_ADDR_PLATFORMSENSORLEVEL_DEFAULT, USART_RX_BUF[2]-0x30);
+                        printf("Reset default data--platformsensorlevel is %d!\r\n", (int)(USART_RX_BUF[2]-0x30));
+                    break;
+
+                    case '5':   //设备类型
+                        AT24CXX_WriteOneByte(EEPROM_ADDR_MACHINETYPE, USART_RX_BUF[2]-0x30);
+                        printf("Reset current eeprom--machinetype is %d!\r\n", (int)(USART_RX_BUF[2]-0x30));
+                    break;
+                    case '6':  //印头传感器电平
+                        AT24CXX_WriteOneByte(EEPROM_ADDR_HEADSENSORLEVEL, USART_RX_BUF[2]-0x30);
+                        printf("Reset current eeprom--headsensorlevel is %d!\r\n", (int)(USART_RX_BUF[2]-0x30));
+                    break;
+                    case '7':  //平台传感器电平
+                        AT24CXX_WriteOneByte(EEPROM_ADDR_PLATFORMSENSORLEVEL, USART_RX_BUF[2]-0x30);
+                        printf("Reset current eeprom--platformsensorlevel is %d!\r\n", (int)(USART_RX_BUF[2]-0x30));
+                    break;
+                    case '8':  //程序编号
+                        AT24CXX_WriteOneByte(EEPROM_ADDR_PROGRAM_NUM, USART_RX_BUF[2]-0x30);
+                        printf("Reset current eeprom--programnumber is %d!\r\n", (int)(USART_RX_BUF[2]-0x30));
                     break;
                     default:
                     break;
@@ -408,10 +422,10 @@ void UartDataParse(void)
                     }                       
                     break;
                     case '2':
-                        printf("The Hardware Version is %s\r\n", HARDWARE_VERSION);
+                        printf("The Hardware Version is %s\r\n", HARDWARE_VERSION_STRING);
                     break;
                     case '3':
-                        printf("The Software Version is %s\r\n", SOFTWARE_VERSION);
+                        printf("The Software Version is %s\r\n", SOFTWARE_VERSION_STRING);
                     break;
                     default:
                     break;

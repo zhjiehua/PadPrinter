@@ -3,12 +3,28 @@
 #define __MANAGEMENT_H_
 
 #include "project.h"
+#include "common.h"
 
-#define HARDWARE_VERSION    "YYJ24A-V1.03-B1902"
-#define SOFTWARE_VERSION    "V1.4.1"
+//硬件版本管理
+//23A版本使用的是1668的矩阵键盘 SW8使用的是单片机IO口
+//24A版本使用的是矩阵键盘，SW8使用的是单片机IO口
+//24B版本使用的是矩阵键盘，SW8使用的是矩阵键盘
+#define HARDWARE_VERSION_MAJOR    2
+#define HARDWARE_VERSION_MINOR    3
+#define HARDWARE_VERSION_APPEND   'A'
+
+#define HARDWARE_VERSION_STRING    "YYJ24A-V1.03-B1902"
+#define SOFTWARE_VERSION_STRING    "V1.5.0"
 
 //如果用12V3传感器设备测试2传感器设备，则该宏设为1，否则设为0
 #define MACHINE3SENSOR_SIM_2SENSOR 1
+
+#if(HARDWARE_VERSION_MAJOR == 2 && HARDWARE_VERSION_MINOR == 3) //小于23A的板用的是1668键盘
+    #define ARRAY_KEYBOARD 0 //1：用矩阵键盘，0：用1668的键盘
+#else
+    #define ARRAY_KEYBOARD 1 //1：用矩阵键盘，0：用1668的键盘
+#endif
+
 
 //按键
 //#define KEY_NONE        0
@@ -62,8 +78,9 @@ typedef struct
     PROJECTMODE_TypeDef mode;
 
     //设备类型
-    MachineType_TypeDef machineType;   //0:MACHINE_4SENSORS     1:MACHINE_2SENSORS     2:MACHINE_3SENSORS
-    uint8_t sensorLevel; //1:12V,金属感应开关 ； 0:5V，光电开关
+    MachineType_TypeDef machineType;   //0:MACHINE_4SENSORS     1:MACHINE_2SENSORS     2:MACHINE_3SENSORS     3:MACHINE_0SENSORS
+    uint8_t platformSensorLevel; //1:12V,金属感应开关 ； 0:5V，光电开关
+    uint8_t headSensorLevel; //1:12V,金属感应开关 ； 0:5V，光电开关
 
     //实际动作，印头和平台要分开控制
     ACT_TypeDef actHead;

@@ -16,20 +16,32 @@ FATool::FATool(QWidget *parent)
 	bgRcv = new QButtonGroup(this);
 	bgSend = new QButtonGroup(this);
 	bgMachineType = new QButtonGroup(this);
+	bgHeadSensorsType = new QButtonGroup(this);
+	bgPlatformSensorsType = new QButtonGroup(this);
 	bgRcv->addButton(ui.rdbRcvHex, 0);
 	bgRcv->addButton(ui.rdbRcvASCII, 1);
 	bgSend->addButton(ui.rdbSendHex, 0);
 	bgSend->addButton(ui.rdbSendASCII, 1);
-	bgMachineType->addButton(ui.rb2Sensors5V, 0);
-	bgMachineType->addButton(ui.rb3Sensors12V, 1);
-	bgMachineType->addButton(ui.rb2Sensors12V, 2);
+	bgMachineType->addButton(ui.rb0Sensors, 0);
+	bgMachineType->addButton(ui.rb2Sensors, 1);
+	bgMachineType->addButton(ui.rb3Sensors, 2);
+	bgMachineType->addButton(ui.rb4Sensors, 3);
+	bgHeadSensorsType->addButton(ui.rbHeadSensorsNormalClose, 0);
+	bgHeadSensorsType->addButton(ui.rbHeadSensorsNormalOpen, 1);
+	bgPlatformSensorsType->addButton(ui.rbPlatformSensorsNormalClose, 0);
+	bgPlatformSensorsType->addButton(ui.rbPlatformSensorsNormalOpen, 1);
+
 	ui.rdbRcvASCII->setChecked(true);
 	//ui.rdbSendASCII->setChecked(true);
 	ui.rdbSendHex->setChecked(true);
-	ui.rb2Sensors5V->setChecked(true);
+	//ui.rb2Sensors->setChecked(true);
 	connect(bgRcv, SIGNAL(buttonClicked(int)), this, SLOT(bgRcvButtonsClicked(int)));
 	connect(bgSend, SIGNAL(buttonClicked(int)), this, SLOT(bgSendButtonsClicked(int)));
 	connect(bgMachineType, SIGNAL(buttonClicked(int)), this, SLOT(bgMachineTypeButtonsClicked(int)));
+	connect(bgHeadSensorsType, SIGNAL(buttonClicked(int)), this, SLOT(bgHeadSensorsTypeButtonsClicked(int)));
+	connect(bgPlatformSensorsType, SIGNAL(buttonClicked(int)), this, SLOT(bgPlatformSensorsTypeButtonsClicked(int)));
+
+	connect(ui.cmbCurrentProgramNum, SIGNAL(currentIndexChanged(int)), this, SLOT(cmbCurrentProgramNumIndexChanged(int)));
 
 	InitPort();//初始化串口
 
@@ -235,6 +247,12 @@ void FATool::on_btnSend_clicked()
 	{
 		sendBufferASCII = ui.teSendData->toPlainText();
 
+		if (ui.cbSendNewLine->isChecked())
+		{
+			sendBufferASCII.append(0x0D);
+			sendBufferASCII.append(0x0A);
+		}
+
 		//写入缓冲区 
 		if (serialPort)
 			serialPort->write(sendBufferASCII.toLatin1());
@@ -360,17 +378,26 @@ void FATool::bgMachineTypeButtonsClicked(int id)
 	QByteArray sendData;
 	sendData.append('S');
 
-	if (bgMachineType->checkedId() == 0)//2Sensors5V
-	{
+	if (ui.cbChangeSetupNow->isChecked())
+		sendData.append('5');
+	else
 		sendData.append('0');
+
+	if (bgMachineType->checkedId() == 0)//0Sensors,单色
+	{
+		sendData.append('3');
 	}
-	else if(bgMachineType->checkedId() == 1)//3Sensors12V
+	else if(bgMachineType->checkedId() == 1)//2Sensors
 	{
 		sendData.append('1');
 	}
-	else //2Sensors12V
+	else if (bgMachineType->checkedId() == 2)//3Sensors
 	{
 		sendData.append('2');
+	}
+	else if (bgMachineType->checkedId() == 3)//4Sensors
+	{
+		sendData.append('0');
 	}
 
 	sendData.append('\r');
@@ -383,6 +410,79 @@ void FATool::bgMachineTypeButtonsClicked(int id)
 		QMessageBox::about(NULL, QString::fromLocal8Bit("提示"), QStringLiteral("串口没有打开！"));
 }
 
+void FATool::bgHeadSensorsTypeButtonsClicked(int id)
+{
+	QByteArray sendData;
+	sendData.append('S');
+	if (ui.cbChangeSetupNow->isChecked())
+		sendData.append('6');
+	else
+		sendData.append('1');
+
+	if (bgHeadSensorsType->checkedId() == 0)//
+	{
+		sendData.append('0');
+	}
+	else if (bgHeadSensorsType->checkedId() == 1)//
+	{
+		sendData.append('1');
+	}
+
+	sendData.append('\r');
+	sendData.append('\n');
+
+	//写入缓冲区
+	if (serialPort)
+		serialPort->write(sendData);
+	else
+		QMessageBox::about(NULL, QString::fromLocal8Bit("提示"), QStringLiteral("串口没有打开！"));
+}
+
+void FATool::bgPlatformSensorsTypeButtonsClicked(int id)
+{
+	QByteArray sendData;
+	sendData.append('S');
+	if (ui.cbChangeSetupNow->isChecked())
+		sendData.append('7');
+	else
+		sendData.append('2');
+
+	if (bgPlatformSensorsType->checkedId() == 0)//常闭（5V）
+	{
+		sendData.append('0');
+	}
+	else if (bgPlatformSensorsType->checkedId() == 1)//常开（12V）
+	{
+		sendData.append('1');
+	}
+
+	sendData.append('\r');
+	sendData.append('\n');
+
+	//写入缓冲区
+	if (serialPort)
+		serialPort->write(sendData);
+	else
+		QMessageBox::about(NULL, QString::fromLocal8Bit("提示"), QStringLiteral("串口没有打开！"));
+}
+
+void FATool::cmbCurrentProgramNumIndexChanged(int index)
+{
+	QByteArray sendData;
+	sendData.append('S');
+	sendData.append('8');
+
+	sendData.append(0x30+index);
+
+	sendData.append('\r');
+	sendData.append('\n');
+
+	//写入缓冲区
+	if (serialPort)
+		serialPort->write(sendData);
+	else
+		QMessageBox::about(NULL, QString::fromLocal8Bit("提示"), QStringLiteral("串口没有打开！"));
+}
 
 quint32 FATool::BufferFindCMD(void)
 {

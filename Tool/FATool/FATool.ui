@@ -313,8 +313,8 @@ p, li { white-space: pre-wrap; }
    <widget class="QPushButton" name="btnResetDefault">
     <property name="geometry">
      <rect>
-      <x>190</x>
-      <y>440</y>
+      <x>350</x>
+      <y>390</y>
       <width>91</width>
       <height>23</height>
      </rect>
@@ -323,63 +323,76 @@ p, li { white-space: pre-wrap; }
      <string>恢复出厂设置</string>
     </property>
    </widget>
-   <widget class="QRadioButton" name="rb2Sensors5V">
-    <property name="geometry">
-     <rect>
-      <x>60</x>
-      <y>410</y>
-      <width>89</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>2传感器5V</string>
-    </property>
-   </widget>
-   <widget class="QRadioButton" name="rb3Sensors12V">
-    <property name="geometry">
-     <rect>
-      <x>60</x>
-      <y>430</y>
-      <width>89</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>3传感器12V</string>
-    </property>
-   </widget>
-   <widget class="QRadioButton" name="rb2Sensors12V">
-    <property name="geometry">
-     <rect>
-      <x>60</x>
-      <y>450</y>
-      <width>89</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>2传感器12V</string>
-    </property>
-   </widget>
    <widget class="QGroupBox" name="groupBox_3">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>380</y>
-      <width>121</width>
-      <height>101</height>
+      <x>10</x>
+      <y>370</y>
+      <width>101</width>
+      <height>111</height>
      </rect>
     </property>
     <property name="title">
-     <string>设备类型</string>
+     <string>设备类型（平台）</string>
     </property>
+    <widget class="QRadioButton" name="rb0Sensors">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>20</y>
+       <width>89</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>0传感器</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="rb4Sensors">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>80</y>
+       <width>89</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>4传感器</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="rb3Sensors">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>60</y>
+       <width>89</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>3传感器</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="rb2Sensors">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>40</y>
+       <width>89</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>2传感器</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QPushButton" name="btnInitBoardID">
     <property name="geometry">
      <rect>
-      <x>350</x>
-      <y>440</y>
+      <x>470</x>
+      <y>390</y>
       <width>91</width>
       <height>23</height>
      </rect>
@@ -391,8 +404,8 @@ p, li { white-space: pre-wrap; }
    <widget class="QPushButton" name="btnClsBoardID">
     <property name="geometry">
      <rect>
-      <x>350</x>
-      <y>400</y>
+      <x>470</x>
+      <y>360</y>
       <width>91</width>
       <height>23</height>
      </rect>
@@ -404,8 +417,8 @@ p, li { white-space: pre-wrap; }
    <widget class="QPushButton" name="btnRestart">
     <property name="geometry">
      <rect>
-      <x>190</x>
-      <y>400</y>
+      <x>350</x>
+      <y>360</y>
       <width>91</width>
       <height>23</height>
      </rect>
@@ -413,6 +426,183 @@ p, li { white-space: pre-wrap; }
     <property name="text">
      <string>重启</string>
     </property>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_4">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>370</y>
+      <width>101</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>印头传感器类型</string>
+    </property>
+    <widget class="QRadioButton" name="rbHeadSensorsNormalClose">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>20</y>
+       <width>89</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>常闭（5V）</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="rbHeadSensorsNormalOpen">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>40</y>
+       <width>89</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>常开（12V）</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_5">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>370</y>
+      <width>101</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>平台传感器类型</string>
+    </property>
+    <widget class="QRadioButton" name="rbPlatformSensorsNormalClose">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>20</y>
+       <width>89</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>常闭（5V）</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="rbPlatformSensorsNormalOpen">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>40</y>
+       <width>89</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>常开（12V）</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QCheckBox" name="cbSendNewLine">
+    <property name="geometry">
+     <rect>
+      <x>390</x>
+      <y>330</y>
+      <width>71</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>发送新行</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="cbChangeSetupNow">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>450</y>
+      <width>211</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>直接更改设置（无需恢复出厂设置）</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lbCurrentProgramNum">
+    <property name="geometry">
+     <rect>
+      <x>370</x>
+      <y>441</y>
+      <width>81</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>当前程序编号</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="cmbCurrentProgramNum">
+    <property name="geometry">
+     <rect>
+      <x>460</x>
+      <y>440</y>
+      <width>69</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>0</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>1</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>2</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>3</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>4</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>5</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>6</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>7</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>8</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>9</string>
+     </property>
+    </item>
    </widget>
    <zorder>groupBox_3</zorder>
    <zorder>groupBox</zorder>
@@ -439,12 +629,15 @@ p, li { white-space: pre-wrap; }
    <zorder>rdbRcvHex</zorder>
    <zorder>teReceiveData</zorder>
    <zorder>btnResetDefault</zorder>
-   <zorder>rb2Sensors5V</zorder>
-   <zorder>rb3Sensors12V</zorder>
-   <zorder>rb2Sensors12V</zorder>
    <zorder>btnInitBoardID</zorder>
    <zorder>btnClsBoardID</zorder>
    <zorder>btnRestart</zorder>
+   <zorder>groupBox_4</zorder>
+   <zorder>groupBox_5</zorder>
+   <zorder>cbSendNewLine</zorder>
+   <zorder>cbChangeSetupNow</zorder>
+   <zorder>lbCurrentProgramNum</zorder>
+   <zorder>cmbCurrentProgramNum</zorder>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">

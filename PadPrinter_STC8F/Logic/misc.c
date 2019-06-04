@@ -20,7 +20,12 @@ void MachineSensorsHeadCheck(void)
     GXL(X_ABSORB_L) ? TM1638_SendData(1, "8") : TM1638_SendData(1, "-");
     GXL(X_ABSORB_O) ? TM1638_SendData(2, "8") : TM1638_SendData(2, "-");
     GXL(X_PRINT_O) ? TM1638_SendData(3, "8") : TM1638_SendData(3, "-");
-    GXL(X_PRINT_L) ? TM1638_SendData(4, "8") : TM1638_SendData(4, "-");
+    //GXL(X_PRINT_L) ? TM1638_SendData(4, "8") : TM1638_SendData(4, "-");
+
+    if(GXL(X_PRINT_L) && GXL(X_SCRAPER))  TM1638_SendData(4, "8.");
+    else if(!GXL(X_PRINT_L) && GXL(X_SCRAPER))  TM1638_SendData(4, "-.");
+    else if(GXL(X_PRINT_L) && !GXL(X_SCRAPER))  TM1638_SendData(4, "8");
+    else if(!GXL(X_PRINT_L) && !GXL(X_SCRAPER))  TM1638_SendData(4, "-");
 }
 
 void MachineSensorsPlatformCheck(void)
@@ -249,6 +254,11 @@ void MachineTypeCheck(void)
                 break;
             else
                 TM1638_SendData(0, "--A--");
+        }
+        else if(man.machineType == MACHINE_0SENSORS)  //单色设备不检查平台
+        {
+            cnt = timeCount;
+            break;
         }
     }
     

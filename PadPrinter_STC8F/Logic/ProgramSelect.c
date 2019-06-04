@@ -46,8 +46,11 @@ void ProgramSelect(void)
     }
     else if(GMR(M_KEY_AUX))//按10下进入内部参数设置程序
     {
+#if(HARDWARE_VERSION_MAJOR == 2 && HARDWARE_VERSION_MINOR == 4 && HARDWARE_VERSION_APPEND == 'B') //24B版本的SW8使用的是矩阵键盘
+        if(GML(M_KEY_SW8))
+#else
         if(!INT_SW8)
-        //if(GML(M_KEY_SW8))
+#endif
         {
             man.intSetAuxCnt++;
             if(man.intSetAuxCnt >= 10)
@@ -61,7 +64,8 @@ void ProgramSelect(void)
 
 
                 man.machineType = (MachineType_TypeDef)AT24CXX_ReadOneByte(EEPROM_ADDR_MACHINETYPE);
-                man.sensorLevel = AT24CXX_ReadOneByte(EEPROM_ADDR_SENSORLEVEL);
+                man.platformSensorLevel = AT24CXX_ReadOneByte(EEPROM_ADDR_PLATFORMSENSORLEVEL);
+                man.headSensorLevel = AT24CXX_ReadOneByte(EEPROM_ADDR_HEADSENSORLEVEL);
                 man.delayUnit = AT24CXX_ReadOneByte(EEPROM_ADDR_DELAYUNIT);
                 man.returnPosDelayFactor = AT24CXX_ReadOneByte(EEPROM_ADDR_RETURNPOSDELAYFACTOR);
                 man.shiftPosDelayFactor = AT24CXX_ReadOneByte(EEPROM_ADDR_SHIFTPOSDELAYFACTOR);
@@ -72,7 +76,8 @@ void ProgramSelect(void)
 
                 printf("++++++++The return pos delay factor is %d\r\n", (int)man.returnPosDelayFactor);
                 printf("++++++++The machine type is %d\r\n", (int)man.machineType);
-                printf("++++++++The sensor level is %d\r\n", (int)man.sensorLevel);
+                printf("++++++++The platform sensor level is %d\r\n", (int)man.platformSensorLevel);
+                printf("++++++++The head sensor level is %d\r\n", (int)man.headSensorLevel);
                 printf("++++++++The delay unit is %d\r\n", (int)man.delayUnit);               
                 printf("++++++++The return pos delay factor is %d\r\n", (int)man.returnPosDelayFactor);
                 printf("++++++++The shift pos delay factor is %d\r\n", (int)man.shiftPosDelayFactor);
@@ -83,7 +88,8 @@ void ProgramSelect(void)
 
                 man.internalSetting[INTERNALSETTING_DEFAULT].val = defaultInternalSetting[INTERNALSETTING_DEFAULT].val;
                 man.internalSetting[INTERNALSETTING_MACHINETYPE].val = man.machineType;
-                man.internalSetting[INTERNALSETTING_SENSORLEVEL].val = man.sensorLevel;
+                man.internalSetting[INTERNALSETTING_PLATFORMSENSORLEVEL].val = man.platformSensorLevel;
+                man.internalSetting[INTERNALSETTING_HEADSENSORLEVEL].val = man.headSensorLevel;
                 man.internalSetting[INTERNALSETTING_DELAYUNIT].val = man.delayUnit;
 
                 man.internalSetting[INTERNALSETTING_RETURNPOSDELAYFACTOR].val = man.returnPosDelayFactor;
@@ -98,14 +104,25 @@ void ProgramSelect(void)
     }
     else if(GMR(M_KEY_UPDOWN))
     {
-         if(!INT_SW8)
-         //if(GML(M_KEY_SW8))
+#if(HARDWARE_VERSION_MAJOR == 2 && HARDWARE_VERSION_MINOR == 4 && HARDWARE_VERSION_APPEND == 'B') //24B版本的SW8使用的是矩阵键盘
+        if(GML(M_KEY_SW8))
+#else
+        if(!INT_SW8)
+#endif
          {
             man.factoryModeCnt++;
             if(man.factoryModeCnt >= 10)
             {
                 man.mode = PM_FACTORY;
-            
+
+#if !MACHINE_FIX    
+                man.platformSensorLevel = AT24CXX_ReadOneByte(EEPROM_ADDR_PLATFORMSENSORLEVEL);
+                man.headSensorLevel = AT24CXX_ReadOneByte(EEPROM_ADDR_HEADSENSORLEVEL);
+#else
+                man.platformSensorLevel = defaultInternalSetting[INTERNALSETTING_PLATFORMSENSORLEVEL].val;
+                man.headSensorLevel = defaultInternalSetting[INTERNALSETTING_HEADSENSORLEVEL].val;
+#endif
+                        
                 printf("Bootloader : Factory Mode...\r\n");
             }
          }
@@ -197,6 +214,11 @@ void ParameterSet(void)
                     man.machineType = MACHINE_3SENSORS;
                     printf("++++++++This is a 3 sensors machine!!!!\r\n");
                 }
+                else if(man.internalSetting[man.intSetPos].val == 0)
+                {
+                    man.machineType = MACHINE_0SENSORS;
+                    printf("++++++++This is a 0 sensors machine!!!!\r\n");
+                }
                 else
                 {
                     man.machineType = MACHINE_4SENSORS;
@@ -204,18 +226,31 @@ void ParameterSet(void)
                 }
                 AT24CXX_WriteOneByte(EEPROM_ADDR_MACHINETYPE, man.internalSetting[man.intSetPos].val);
             break;
-            case INTERNALSETTING_SENSORLEVEL://传感器电平
+            case INTERNALSETTING_PLATFORMSENSORLEVEL://平台传感器电平
                 if(man.internalSetting[man.intSetPos].val > 0)
                 {
-                    man.sensorLevel = 1;
-                    printf("++++++++This is a 12V sensors machine!!!!\r\n");
+                    man.platformSensorLevel = 1;
+                    printf("++++++++This is a 12V sensors machine--platform!!!!\r\n");
                 }
                 else
                 {
-                    man.sensorLevel = 0;
-                    printf("++++++++This is a 5V sensors machine!!!!\r\n");
+                    man.platformSensorLevel = 0;
+                    printf("++++++++This is a 5V sensors machine--platform!!!!\r\n");
                 }
-                AT24CXX_WriteOneByte(EEPROM_ADDR_SENSORLEVEL, man.internalSetting[man.intSetPos].val);
+                AT24CXX_WriteOneByte(EEPROM_ADDR_PLATFORMSENSORLEVEL, man.internalSetting[man.intSetPos].val);
+            break;
+            case INTERNALSETTING_HEADSENSORLEVEL://印头传感器电平
+                if(man.internalSetting[man.intSetPos].val > 0)
+                {
+                    man.headSensorLevel = 1;
+                    printf("++++++++This is a 12V sensors machine--head!!!!\r\n");
+                }
+                else
+                {
+                    man.headSensorLevel = 0;
+                    printf("++++++++This is a 5V sensors machine--head!!!!\r\n");
+                }
+                AT24CXX_WriteOneByte(EEPROM_ADDR_HEADSENSORLEVEL, man.internalSetting[man.intSetPos].val);
             break;
             case INTERNALSETTING_RETURNPOSDELAYFACTOR://
                 AT24CXX_WriteOneByte(EEPROM_ADDR_RETURNPOSDELAYFACTOR, man.internalSetting[man.intSetPos].val);
