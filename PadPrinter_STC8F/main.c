@@ -54,7 +54,7 @@ int main(void)
 
     //延时200mS查看数码管显示是否有损坏
     TS(1, 200);
-    while(!TG(1));
+    while(!TG(1)) WDT_CONTR = 0x3C;
 
     EEPROM_Check();
 

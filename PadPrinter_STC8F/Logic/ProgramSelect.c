@@ -48,8 +48,10 @@ void ProgramSelect(void)
     {
 #if(HARDWARE_VERSION_MAJOR == 2 && HARDWARE_VERSION_MINOR == 4 && HARDWARE_VERSION_APPEND == 'B') //24B版本的SW8使用的是矩阵键盘
         if(GML(M_KEY_SW8))
-#else
+#elif (HARDWARE_VERSION_MAJOR == 2 && HARDWARE_VERSION_MINOR <= 4)
         if(!INT_SW8)
+#elif (HARDWARE_VERSION_MAJOR == 2 && HARDWARE_VERSION_MINOR == 5 && HARDWARE_VERSION_APPEND == 'A')//25A版本SW8改成拨码开关了
+        if(1)
 #endif
         {
             man.intSetAuxCnt++;
@@ -106,8 +108,10 @@ void ProgramSelect(void)
     {
 #if(HARDWARE_VERSION_MAJOR == 2 && HARDWARE_VERSION_MINOR == 4 && HARDWARE_VERSION_APPEND == 'B') //24B版本的SW8使用的是矩阵键盘
         if(GML(M_KEY_SW8))
-#else
+#elif (HARDWARE_VERSION_MAJOR == 2 && HARDWARE_VERSION_MINOR <= 4)
         if(!INT_SW8)
+#elif (HARDWARE_VERSION_MAJOR == 2 && HARDWARE_VERSION_MINOR == 5 && HARDWARE_VERSION_APPEND == 'A')//25A版本SW8改成拨码开关了
+        if(1)
 #endif
          {
             man.factoryModeCnt++;

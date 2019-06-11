@@ -9,12 +9,13 @@
 //23A版本使用的是1668的矩阵键盘 SW8使用的是单片机IO口
 //24A版本使用的是矩阵键盘，SW8使用的是单片机IO口
 //24B版本使用的是矩阵键盘，SW8使用的是矩阵键盘
+//25A版本使用的是矩阵键盘，SW8为单片机IO口，改为拨码开关，用于切换2传感器5V设备和3传感器12V设备
 #define HARDWARE_VERSION_MAJOR    2
-#define HARDWARE_VERSION_MINOR    3
+#define HARDWARE_VERSION_MINOR    5
 #define HARDWARE_VERSION_APPEND   'A'
 
-#define HARDWARE_VERSION_STRING    "YYJ24A-V1.03-B1902"
-#define SOFTWARE_VERSION_STRING    "V1.5.0"
+#define HARDWARE_VERSION_STRING    "YYJ25A-V1.01-B1901"
+#define SOFTWARE_VERSION_STRING    "V1.6.0"
 
 //如果用12V3传感器设备测试2传感器设备，则该宏设为1，否则设为0
 #define MACHINE3SENSOR_SIM_2SENSOR 1

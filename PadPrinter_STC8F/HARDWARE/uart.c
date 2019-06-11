@@ -431,6 +431,28 @@ void UartDataParse(void)
                     break;
                 }
             break;
+            case 'M':   //模式设置
+                switch(USART_RX_BUF[1])
+                {
+                    case '0':  //工厂模式
+                    {  
+                        man.mode = PM_FACTORY;
+        
+#if !MACHINE_FIX    
+                        man.platformSensorLevel = AT24CXX_ReadOneByte(EEPROM_ADDR_PLATFORMSENSORLEVEL);
+                        man.headSensorLevel = AT24CXX_ReadOneByte(EEPROM_ADDR_HEADSENSORLEVEL);
+#else
+                        man.platformSensorLevel = defaultInternalSetting[INTERNALSETTING_PLATFORMSENSORLEVEL].val;
+                        man.headSensorLevel = defaultInternalSetting[INTERNALSETTING_HEADSENSORLEVEL].val;
+#endif
+                                
+                        printf("Bootloader : Factory Mode...\r\n");
+                    }
+                    break;
+                    default:
+                    break;
+                }
+            break;
             default:
             break;
         }

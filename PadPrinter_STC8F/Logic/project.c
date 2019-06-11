@@ -234,10 +234,27 @@ void ProgramRead(void)
 
     WDT_CONTR = 0x3C;
 
-#if !MACHINE_FIX    
+#if !MACHINE_FIX
+
+#if (HARDWARE_VERSION_MAJOR == 2 && HARDWARE_VERSION_MINOR == 5 && HARDWARE_VERSION_APPEND == 'A')//25A版本SW8改成拨码开关了
+    if(INT_SW8)
+    {
+        man.headSensorLevel = 0;//5V
+        man.platformSensorLevel = 0;//5V
+        man.machineType = MACHINE_2SENSORS;    
+    }
+    else
+    {
+        man.headSensorLevel = 0;//5V
+        man.platformSensorLevel = 1;//12V
+        man.machineType = MACHINE_3SENSORS;  
+    }
+#else    
     man.machineType = (MachineType_TypeDef)AT24CXX_ReadOneByte(EEPROM_ADDR_MACHINETYPE);
     man.platformSensorLevel = AT24CXX_ReadOneByte(EEPROM_ADDR_PLATFORMSENSORLEVEL);
     man.headSensorLevel = AT24CXX_ReadOneByte(EEPROM_ADDR_HEADSENSORLEVEL);
+#endif
+
 #else
     man.machineType = defaultInternalSetting[INTERNALSETTING_MACHINETYPE].val;
     man.platformSensorLevel = defaultInternalSetting[INTERNALSETTING_PLATFORMSENSORLEVEL].val;
@@ -481,13 +498,28 @@ void Project_Run(void)
         {
             man.mode = PM_HEAD_CHECK;
             
-            #if !MACHINE_FIX    
-                man.headSensorLevel = AT24CXX_ReadOneByte(EEPROM_ADDR_HEADSENSORLEVEL);
-                man.platformSensorLevel = AT24CXX_ReadOneByte(EEPROM_ADDR_PLATFORMSENSORLEVEL);
-            #else
-                man.headSensorLevel = defaultInternalSetting[INTERNALSETTING_HEADSENSORLEVEL].val;
-                man.platformSensorLevel = defaultInternalSetting[INTERNALSETTING_PLATFORMSENSORLEVEL].val;
-            #endif
+#if !MACHINE_FIX
+
+#if (HARDWARE_VERSION_MAJOR == 2 && HARDWARE_VERSION_MINOR == 5 && HARDWARE_VERSION_APPEND == 'A')//25A版本SW8改成拨码开关了
+            if(INT_SW8)
+            {
+                man.headSensorLevel = 0;//5V
+                man.platformSensorLevel = 0;//5V    
+            }
+            else
+            {
+                man.headSensorLevel = 0;//5V
+                man.platformSensorLevel = 1;//12V  
+            }
+#else    
+            man.headSensorLevel = AT24CXX_ReadOneByte(EEPROM_ADDR_HEADSENSORLEVEL);
+            man.platformSensorLevel = AT24CXX_ReadOneByte(EEPROM_ADDR_PLATFORMSENSORLEVEL);
+#endif
+
+#else
+            man.headSensorLevel = defaultInternalSetting[INTERNALSETTING_HEADSENSORLEVEL].val;
+            man.platformSensorLevel = defaultInternalSetting[INTERNALSETTING_PLATFORMSENSORLEVEL].val;
+#endif
 
             printf("Bootloader : Machine sensors head check...\r\n");
         }
@@ -495,13 +527,28 @@ void Project_Run(void)
         {
             man.mode = PM_PLATFORM_CHECK;
             
-            #if !MACHINE_FIX    
-                man.headSensorLevel = AT24CXX_ReadOneByte(EEPROM_ADDR_HEADSENSORLEVEL);
-                man.platformSensorLevel = AT24CXX_ReadOneByte(EEPROM_ADDR_PLATFORMSENSORLEVEL);
-            #else
-                man.headSensorLevel = defaultInternalSetting[INTERNALSETTING_HEADSENSORLEVEL].val;
-                man.platformSensorLevel = defaultInternalSetting[INTERNALSETTING_PLATFORMSENSORLEVEL].val;
-            #endif
+#if !MACHINE_FIX    
+
+#if (HARDWARE_VERSION_MAJOR == 2 && HARDWARE_VERSION_MINOR == 5 && HARDWARE_VERSION_APPEND == 'A')//25A版本SW8改成拨码开关了
+            if(INT_SW8)
+            {
+                man.headSensorLevel = 0;//5V
+                man.platformSensorLevel = 0;//5V    
+            }
+            else
+            {
+                man.headSensorLevel = 0;//5V
+                man.platformSensorLevel = 1;//12V  
+            }
+#else    
+            man.headSensorLevel = AT24CXX_ReadOneByte(EEPROM_ADDR_HEADSENSORLEVEL);
+            man.platformSensorLevel = AT24CXX_ReadOneByte(EEPROM_ADDR_PLATFORMSENSORLEVEL);
+#endif
+
+#else
+            man.headSensorLevel = defaultInternalSetting[INTERNALSETTING_HEADSENSORLEVEL].val;
+            man.platformSensorLevel = defaultInternalSetting[INTERNALSETTING_PLATFORMSENSORLEVEL].val;
+#endif
 
             printf("Bootloader : Machine sensors platform check...\r\n");
         }
@@ -513,6 +560,13 @@ void Project_Run(void)
 
             //读取程序
             ProgramRead();
+
+            //显示设备类型
+            sprintf((char*)man.segStr, "%01d.%02d.%02d", (int)(man.machineType), (int)(man.headSensorLevel), (int)(man.platformSensorLevel));
+            TM1638_SendData(0, man.segStr);
+            //延时800mS
+            TS(1, 800);
+            while(!TG(1)) WDT_CONTR = 0x3C;
 
             //检测单片机ID，如果换了单片机，则需要重新写一次MCUID进EEPROM，否则程序不能正常运行
             MCUID_Check();

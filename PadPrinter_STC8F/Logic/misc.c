@@ -133,6 +133,8 @@ void MachineStateCheck(void)
         
         UartDataParse();
 
+        if(man.mode == PM_FACTORY) break;
+
         if(GXL(X_ABSORB_O) && !GXL(X_ABSORB_L) && !GXL(X_PRINT_O) && !GXL(X_PRINT_L))
         {
             TM1638_SendData(0, "88888");
@@ -184,6 +186,8 @@ void MachineTypeCheck(void)
         
         UartDataParse();
         
+        if(man.mode == PM_FACTORY) break;
+
         if(man.programNum != 0 && man.programNum != 2 && man.programNum != 4 && man.programNum != 6 && man.programNum != 8)
             cnt = 0;
 
@@ -375,7 +379,9 @@ void MCUID_Check(void)
                 TM1638_SendData(0, "--P--");
                 WDT_CONTR = 0x3C;
                 
-                UartDataParse();      
+                UartDataParse();
+                
+                if(man.mode == PM_FACTORY) break;     
             }
         }
     }
