@@ -23,7 +23,7 @@
 
 #define IN_NUM 9 //输入点数
 #define OUT_NUM 6  //输出点数
-#define RELAY_NUM 100 //中间继电器个数
+#define RELAY_NUM 110 //中间继电器个数
 
 //元件类型
 #define X_COMPONET	0
@@ -55,15 +55,25 @@ typedef struct
 }IO_Man_TypeDef;
 
 //定义输入点
+//#define X0  MIN1
+//#define X1  MIN2
+//#define X2  MIN3
+//#define X3  MIN4
+//#define X4  MIN9
+//#define X5  MIN8
+//#define X6  MIN7
+//#define X7  MIN6
+//#define X8  MIN5
+
 #define X0  MIN1
 #define X1  MIN2
 #define X2  MIN3
 #define X3  MIN4
-#define X4  MIN9
-#define X5  MIN8
+#define X4  MIN5
+#define X5  MIN6
 #define X6  MIN7
-#define X7  MIN6
-#define X8  MIN5
+#define X7  MIN8
+#define X8  MIN9
 
 //定义输出点
 #define Y0(x)  MOUT1 = x
@@ -206,17 +216,29 @@ typedef struct
 
 #define M_RESTORE_DELAY         99
 
+#define M_WAITMSIGNAL_NONE      100
 
 //X
+//#define X_ABSORB_O        0
+//#define X_ABSORB_L        1
+//#define X_PRINT_O         2
+//#define X_PRINT_L         3
+//#define X_SHIFT_O         4
+//#define X_POS             5
+//#define X_SHIFT_L1        6
+//#define X_SHIFT_L2        7
+//#define X_SCRAPER         8
+
 #define X_ABSORB_O        0
 #define X_ABSORB_L        1
 #define X_PRINT_O         2
 #define X_PRINT_L         3
-#define X_SHIFT_O         4
-#define X_POS             5
-#define X_SHIFT_L1        6
-#define X_SHIFT_L2        7
-#define X_SCRAPER         8
+#define X_SCRAPER         4
+#define X_SHIFT_O         5
+#define X_POS             6
+#define X_SHIFT_L1        7
+#define X_SHIFT_L2        8
+
 
 //Y
 #define Y_UPDOWN          0
@@ -239,6 +261,9 @@ void SIMPLC_IO_Refresh(void);
 
 uint8_t SIMPLC_IO_Get(uint8_t Component, uint8_t Index, uint8_t Type);
 void SIMPLC_IO_Set(uint8_t Component, uint8_t Index, uint8_t Level);
+
+void SIMPLC_IO_SetRising(uint8_t Component, uint8_t Index, uint8_t Level);
+#define SMR(x, y)   SIMPLC_IO_SetRising(M_COMPONET, x, y)
 
 #define GML(x)   SIMPLC_IO_Get(M_COMPONET, x, LEVEL)
 #define GMR(x)   SIMPLC_IO_Get(M_COMPONET, x, RISING_EDGE)

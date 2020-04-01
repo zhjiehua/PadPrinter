@@ -83,10 +83,14 @@ void Key_Refresh(void)
         SML(i, 0);
     SML(M_KEY_FOOT_AFTERFILTER, 0);
 
+#if 1
     if(key)
     {
         if(man.mode != PM_NORMAL)
+        {
             Delay10ms();
+            Delay10ms();
+        }
 
         key = TM1638_ReadKey(0);
         if(key)
@@ -129,6 +133,30 @@ void Key_Refresh(void)
 		FootKeyPressFlag = 0;
 		SIMPLC_Timer_ResetTimeOutFlag(5);	
 	}
+#else //使用模拟按键测试程序
+    
+    if(man.mode == PM_NORMAL)
+    {
+        key = KeyRandom();
+        //key = KEY_FOOT;
+
+        if(key <= KEY_SW8)
+        {
+            if(key-1 != M_KEY_FRONTBACK)
+                SML(key-1, 1);
+    
+            if(GML(M_KEY_FOOT))
+    		{
+    			SML(M_KEY_FOOT_AFTERFILTER, 1);	
+    		}
+        }
+//        else
+//        {
+//            SML(M_KEY_AUX, 1);
+//            SML(M_KEY_SW8, 1);
+//        }
+    }
+#endif
 
     K_COL1 = 1;
     K_COL2 = 1;

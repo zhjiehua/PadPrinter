@@ -10,6 +10,9 @@
 #include "simplc_io.h"
 #include "simplc_timer.h"
 
+#include "NormalAuto.h"
+#include "NormalMannual.h"
+#include "NormalRestore.h"
  
 //正常启动后的按键识别
 void Key_Normal(void)
@@ -88,7 +91,7 @@ void Key_Normal(void)
         man.keyPress = KEY_STARTSTOP;
     else if(GMR(M_KEY_AUX))
     {
-        if(man.keyPress == KEY_STARTSTOP && !GML(M_MODE_AUTO))
+        if(man.keyPress == KEY_STARTSTOP && man.runMode == RM_MANNUAL)
         {
             if(!GML(M_AUTO_FLAG_AUX))
             {
@@ -104,7 +107,7 @@ void Key_Normal(void)
         man.keyPress = KEY_FRONTBACK;
     else if(GMR(M_KEY_FOOT_AFTERFILTER)) //M_KEY_FOOT_AFTERFILTER  M_KEY_FOOT
         man.keyPress = KEY_FOOT;  
-    else if(!GML(M_MODE_AUTO) && GML(M_KEY_UPDOWN) && (GML(M_ABSORB_FINISH) || GML(M_PRINT_FINISH)))
+    else if(man.runMode == RM_MANNUAL && GML(M_KEY_UPDOWN) && (GML(M_ABSORB_FINISH) || GML(M_PRINT_FINISH)))
         man.keyPress = KEY_UPDOWN;
 
     if(GML(M_ABSORBDOWN_FINISH) && GML(M_ABSORBUP_FINISH) && GML(M_ABSORB_FINISH)
@@ -112,7 +115,7 @@ void Key_Normal(void)
             && GML(M_FRONT_FINISH) && GML(M_BACK_FINISH))
     {
         SML(M_ACTIONHEAD_FINISH, 1);
-        man.actHead = ACTION_NONE;
+        //man.actHead = ACTION_NONE;
 
         //printf("---------M_ACTIONHEAD_FINISH\r\n");
     }
@@ -122,7 +125,7 @@ void Key_Normal(void)
     if(GML(M_SHIFT_FINISH) && GML(M_RETURN_FINISH) && GML(M_SHIFTRETURN_FINISH) && GML(M_SHIFTRETURN2_FINISH))
     {
         SML(M_ACTIONPLATFORM_FINISH, 1);
-        man.actPlatform = ACTION_NONE;
+        //man.actPlatform = ACTION_NONE;
 
         //printf("---++----M_ACTIONPLATFORM_FINISH\r\n");
     }
@@ -134,17 +137,17 @@ void Key_Normal(void)
         man.keyPressLast = KEY_NONE;
 
         SML(M_ACTION_FINISH, 1);
-
-        //正在修改延时，暂停更新下一动作
-//        if(GML(M_CHANGEDELAY))
-//            return;
     }
     else
         SML(M_ACTION_FINISH, 0);
 
- 
-    if((!GML(M_ACTIONHEAD_FINISH) || !GML(M_ACTIONPLATFORM_FINISH))
-        && man.keyPressLast == man.keyPress  && man.keyPress != KEY_NONE//正在动作时按了相同的键
+    if((GML(M_MAN_FRONTBACK) && man.keyPress == KEY_AUX)) //手动前后时，穿梭和印头是独立的
+    {
+        if(!GML(M_ACTIONPLATFORM_FINISH))
+            man.keyPress = KEY_NONE;
+    }
+    else if((!GML(M_ACTIONHEAD_FINISH) || !GML(M_ACTIONPLATFORM_FINISH))
+        && man.keyPressLast == man.keyPress && man.keyPress != KEY_NONE//正在动作时按了相同的键
         && (man.keyPress != KEY_STARTSTOP && man.keyPress != KEY_FRONTBACK && man.keyPress != KEY_FOOT))//这3个键可重复按2次
     {
         man.keyPress = KEY_NONE;
@@ -153,348 +156,88 @@ void Key_Normal(void)
 
 //    if(man.keyPressLast == man.keyPress && man.keyPressLast != KEY_NONE)
 //        printf("man.keyPressLast == man.keyPress\r\n");
-    
-    //KeyLogicBetweenDelay();
-//    KeyLogic();
 
 
 
 
 
-
-
+    if(man.runMode == RM_MANNUAL && !GML(M_RESTORE_DELAY)) //防止在等待过程中，印头在前面时，按了上下，出现下压卡死的问题
+        NormalMannual_KeyProcess();
+    else if(man.runMode == RM_AUTO)
+        NormalAuto_KeyProcess();
+    else if(man.runMode == RM_RESTORE)  //恢复过程中不响应按键，只在印头最后恢复完成了再响应一次按键
+        NormalRestore_KeyProcess();
 
     //========================手动：前后不断切换=============================== 
-    //if(!GML(M_MODE_AUTO) && GML(M_MAN_FRONTBACK) && ((GMR(M_ACTIONHEAD_FINISH) && !GML(M_CHANGEDELAY)) || GMF(M_CHANGEDELAY)))
-    if(!GML(M_MODE_AUTO) && GML(M_MAN_FRONTBACK) && GMR(M_ACTIONHEAD_FINISH))
-    //if(!GML(M_MODE_AUTO) && GML(M_MAN_FRONTBACK) && (GMR(M_ACTIONHEAD_FINISH) || GMF(M_CHANGEDELAY)))
+    if(man.runMode == RM_MANNUAL)
     {
-        //printf("Manual====FrontBack!\r\n");
-        if((man.headPos&FRONTBACK_MASK))
+        if(GML(M_MAN_FRONTBACK) && (GMR(M_BACK_FINISH) || GMR(M_FRONT_FINISH)))
+            NormalMannual_FrontBackToggle();
+        else if(GML(M_RESTORE_DELAY))  //正在执行前后动作时，延时一小段时间再进入恢复模式
         {
-            //SML(M_ACTIONHEAD_FINISH, 0);
-            man.actHead = BACK;
-            man.delay = man.frontBackDelay; //8          
-            SML(M_BACK_FINISH, 0);
+            if(man.delay)
+            {
+                if(!GML(M_ACTION_DELAY))
+                {
+                    TS(0, man.delayUnit);//动作延时最小单位
+                    SML(M_ACTION_DELAY, 1);
+                }
+                else if(TG(0))
+                {
+                    man.delay--;
+                    SML(M_ACTION_DELAY, 0);
+    
+                    //printf("Wait++++man.delay = %d\r\n", (int)man.delay);
+                }
+            }
+            else
+            {
+                SML(M_RESTORE_DELAY, 0);
 
-            //printf("Manual====Back!\r\n");
-        }
-        else// if(!(man.headPos&FRONTBACK_MASK))
-        {
-            //SML(M_ACTIONHEAD_FINISH, 0);
-            man.actHead = FRONT;
-            man.delay = man.frontBackDelay; //8
-            SML(M_FRONT_FINISH, 0);
-
-            //printf("Manual====Front!\r\n");
+                man.runMode = RM_RESTORE;
+                NormalRestore_HeadRestore();
+                NormalRestore_PlatformRestore();
+   
+                printf("Restore the machine!\r\n");
+            }
         }
     }
 
     //===========================自动============================
-    if(GML(M_MODE_AUTO) && !GML(M_MODE_RESTORE) && (GMR(M_ACTIONHEAD_FINISH) || (GMR(M_ACTIONPLATFORM_FINISH) && !GML(M_MODE_RESTORE_QUIT))))
-    //if(GML(M_MODE_AUTO) && !GML(M_MODE_RESTORE) && GMR(M_ACTIONHEAD_FINISH))
+    //if(GML(M_MODE_AUTO) && !GML(M_MODE_RESTORE) && (GMR(M_ACTIONHEAD_FINISH) || (GMR(M_ACTIONPLATFORM_FINISH) && !GML(M_MODE_RESTORE_QUIT))))
+    if(man.runMode == RM_AUTO)
     {
-//        if(GMR(M_ACTIONHEAD_FINISH))
-//            printf("Action next GMR(M_ACTIONHEAD_FINISH)");
-//        else
-//            printf("Action next GMR(M_ACTIONPLATFORM_FINISH)");
-
-        if(!GML(M_AUTO_FLAG_AUX))
-        {
-            do
-            {
-                //man.actionPos++;
-                if(man.actionPos >= man.actionCnt)
-                {              
-                    NextPeroid();
-
-//                    if(GML(M_PROGRAM_PERIOD))
-//                    {
-//                        SML(M_MODE_AUTO, 1);
-//                        SML(M_MODE_RESTORE, 1);
-//                        SML(M_PROGRAM_PERIOD, 1);
-//
-//                        SML(M_FLAG_MANUAL, 1);
-//                    }
-//                    else
-                    {
-                        SML(M_MODE_AUTO, 1);
-                        SML(M_MODE_RESTORE, 1);
-                    }
-
-                    return;
-                }
-                
-                man.pCurAction = man.program + man.actionPos;
-                man.actionPos++;
-    
-                printf("Action next!\r\n");
-                
-                
-                
-                 
-            }while(!(man.pCurAction->flag&0x01));
-        }//if(!GML(M_AUTO_FLAG_AUX))
-        else
-        {
-            if(man.actionPos >= man.actionCnt)
-            {
-                NextPeroid();
-
-//                if(GML(M_PROGRAM_PERIOD))
-//                {
-//                    SML(M_MODE_AUTO, 0);
-//                    SML(M_MODE_RESTORE, 0);
-//                    SML(M_PROGRAM_PERIOD, 0);
-//
-//                    SML(M_FLAG_MANUAL, 1);
-//                }
-//                else
-                {
-                    SML(M_MODE_AUTO, 1);
-                    SML(M_MODE_RESTORE, 1);
-                }
-
-                return;
-            }
-            
-            man.pCurAction = man.program + man.actionPos;
-            man.actionPos++;
-
-            printf("Action next!\r\n");
-                
-        }//if(!GML(M_AUTO_FLAG_AUX))
-        
-        switch(man.pCurAction->act)
-        {
-            case ABSORB_DOWN:
-                man.actHead = man.pCurAction->act;
-                man.delay = man.delayAbsorb;
-                SML(M_ABSORBDOWN_FINISH, 0);
-                SML(M_ACTIONHEAD_FINISH, 0);
-            break;
-            case ABSORB:               
-                man.actHead = man.pCurAction->act;
-                man.delay = man.delayAbsorb;
-                SML(M_ABSORB_FINISH, 0);
-                SML(M_ACTIONHEAD_FINISH, 0);
-            break;
-
-            case PRINT_DOWN:
-                man.actHead = man.pCurAction->act;
-                man.delay = man.delayPrint[man.platformPos];
-                SML(M_PRINTDOWN_FINISH, 0);
-                SML(M_ACTIONHEAD_FINISH, 0);
-            break;
-            case PRINT:
-                man.actHead = man.pCurAction->act;
-                man.delay = man.delayPrint[man.platformPos];
-                SML(M_PRINT_FINISH, 0);
-                SML(M_ACTIONHEAD_FINISH, 0);
-            break;
-
-            //不需要延时
-            case ABSORB_UP:
-                SML(M_ABSORBUP_FINISH, 0);
-                man.actHead = man.pCurAction->act;
-                SML(M_ACTIONHEAD_FINISH, 0);
-            break;
-            case FRONT:
-                SML(M_FRONT_FINISH, 0);
-                man.actHead = man.pCurAction->act;
-                SML(M_ACTIONHEAD_FINISH, 0);
-            break;
-            case BACK:
-                SML(M_BACK_FINISH, 0);
-                man.actHead = man.pCurAction->act;
-                SML(M_ACTIONHEAD_FINISH, 0);
-            break;
-            case PRINT_UP:
-                SML(M_PRINTUP_FINISH, 0);
-                man.actHead = man.pCurAction->act;
-                SML(M_ACTIONHEAD_FINISH, 0);
-            break;
-
-            case SHIFT:
-            case RETURN:
-                if(!GML(M_MACHINE_AUX_FAULT))//穿梭可以用
-                {
-                    man.actPlatform = man.pCurAction->act;
-                    SML(M_ACTIONPLATFORM_FINISH, 0);
-                }
-                else
-                {
-                    NextPeroid();
-                    SML(M_MODE_AUTO, 1);   //自编程是遇到平台有问题则先恢复再执行下一个周期
-                    SML(M_MODE_RESTORE, 1);
-                    //return;    //不能立即返回
-                }
-            break;
-            case SHIFTRETURN:
-                if(!GML(M_MACHINE_AUX_FAULT))//穿梭可以用
-                {
-                    man.actPlatform = man.pCurAction->act;
-                    SML(M_ACTIONPLATFORM_FINISH, 0);
-
-                    SML(M_MODE_RESTORE_QUIT, 1);
-                    SML(M_SHIFTRETURN_FINISH, 0);
-                    SML(M_ACTIONHEAD_FINISH, 0); //进入下一个动作    
-                }
-                else
-                {
-                    NextPeroid();
-                    SML(M_MODE_AUTO, 1);   //自编程是遇到平台有问题则先恢复再执行下一个周期
-                    SML(M_MODE_RESTORE, 1);
-                    //return;    //不能立即返回    
-                }
-            break;
-            case SHIFTRETURN2:
-                if(!GML(M_MACHINE_AUX_FAULT))//穿梭可以用
-                {
-                    man.actPlatform = man.pCurAction->act;
-                    SML(M_ACTIONPLATFORM_FINISH, 0);
-
-                    SML(M_MODE_RESTORE_QUIT, 1);
-                    SML(M_SHIFTRETURN2_FINISH, 0);
-                    SML(M_ACTIONHEAD_FINISH, 0); //进入下一个动作
-                    
-                }
-                else
-                {
-                    NextPeroid();
-                    SML(M_MODE_AUTO, 1);   //自编程是遇到平台有问题则先恢复再执行下一个周期
-                    SML(M_MODE_RESTORE, 1);
-                    //return;    //不能立即返回    
-                } 
-            break;
-            default:
-            break;
-        }  
+        if(GML(man.waitMSignal))
+            NormalAuto_ActionsChange();
     }
-    else if(GML(M_MODE_RESTORE_QUIT) && GMR(M_ACTIONPLATFORM_FINISH))
-        SML(M_MODE_RESTORE_QUIT, 0);
 
     //===========================恢复原始状态============================
-    if(GML(M_MODE_AUTO) && GML(M_MODE_RESTORE))
+    if(man.runMode == RM_RESTORE)
     {
         //printf("Restore \r\n");
         if(GMR(M_ACTIONHEAD_FINISH))
         {
-            if(man.headPos&FRONTBACK_MASK)
-            {
-                if((man.headPos&UPDOWN_MASK))
-                {
-                    man.actHead = PRINT_UP;
-                    SML(M_PRINTUP_FINISH, 0);
-                    
-                    printf("Restore====PrintUp!\r\n");    
-                }
-                else
-                {
-                    man.actHead = BACK;
-                    SML(M_BACK_FINISH, 0);
-
-                    printf("Restore====Back!\r\n");
-                }
-                
-            }
-            else
-            {
-                if((man.headPos&UPDOWN_MASK))
-                {
-                    man.actHead = ABSORB_UP;
-                    SML(M_ABSORBUP_FINISH, 0);
-
-                    printf("Restore====AbsorbUp!\r\n");    
-                }
-                else
-                {
-                    SML(M_MODE_RESTORE, 0);
-                    SML(M_ACTIONHEAD_FINISH, 0);
-
-                    man.actionPos = 0;
-
-                    printf("Restore quit!\r\n");
-
-                    SML(M_FLAG_MANUAL, 0);
-
-                    //暂停
-                    if(GML(M_KEY_FOOT_PRESSED)) //跳过一次
-                        SML(M_KEY_FOOT_PRESSED, 0);
-                    else if(GML(M_PROGRAM_PERIOD))
-                    {
-                        SML(M_MODE_AUTO, 0);
-                        SML(M_MODE_RESTORE, 0);
-                        SML(M_PROGRAM_PERIOD, 0);
-
-                        printf("M_PROGRAM_PERIOD\r\n");
-                    }
-
-                    KeyLogic(1);
-                }
-            }
+            NormalRestore_HeadRestore();   
         }
 
         if(GMR(M_ACTIONPLATFORM_FINISH))
         {
-            if(GML(M_AUTO_FLAG_AUX) && man.programNum != 3 && man.programNum != 4)
-            {
-                if(man.platformPos)
-                {
-                    man.actPlatform = RETURN;
-                    SML(M_RETURN_FINISH, 0);
-                    
-                    SML(M_MODE_RESTORE_QUIT, 1);//防止恢复原始状态时，RETURN动作完成时触发下一动作
-
-                    printf("Restore====Return!\r\n");
-                }   
-            }
-        }
-    }
-
-
-    KeyLogic(0);
-
-    if(GML(M_RESTORE_DELAY))
-    {
-        SML(M_MODE_AUTO, 0);
-        SML(M_MODE_RESTORE, 0);
-
-        if(man.delay)
-        {
-            if(!GML(M_ACTION_DELAY))
-            {
-                TS(0, man.delayUnit);//动作延时最小单位
-                SML(M_ACTION_DELAY, 1);
-            }
-            else if(TG(0))
-            {
-                man.delay--;
-                SML(M_ACTION_DELAY, 0);
-
-                //printf("Wait++++man.delay = %d\r\n", (int)man.delay);
-            }
-        }
-        else
-        {
-            SML(M_MODE_AUTO, 1);
-            SML(M_MODE_RESTORE, 1);
-
-            SML(M_ACTION_FINISH, 0);
-
-            SML(M_ACTIONHEAD_FINISH, 0);
-            if(GML(M_AUTO_FLAG_AUX))
-                SML(M_ACTIONPLATFORM_FINISH, 0);
-
-            printf("Restore the machine!\r\n");
-
-            SML(M_RESTORE_DELAY, 0);
+            NormalRestore_PlatformRestore();
         }
     }
 }
 
 void Normal(void)
 {
+    //按键测试
+    //SMR(KeyRandom(), 1);
+    //SMR(M_KEY_FOOT_AFTERFILTER, 1);
+//    if(man.runMode == RM_RESTORE)
+//    {
+//            
+//    }
+
+
     //识别按键
     Key_Normal();
 
@@ -526,9 +269,9 @@ void Normal(void)
     //==================================================================
     //=============================执行动作=============================
     //==================================================================
-    if(!GML(M_MODE_AUTO) && !GML(M_MODE_RESTORE))//手动中，前后动作需要延时
+    if(man.runMode == RM_MANNUAL) //手动
     {       
-        if((man.actHead == FRONT || man.actHead == BACK) && man.delay)
+        if((man.actHead == FRONT || man.actHead == BACK) && man.delay)//手动中，前后动作需要延时
         {
             if(!GML(M_ACTION_DELAY))
             {
@@ -592,10 +335,10 @@ void Normal(void)
             break;
         }
     }
-    else if(GML(M_MODE_AUTO) && !GML(M_MODE_RESTORE))//自动程序中，吸油和印油需要延时
+    else if(man.runMode == RM_AUTO)  //自动
     {
         if((man.actHead == ABSORB_DOWN || man.actHead == ABSORB 
-            || man.actHead == PRINT_DOWN || man.actHead == PRINT) && man.delay)
+            || man.actHead == PRINT_DOWN || man.actHead == PRINT) && man.delay) //自动程序中，吸油和印油需要延时
         {
             if(!GML(M_ACTION_DELAY))
             {
@@ -665,34 +408,19 @@ void Normal(void)
             break;
         }        
     }
-    else if(GML(M_MODE_AUTO) && GML(M_MODE_RESTORE))//恢复原始状态
+    else if(man.runMode == RM_RESTORE)//恢复原始状态
     {
          //印头动作
         switch(man.actHead)
         {
-            case ABSORB_DOWN:
-                AbsorbDown();
-            break;
             case ABSORB_UP:
                 AbsorbUp();
-            break;
-            case ABSORB:
-                Absorb();
-            break;
-            case FRONT:
-                Front();
             break;
             case BACK:
                 Back();
             break;
-            case PRINT_DOWN:
-                PrintDown();
-            break;
             case PRINT_UP:
                 PrintUp();
-            break;
-            case PRINT:
-                Print();
             break;
             default:
             break;
@@ -702,35 +430,21 @@ void Normal(void)
 
 
     //=============================穿梭平台动作=============================
-    if(!GML(M_MACHINE_AUX_FAULT))//穿梭可以用
+    switch(man.actPlatform)
     {
-        //if(GML(M_PRINT_FINISH) && GML(M_PRINTDOWN_FINISH))
-        {
-            switch(man.actPlatform)
-            {
-                case SHIFT:
-                    man.Shift();
-                break;
-                case RETURN:
-                    man.Return();
-                break;
-                case SHIFTRETURN:
-                    man.ShiftReturn();
-                break;
-                case SHIFTRETURN2:
-                    man.ShiftReturn2();
-                break;
-                default:
-                break;
-            }
-        }
+        case SHIFT:
+            man.Shift();
+        break;
+        case RETURN:
+            man.Return();
+        break;
+        case SHIFTRETURN:
+            man.ShiftReturn();
+        break;
+        case SHIFTRETURN2:
+            man.ShiftReturn2();
+        break;
+        default:
+        break;
     }
-//    else
-//        man.actPlatform = ACTION_NONE;
-
-
-
-
-
-    
 }

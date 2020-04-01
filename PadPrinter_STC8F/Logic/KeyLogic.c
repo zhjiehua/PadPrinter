@@ -323,36 +323,3 @@ void KeyLogic(uint8_t flag)
     }
 }
 
-void KeyLogicBetweenDelay(void)
-{
-    if(!GML(M_MODE_AUTO) && !GML(M_MODE_RESTORE))//手动
-    {
-        if(man.delay && man.keyPress == KEY_FRONTBACK)
-        {
-            SML(M_FLAG_MANUAL, 1);
-
-            if(GML(M_MAN_FRONTBACK))//印头在下面不能执行前后
-            {
-                SML(M_MAN_FRONTBACK, 0);
-            }
-        }
-
-        //
-        if(!GML(M_MAN_FRONTBACK)) //前后动作运行过程中在延时时即可停止
-        {
-            if(man.actHead == BACK)
-            {
-                SML(M_BACK_FINISH, 1);
-            }
-            else
-            {
-                SML(M_FRONT_FINISH, 1);
-            }
-
-            man.actHead == ACTION_NONE;
-            SML(M_ACTIONHEAD_FINISH, 1);
-            man.delay = 0;
-        }
-    }    
-}
-

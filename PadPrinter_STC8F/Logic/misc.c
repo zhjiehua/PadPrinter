@@ -194,6 +194,8 @@ void MachineTypeCheck(void)
         if(man.programNum == 11)//程序11不检查平台
             break;
 
+        //printf("cnt = %d\r\n", (int)cnt);
+
 //        if(GXL(X_POS))
 //        {
 //            if(GXL(X_SHIFT_L1))
@@ -243,11 +245,13 @@ void MachineTypeCheck(void)
         }
         else if(man.machineType == MACHINE_2SENSORS)
         {
-#if MACHINE3SENSOR_SIM_2SENSOR            
-            if(GXL(X_SHIFT_O) && !GXL(X_POS))  //2传感器12V设备，使用3传感器12V设备测试
-#else
-            if(GXL(X_POS) && !GXL(X_SHIFT_L1)) //正常2传感器5V设备
-#endif
+//#if MACHINE3SENSOR_SIM_2SENSOR            
+//            if(GXL(X_SHIFT_O) && !GXL(X_POS))  //2传感器12V设备，使用3传感器12V设备测试
+//#else
+//            if(GXL(X_POS) && !GXL(X_SHIFT_L1)) //正常2传感器5V设备
+//#endif
+            if(GXL(X_SHIFT_O) && !GXL(X_POS))
+
                 break;
             else
                 TM1638_SendData(0, "--A--");
@@ -385,4 +389,18 @@ void MCUID_Check(void)
             }
         }
     }
+}
+
+#include "stdlib.h"
+//随机按键产生
+uint8_t KeyRandom(void)
+{
+    int r;
+    srand(T4H<<8|T4L);
+    //r = rand()%5+2; //产生2~6的随机数
+    r = rand()%5+3; //产生3~7的随机数
+
+    //printf("The Random is %d\r\n", r);
+
+    return r;    
 }

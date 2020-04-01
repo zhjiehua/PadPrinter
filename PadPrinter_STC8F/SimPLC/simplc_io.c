@@ -116,39 +116,39 @@ void SIMPLC_IO_Refresh(void)
 	for(i=0;i<(IN_NUM+7)/8;i++)
 		IN_Last[i] = IN[i];
 
-	//读取输入点
+	//读取输入点，注意下面的_GetX为实际物理IO与输入点之间的映射关系
     //印头
     if(man.headSensorLevel)//金属感应开关，常开
     {
-        _GetX(!X0, X_ABSORB_O);
-        _GetX(!X1, X_ABSORB_L);
+        _GetX(!X0, X_ABSORB_L);
+        _GetX(!X1, X_ABSORB_O);
         _GetX(!X2, X_PRINT_O);
         _GetX(!X3, X_PRINT_L);
-        _GetX(!X8, X_SCRAPER);
+        _GetX(!X4, X_SCRAPER);
     }
     else  //光电开关，常闭
     {
-        _GetX(X0, X_ABSORB_O);
-        _GetX(X1, X_ABSORB_L);
+        _GetX(X0, X_ABSORB_L);
+        _GetX(X1, X_ABSORB_O);
         _GetX(X2, X_PRINT_O);
         _GetX(X3, X_PRINT_L);
-        _GetX(X8, X_SCRAPER);
+        _GetX(X4, X_SCRAPER);
     }
 
     //平台
     if(man.platformSensorLevel)//金属感应开关
     {
-        _GetX(!X4, X_SHIFT_O);
-        _GetX(!X5, X_POS);
-        _GetX(!X6, X_SHIFT_L1);
-        _GetX(!X7, X_SHIFT_L2);
+        _GetX(!X5, X_SHIFT_L2);
+        _GetX(!X6, X_SHIFT_L1); 
+        _GetX(!X7, X_POS);
+        _GetX(!X8, X_SHIFT_O);
     }
     else//光电开关
     {
-        _GetX(X4, X_SHIFT_O);
-        _GetX(X5, X_POS);
+        _GetX(X5, X_SHIFT_L2);  
         _GetX(X6, X_SHIFT_L1);
-        _GetX(X7, X_SHIFT_L2);        
+        _GetX(X7, X_POS);
+        _GetX(X8, X_SHIFT_O);        
     }
 	
 	for(i=0;i<(IN_NUM+7)/8;i++)
@@ -158,7 +158,7 @@ void SIMPLC_IO_Refresh(void)
 	}
     
 /*----------------------------输出点--------------------------------------*/
-	//输出点刷新
+	//输出点刷新，注意下面的Y0~5为实际物理IO与输出点之间的映射关系
     Y0(OUT[Y_UPDOWN/8]&(0x01<<Y_UPDOWN));
     Y1(OUT[Y_FRONTBACK/8]&(0x01<<Y_FRONTBACK));
     Y2(OUT[Y_SHIFT/8]&(0x01<<Y_SHIFT));
@@ -201,4 +201,14 @@ void SIMPLC_IO_Set(uint8_t Component, uint8_t Index, uint8_t Level)
 		(*(p + Component))[Index/8] |= (0x01<<(Index%8));
 	else
 		(*(p + Component))[Index/8] &= ~(0x01<<(Index%8));	
+}
+
+//调试用
+void SIMPLC_IO_SetRising(uint8_t Component, uint8_t Index, uint8_t Level)
+{
+	uint8_t **p = &IO_Man.X_Level;
+	if(Level)
+		(*(p + Component + 3*RISING_EDGE))[Index/8] |= (0x01<<(Index%8));
+	else
+		(*(p + Component + 3*RISING_EDGE))[Index/8] &= ~(0x01<<(Index%8));	
 }

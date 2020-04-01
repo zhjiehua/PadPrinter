@@ -22,4 +22,6 @@ void Output_Flash(void);
 
 void MCUID_Check(void);
 
+uint8_t KeyRandom(void);
+
 #endif

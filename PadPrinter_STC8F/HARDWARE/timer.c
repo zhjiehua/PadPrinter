@@ -130,6 +130,7 @@ void TM3_Isr() interrupt 19 using 3
     T3H = (65536 - (FOSC/12/(BEEPER_PEROID/2))) >> 8;
 
     MBEEP = !MBEEP;                                  //测试端口
+
     //LEDM = !LEDM;
     AUXINTIF &= ~T3IF;                          //清中断标志
 }

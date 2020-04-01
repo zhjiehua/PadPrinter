@@ -20,7 +20,7 @@ void AbsorbDown(void)
     switch(man.headState)
     {
         case 0:
-            //if(GXL(X_ABSORB_O))
+            if(GXL(X_ABSORB_O))
             {
                 printf("Action----Absorb Down\r\n");
                 SYL(Y_UPDOWN, 1);
@@ -37,6 +37,7 @@ void AbsorbDown(void)
                 printf("Action----Absorb Down----Finish\r\n");
               
                 SML(M_ABSORBDOWN_FINISH, 1);
+                man.actHead = ACTION_NONE;
 
                 man.headPos |= UPDOWN_MASK;
                 man.headState = 0;
@@ -65,6 +66,7 @@ void AbsorbUp(void)
                 printf("Action----Absorb Up----Finish\r\n");
               
                 SML(M_ABSORBUP_FINISH, 1);
+                man.actHead = ACTION_NONE;
 
                 man.headPos &= ~UPDOWN_MASK;               
                 man.headState = 0;
@@ -81,14 +83,17 @@ void Absorb(void)
     switch(man.headState)
     {
         case 0:
-            SYL(Y_UPDOWN, 1);
-            man.headState = 1;
-            
-            printf("Action----Absorb\r\n");
-
-            SML(M_ABSORB_FINISH, 0);
-
-            SML(M_AUTO_FLAG_OIL, 1);
+            if(GXL(X_ABSORB_O))
+            {
+                SYL(Y_UPDOWN, 1);
+                man.headState = 1;
+                
+                printf("Action----Absorb\r\n");
+    
+                SML(M_ABSORB_FINISH, 0);
+    
+                SML(M_AUTO_FLAG_OIL, 1);
+            }
         break;
         case 1:
             if(GXL(X_ABSORB_L))//动作到位
@@ -103,6 +108,7 @@ void Absorb(void)
                 printf("Action----Absorb----Finish\r\n");
               
                 SML(M_ABSORB_FINISH, 1);
+                man.actHead = ACTION_NONE;
 
                 man.headPos &= ~UPDOWN_MASK;                
                 man.headState = 0;
@@ -118,14 +124,17 @@ void PrintDown(void)
     switch(man.headState)
     {
         case 0:
-            SYL(Y_UPDOWN, 1);
-            man.headState = 1;
-            
-            printf("Action----Print Down\r\n");
-
-            SML(M_PRINTDOWN_FINISH, 0);
-
-            SML(M_AUTO_FLAG_OIL, 0);
+            if(GXL(X_PRINT_O))
+            {
+                SYL(Y_UPDOWN, 1);
+                man.headState = 1;
+                
+                printf("Action----Print Down\r\n");
+    
+                SML(M_PRINTDOWN_FINISH, 0);
+    
+                SML(M_AUTO_FLAG_OIL, 0);
+            }
         break;
         case 1:
             if(GXL(X_PRINT_L))//动作到位
@@ -133,6 +142,7 @@ void PrintDown(void)
                 printf("Action----Print Down----Finish\r\n");
               
                 SML(M_PRINTDOWN_FINISH, 1);
+                man.actHead = ACTION_NONE;
 
                 man.headPos |= UPDOWN_MASK;
                 man.headState = 0;
@@ -161,6 +171,7 @@ void PrintUp(void)
                 printf("Action----Print Up----Finish\r\n");
               
                 SML(M_PRINTUP_FINISH, 1);
+                man.actHead = ACTION_NONE;
 
                 man.headPos &= ~UPDOWN_MASK;
                 man.headState = 0;
@@ -177,14 +188,17 @@ void Print(void)
     switch(man.headState)
     {
         case 0:
-            SYL(Y_UPDOWN, 1);
-            man.headState = 1;
-            
-            printf("Action----Print\r\n");
-
-            SML(M_PRINT_FINISH, 0);
-
-            SML(M_AUTO_FLAG_OIL, 0);
+            if(GXL(X_PRINT_O))
+            {
+                SYL(Y_UPDOWN, 1);
+                man.headState = 1;
+                
+                printf("Action----Print\r\n");
+    
+                SML(M_PRINT_FINISH, 0);
+    
+                SML(M_AUTO_FLAG_OIL, 0);
+            }
         break;
         case 1:
             if(GXL(X_PRINT_L))//动作到位
@@ -199,6 +213,7 @@ void Print(void)
                 printf("Action----Print----Finish\r\n");
               
                 SML(M_PRINT_FINISH, 1);
+                man.actHead = ACTION_NONE;
 
                 man.headPos &= ~UPDOWN_MASK;
                 man.headState = 0;
@@ -232,6 +247,7 @@ void Front(void)
                 SYL(Y_SCRAPER, 1);
 
                 SML(M_FRONT_FINISH, 1);
+                man.actHead = ACTION_NONE;
 
                 man.headPos |= FRONTBACK_MASK;   
                 man.headState = 0;
@@ -266,6 +282,7 @@ void Back(void)
                 printf("Action----Back----Finish\r\n");
                 
                 SML(M_BACK_FINISH, 1);
+                man.actHead = ACTION_NONE;
 
                 man.headPos &= ~FRONTBACK_MASK;
                 man.headState = 0;
@@ -290,6 +307,7 @@ void Shift3Sensors(void)
                     printf("Action----Shift3Sensors----Finish----%d\r\n", (int)man.platformPos);
                     
                     SML(M_SHIFT_FINISH, 1);
+                    man.actPlatform = ACTION_NONE;
                 }
                 else//退回到位置0
                 {
@@ -299,8 +317,9 @@ void Shift3Sensors(void)
 
                     printf("Action----Shift3Sensors++++Return3Sensors\r\n");
 
-                    //SML(M_SHIFT_FINISH, 1);
+                    SML(M_SHIFT_FINISH, 1);
                     SML(M_RETURN_FINISH, 0);
+                    man.waitMSignal = M_RETURN_FINISH;
                 }
             }
             else//未到极限点
@@ -434,6 +453,7 @@ void Shift3Sensors(void)
                 printf("Action----Shift3Sensors----Finish----%d\r\n", (int)man.platformPos);
                 
                 SML(M_SHIFT_FINISH, 1);
+                man.actPlatform = ACTION_NONE;
 
                 man.platformState = 0;
             }
@@ -455,6 +475,7 @@ void Shift4Sensors(void)
                     printf("Action----Shift4Sensors----Finish----%d\r\n", (int)man.platformPos);
                     
                     SML(M_SHIFT_FINISH, 1);
+                    man.actPlatform = ACTION_NONE;
                 }
                 else//退回到位置0
                 {
@@ -464,7 +485,9 @@ void Shift4Sensors(void)
 
                     printf("Action----Shift4Sensors++++Return4Sensors\r\n");
 
+                    SML(M_SHIFT_FINISH, 1);
                     SML(M_RETURN_FINISH, 0);
+                    man.waitMSignal = M_RETURN_FINISH;
                 }
             }
             else//未到极限点
@@ -527,6 +550,7 @@ void Shift4Sensors(void)
                 printf("Action----Shift4Sensors----Finish----%d\r\n", (int)man.platformPos);
                 
                 SML(M_SHIFT_FINISH, 1);
+                man.actPlatform = ACTION_NONE;
 
                 man.platformState = 0;
             }
@@ -538,11 +562,12 @@ void Shift4Sensors(void)
 
 void Shift2Sensors(void)
 {
-#if MACHINE3SENSOR_SIM_2SENSOR 
-    uint8_t sensor = X_POS;      
-#else
-    uint8_t sensor = X_SHIFT_L1;
-#endif
+//#if MACHINE3SENSOR_SIM_2SENSOR 
+//    uint8_t sensor = X_POS;      
+//#else
+//    uint8_t sensor = X_SHIFT_L1;
+//#endif
+    uint8_t sensor = X_POS;
 
     switch(man.platformState)
     {
@@ -554,6 +579,7 @@ void Shift2Sensors(void)
                     printf("Action----Shift2Sensors----Finish----%d\r\n", (int)man.platformPos);
                     
                     SML(M_SHIFT_FINISH, 1);
+                    man.actPlatform = ACTION_NONE;
                 }
                 else//退回到位置0
                 {
@@ -563,7 +589,9 @@ void Shift2Sensors(void)
 
                     printf("Action----Shift2Sensors++++Return2Sensors\r\n");
 
+                    SML(M_SHIFT_FINISH, 1);
                     SML(M_RETURN_FINISH, 0);
+                    man.waitMSignal = M_RETURN_FINISH;
                 }
             }
             else//未到极限点
@@ -591,6 +619,10 @@ void Shift2Sensors(void)
                     man.delayPlatformPos = 0;
 
                     printf("Action----Shift2Sensors++++Return2Sensors\r\n");
+
+                    SML(M_SHIFT_FINISH, 1);
+                    SML(M_RETURN_FINISH, 0);
+                    man.waitMSignal = M_RETURN_FINISH;
                 }
             }
         break;
@@ -602,6 +634,7 @@ void Shift2Sensors(void)
                 printf("Action----Shift2Sensors----Finish----%d\r\n", (int)man.platformPos);
                 
                 SML(M_SHIFT_FINISH, 1);
+                man.actPlatform = ACTION_NONE;
 
                 man.platformState = 0;
             }
@@ -619,12 +652,17 @@ void Return3Sensors(void)
 
             SML(M_RETURN_FINISH, 0);
 
-            //if(GML(X_SHIFT_L1))
+            if(GXL(X_SHIFT_L1) || GXL(X_SHIFT_O)) //在原点和最后位置直接收回定位气缸
+                man.platformState = 2; 
+            else //在中间位置需要等到退过定位气缸再把定位气缸收回来
+                man.platformState = 1;
+
+            //if(GXL(X_SHIFT_L1))
             {
                 SYL(Y_SHIFT, 0);
                 //SYL(Y_SHIFT2, 1);
 
-                man.platformState = 1;
+//                man.platformState = 1;
                 
                 man.delayPlatformPos = 0;
 
@@ -632,11 +670,15 @@ void Return3Sensors(void)
             }
         break;
         case 1:
-            SYL(Y_POS, 0);//先将定位气缸收回来
-
-            man.platformState = 2;
+            if(GXF(X_POS))
+                man.platformState = 2;    
         break;
         case 2:
+            SYL(Y_POS, 0);//再将定位气缸收回来
+
+            man.platformState = 3;
+        break;
+        case 3:
             if(GXL(X_SHIFT_O))//确定到位
             {
                 man.platformPos = 0;
@@ -644,6 +686,7 @@ void Return3Sensors(void)
                 printf("Action----Return3Sensors----Finish----%d\r\n", (int)man.platformPos);
                 
                 SML(M_RETURN_FINISH, 1);
+                man.actPlatform = ACTION_NONE;
 
                 man.platformState = 0;
             }
@@ -688,6 +731,7 @@ void Return4Sensors(void)
                 printf("Action----Return4Sensors----Finish----%d\r\n", (int)man.platformPos);
                 
                 SML(M_RETURN_FINISH, 1);
+                man.actPlatform = ACTION_NONE;
 
                 man.platformState = 0;
             }
@@ -699,11 +743,12 @@ void Return4Sensors(void)
 
 void Return2Sensors(void)
 {
-#if MACHINE3SENSOR_SIM_2SENSOR 
+//#if MACHINE3SENSOR_SIM_2SENSOR 
+//    uint8_t sensor = X_SHIFT_O;
+//#else
+//    uint8_t sensor = X_POS;
+//#endif
     uint8_t sensor = X_SHIFT_O;
-#else
-    uint8_t sensor = X_POS;
-#endif
 
     switch(man.platformState)
     {
@@ -730,6 +775,7 @@ void Return2Sensors(void)
                 printf("Action----Return2Sensors----Finish----%d\r\n", (int)man.platformPos);
                 
                 SML(M_RETURN_FINISH, 1);
+                man.actPlatform = ACTION_NONE;
 
                 man.platformState = 0;
             }
@@ -741,13 +787,16 @@ void Return2Sensors(void)
 
 void ShiftReturn2Sensors(void)
 {
-#if MACHINE3SENSOR_SIM_2SENSOR 
+//#if MACHINE3SENSOR_SIM_2SENSOR 
+//    uint8_t sensor0 = X_SHIFT_O;
+//    uint8_t sensor1 = X_POS;
+//#else
+//    uint8_t sensor0 = X_POS;
+//    uint8_t sensor1 = X_SHIFT_L1;
+//#endif
+
     uint8_t sensor0 = X_SHIFT_O;
     uint8_t sensor1 = X_POS;
-#else
-    uint8_t sensor0 = X_POS;
-    uint8_t sensor1 = X_SHIFT_L1;
-#endif
 
     switch(man.platformState)
     {
@@ -781,6 +830,7 @@ void ShiftReturn2Sensors(void)
                 printf("Action----ShiftReturn2Sensors----Finish----%d\r\n", (int)man.platformPos);
                 
                 SML(M_SHIFTRETURN_FINISH, 1);
+                man.actPlatform = ACTION_NONE;
 
                 man.platformState = 0;
             }
@@ -792,13 +842,16 @@ void ShiftReturn2Sensors(void)
 
 void ShiftReturnShiftReturn2Sensors(void)
 {
-#if MACHINE3SENSOR_SIM_2SENSOR 
+//#if MACHINE3SENSOR_SIM_2SENSOR 
+//    uint8_t sensor0 = X_SHIFT_O;
+//    uint8_t sensor1 = X_POS;
+//#else
+//    uint8_t sensor0 = X_POS;
+//    uint8_t sensor1 = X_SHIFT_L1;
+//#endif
+
     uint8_t sensor0 = X_SHIFT_O;
     uint8_t sensor1 = X_POS;
-#else
-    uint8_t sensor0 = X_POS;
-    uint8_t sensor1 = X_SHIFT_L1;
-#endif
 
     switch(man.platformState)
     {
@@ -859,12 +912,12 @@ void ShiftReturnShiftReturn2Sensors(void)
                 printf("Action----ShiftReturnShiftReturn2Sensors----Finish----%d\r\n", (int)man.platformPos);
                 
                 SML(M_SHIFTRETURN2_FINISH, 1);
+                man.actPlatform = ACTION_NONE;
 
                 man.platformState = 0;
             }
         break;
         
-
         default:
         break;
     }
@@ -898,6 +951,7 @@ void ShiftProgram11(void)
             printf("Action----ShiftProgram11----Finish----%d\r\n", (int)man.platformPos);
             
             SML(M_SHIFT_FINISH, 1);
+            man.actPlatform = ACTION_NONE;
 
             man.platformState = 0;
         break;
@@ -939,6 +993,7 @@ void ReturnProgram11(void)
                 printf("Action----ReturnProgram11----Finish----%d\r\n", (int)man.platformPos);
                 
                 SML(M_RETURN_FINISH, 1);
+                man.actPlatform = ACTION_NONE;
 
                 man.platformState = 0;
             }

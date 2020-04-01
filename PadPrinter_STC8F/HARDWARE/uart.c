@@ -163,7 +163,7 @@ void UartDataParse(void)
     {					   
         switch(USART_RX_BUF[0])
         {
-            case 'X':
+            case 'X':    //0x58
                 switch(USART_RX_BUF[1])
                 {
                     case '0':
@@ -291,8 +291,10 @@ void UartDataParse(void)
                         printf("man.actPlatform = %d\r\n", (int)man.actPlatform);
                     break;
                     case '1':
-                        printf("GML(M_MODE_AUTO) = %d, GML(M_MODE_RESTORE) = %d\r\n", (int)GML(M_MODE_AUTO), (int)GML(M_MODE_RESTORE));
+                        //printf("GML(M_MODE_AUTO) = %d, GML(M_MODE_RESTORE) = %d\r\n", (int)GML(M_MODE_AUTO), (int)GML(M_MODE_RESTORE));
+                        printf("man.runMode = %d\r\n", (int)man.runMode);
                         printf("GML(M_ACTIONHEAD_FINISH) = %d, GML(M_ACTIONPLATFORM_FINISH) = %d\r\n", (int)GML(M_ACTIONHEAD_FINISH), (int)GML(M_ACTIONPLATFORM_FINISH));
+                        printf("GML(M_MODE_RESTORE_QUIT) = %d", (int)GML(M_MODE_RESTORE_QUIT));
                     break;
                     case '2':
                         printf("GML(M_ABSORB_FINISH) = %d, GML(M_PRINT_FINISH) = %d\r\n", (int)GML(M_ABSORB_FINISH), (int)GML(M_PRINT_FINISH));
@@ -307,6 +309,8 @@ void UartDataParse(void)
                     break;
                     case '4':
                         printf("man.keyPress = %d\r\n", (int)man.keyPress);
+                        printf("man.delay = %d\r\n", (int)man.delay);
+                        
                     break;
                     default:
                     break;

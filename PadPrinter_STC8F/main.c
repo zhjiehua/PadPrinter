@@ -87,6 +87,9 @@ int main(void)
     SYL(Y_SHIFT2, 1);
     SYL(Y_SHIFT, 0);
 
+    man.waitMSignal = M_WAITMSIGNAL_NONE;
+    man.runMode = RM_MANNUAL;
+
     WDT_CONTR = 0x3C;//开看门狗，溢出时间1.1377s
 
 	while (1)

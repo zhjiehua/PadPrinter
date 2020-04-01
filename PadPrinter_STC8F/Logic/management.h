@@ -15,11 +15,12 @@
 #define HARDWARE_VERSION_APPEND   'A'
 
 #define HARDWARE_VERSION_STRING    "YYJ25A-V1.01-B1901"
-#define SOFTWARE_VERSION_STRING    "V1.6.0"
+#define SOFTWARE_VERSION_STRING    "V1.7.0"
 
 //如果用12V3传感器设备测试2传感器设备，则该宏设为1，否则设为0
 #define MACHINE3SENSOR_SIM_2SENSOR 1
 
+//此处不需要修改
 #if(HARDWARE_VERSION_MAJOR == 2 && HARDWARE_VERSION_MINOR == 3) //小于23A的板用的是1668键盘
     #define ARRAY_KEYBOARD 0 //1：用矩阵键盘，0：用1668的键盘
 #else
@@ -72,11 +73,22 @@ typedef enum
     PM_FACTORY, //工厂模式
 }PROJECTMODE_TypeDef;
 
+//运行模式
+typedef enum
+{
+    RM_MANNUAL = 0,  //手动
+    RM_AUTO = 1,  //自动
+    RM_RESTORE,  //恢复
+}RUNMODE_TypeDef;
+
 
 typedef struct
 {
     //工作模式
     PROJECTMODE_TypeDef mode;
+
+    //运行模式，手动、自动还是恢复模式
+    RUNMODE_TypeDef runMode;
 
     //设备类型
     MachineType_TypeDef machineType;   //0:MACHINE_4SENSORS     1:MACHINE_2SENSORS     2:MACHINE_3SENSORS     3:MACHINE_0SENSORS
@@ -104,7 +116,7 @@ typedef struct
     uint8_t led;
     uint8_t segFlashTimes;//选择完程序后，数码管闪烁次数
     uint8_t segFlashCnt;
-    uint8_t segStr[6];//数码管显示
+    uint8_t segStr[10];//数码管显示
 
     uint8_t programNum;//选择了第几个程序
     uint16_t programAddr;//程序在EEPROM中的地址
@@ -121,6 +133,7 @@ typedef struct
     uint8_t actionCnt;//当前程序共有几个动作
     uint8_t actionPos;//当前执行到第几个动作
     uint8_t delay;//当前执行动作的延时
+    uint8_t waitMSignal;//等待M信号，每个动作开始后，等待该动作完成，才触发下一个动作
 
     //自编程
     uint8_t programSelfPos;

@@ -1,6 +1,7 @@
 ﻿#include "FATool.h"
 #include <QTimer>
-#include <QMessageBox>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QButtonGroup>
 #include <QDebug>
 #include "Misc.h"
 

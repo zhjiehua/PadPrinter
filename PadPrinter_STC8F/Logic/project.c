@@ -236,7 +236,8 @@ void ProgramRead(void)
 
 #if !MACHINE_FIX
 
-#if (HARDWARE_VERSION_MAJOR == 2 && HARDWARE_VERSION_MINOR == 5 && HARDWARE_VERSION_APPEND == 'A')//25A版本SW8改成拨码开关了
+//#if (HARDWARE_VERSION_MAJOR == 2 && HARDWARE_VERSION_MINOR == 5 && HARDWARE_VERSION_APPEND == 'A')//25A版本SW8改成拨码开关了
+#if 0
     if(INT_SW8)
     {
         man.headSensorLevel = 0;//5V
@@ -500,7 +501,8 @@ void Project_Run(void)
             
 #if !MACHINE_FIX
 
-#if (HARDWARE_VERSION_MAJOR == 2 && HARDWARE_VERSION_MINOR == 5 && HARDWARE_VERSION_APPEND == 'A')//25A版本SW8改成拨码开关了
+//#if (HARDWARE_VERSION_MAJOR == 2 && HARDWARE_VERSION_MINOR == 5 && HARDWARE_VERSION_APPEND == 'A')//25A版本SW8改成拨码开关了
+#if 0
             if(INT_SW8)
             {
                 man.headSensorLevel = 0;//5V
@@ -529,7 +531,8 @@ void Project_Run(void)
             
 #if !MACHINE_FIX    
 
-#if (HARDWARE_VERSION_MAJOR == 2 && HARDWARE_VERSION_MINOR == 5 && HARDWARE_VERSION_APPEND == 'A')//25A版本SW8改成拨码开关了
+//#if (HARDWARE_VERSION_MAJOR == 2 && HARDWARE_VERSION_MINOR == 5 && HARDWARE_VERSION_APPEND == 'A')//25A版本SW8改成拨码开关了
+#if 0
             if(INT_SW8)
             {
                 man.headSensorLevel = 0;//5V
