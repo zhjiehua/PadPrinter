@@ -140,25 +140,39 @@ void MachineStateCheck(void)
             TM1638_SendData(0, "88888");
             break;
         }
-        else if(!GXL(X_ABSORB_O) && GXL(X_ABSORB_L) && !GXL(X_PRINT_O) && !GXL(X_PRINT_L))
-            TM1638_SendData(0, "01");
-        else if(!GXL(X_ABSORB_O) && !GXL(X_ABSORB_L) && GXL(X_PRINT_O) && !GXL(X_PRINT_L))
-            TM1638_SendData(0, "03");
-        else if(!GXL(X_ABSORB_O) && !GXL(X_ABSORB_L) && !GXL(X_PRINT_O) && GXL(X_PRINT_L))
-            TM1638_SendData(0, "04");
-        else if(GXL(X_ABSORB_O) && GXL(X_ABSORB_L) && !GXL(X_PRINT_O) && !GXL(X_PRINT_L))
-            TM1638_SendData(0, "01");
-        else if(GXL(X_ABSORB_O) && !GXL(X_ABSORB_L) && GXL(X_PRINT_O) && !GXL(X_PRINT_L))
-            TM1638_SendData(0, "03");
-        else if(GXL(X_ABSORB_O) && !GXL(X_ABSORB_L) && !GXL(X_PRINT_O) && GXL(X_PRINT_L))
-            TM1638_SendData(0, "04");
-        else
-            TM1638_SendData(0, "00");
-        
-        if(!GXL(X_ABSORB_O))
-            TM1638_SendData(3, "20");
-        else
-            TM1638_SendData(3, "00");
+//        else if(!GXL(X_ABSORB_O) && GXL(X_ABSORB_L) && !GXL(X_PRINT_O) && !GXL(X_PRINT_L))
+//            TM1638_SendData(0, "01");
+//        else if(!GXL(X_ABSORB_O) && !GXL(X_ABSORB_L) && GXL(X_PRINT_O) && !GXL(X_PRINT_L))
+//            TM1638_SendData(0, "03");
+//        else if(!GXL(X_ABSORB_O) && !GXL(X_ABSORB_L) && !GXL(X_PRINT_O) && GXL(X_PRINT_L))
+//            TM1638_SendData(0, "04");
+//        else if(GXL(X_ABSORB_O) && GXL(X_ABSORB_L) && !GXL(X_PRINT_O) && !GXL(X_PRINT_L))
+//            TM1638_SendData(0, "01");
+//        else if(GXL(X_ABSORB_O) && !GXL(X_ABSORB_L) && GXL(X_PRINT_O) && !GXL(X_PRINT_L))
+//            TM1638_SendData(0, "03");
+//        else if(GXL(X_ABSORB_O) && !GXL(X_ABSORB_L) && !GXL(X_PRINT_O) && GXL(X_PRINT_L))
+//            TM1638_SendData(0, "04");
+//        else
+//            TM1638_SendData(0, "00");
+//        
+//        if(!GXL(X_ABSORB_O))
+//            TM1638_SendData(3, "20");
+//        else
+//            TM1638_SendData(3, "00");
+
+		else
+		{
+			TM1638_SendData(0, "1");
+			GXL(X_ABSORB_L) ? TM1638_SendData(1, "8") : TM1638_SendData(1, "-");
+		    GXL(X_ABSORB_O) ? TM1638_SendData(2, "8") : TM1638_SendData(2, "-");
+		    GXL(X_PRINT_O) ? TM1638_SendData(3, "8") : TM1638_SendData(3, "-");
+		    //GXL(X_PRINT_L) ? TM1638_SendData(4, "8") : TM1638_SendData(4, "-");
+
+			if(GXL(X_PRINT_L) && GXL(X_SCRAPER))  TM1638_SendData(4, "8.");
+		    else if(!GXL(X_PRINT_L) && GXL(X_SCRAPER))  TM1638_SendData(4, "-.");
+		    else if(GXL(X_PRINT_L) && !GXL(X_SCRAPER))  TM1638_SendData(4, "8");
+		    else if(!GXL(X_PRINT_L) && !GXL(X_SCRAPER))  TM1638_SendData(4, "-");
+		}
     }
     
     printf("Machine state check finish!\r\n");
