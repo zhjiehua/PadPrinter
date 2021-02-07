@@ -26,7 +26,7 @@ void FactoryMode(void)
 	static uint8_t  DetectionMode = 0;
 
 	
-	if(GMR(M_KEY_AUX)||GMR(6)) 
+	if(GMR(M_KEY_AUX)||GMR(M_KEY_FOOT)) 
 	{
 			 
 		DetectionMode++;									 //	输入输出检测模式切换*************************

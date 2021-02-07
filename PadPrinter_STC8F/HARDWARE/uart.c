@@ -294,7 +294,7 @@ void UartDataParse(void)
                         //printf("GML(M_MODE_AUTO) = %d, GML(M_MODE_RESTORE) = %d\r\n", (int)GML(M_MODE_AUTO), (int)GML(M_MODE_RESTORE));
                         printf("man.runMode = %d\r\n", (int)man.runMode);
                         printf("GML(M_ACTIONHEAD_FINISH) = %d, GML(M_ACTIONPLATFORM_FINISH) = %d\r\n", (int)GML(M_ACTIONHEAD_FINISH), (int)GML(M_ACTIONPLATFORM_FINISH));
-                        printf("GML(M_MODE_RESTORE_QUIT) = %d", (int)GML(M_MODE_RESTORE_QUIT));
+                        printf("GML(M_MODE_RESTORE_QUIT) = %d\r\n", (int)GML(M_MODE_RESTORE_QUIT));
                     break;
                     case '2':
                         printf("GML(M_ABSORB_FINISH) = %d, GML(M_PRINT_FINISH) = %d\r\n", (int)GML(M_ABSORB_FINISH), (int)GML(M_PRINT_FINISH));

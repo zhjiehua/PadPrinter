@@ -1,5 +1,4 @@
 #include "management.h"
-#include "man.h"
 #include "misc.h"
 #include "actions.h"
 
