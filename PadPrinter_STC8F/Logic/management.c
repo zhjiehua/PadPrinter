@@ -23,6 +23,7 @@ MAN_TypeDef man;
 #define MACHINETYPE_2SENSORS   1
 #define MACHINETYPE_3SENSORS   0
 #define MACHINETYPE_4SENSORS   0
+#define MACHINETYPE_STEPMOTOR  0
 
 //印头传感器类型
 #define HEADSENSORSTYPE_NORMALCLOSE   1 //常闭，5V
@@ -39,13 +40,15 @@ const __InternalSetting_TypeDef defaultInternalSetting[INTERNALSETTING_COUNT] =
 
 //设备识别  0:4sensors 1:2sensors 2:3sensors 3:0sensors
 #if MACHINETYPE_0SENSORS
-    {3, 0, 3},
+    {3, 0, 4},
 #elif MACHINETYPE_2SENSORS
-    {1, 0, 3},
+    {1, 0, 4},
 #elif MACHINETYPE_3SENSORS
-    {2, 0, 3},
+    {2, 0, 4},
 #elif MACHINETYPE_4SENSORS
-    {0, 0, 3},
+    {0, 0, 4},
+#elif MACHINETYPE_STEPMOTOR
+    {4, 0, 4},
 #endif
 
     //平台传感器电平 0:5V 1:12V

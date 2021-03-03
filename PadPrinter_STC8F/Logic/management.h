@@ -15,7 +15,7 @@
 #define HARDWARE_VERSION_APPEND   'A'
 
 #define HARDWARE_VERSION_STRING    "YYJ25A-V1.01-B1901"
-#define SOFTWARE_VERSION_STRING    "V1.8.0"
+#define SOFTWARE_VERSION_STRING    "V1.9.0"
 
 //如果用12V3传感器设备测试2传感器设备，则该宏设为1，否则设为0
 #define MACHINE3SENSOR_SIM_2SENSOR 1
@@ -91,7 +91,7 @@ typedef struct
     RUNMODE_TypeDef runMode;
 
     //设备类型
-    MachineType_TypeDef machineType;   //0:MACHINE_4SENSORS     1:MACHINE_2SENSORS     2:MACHINE_3SENSORS     3:MACHINE_0SENSORS
+    MachineType_TypeDef machineType;   //0:MACHINE_4SENSORS     1:MACHINE_2SENSORS     2:MACHINE_3SENSORS     3:MACHINE_0SENSORS	4:MACHINE_STEPMOTOR
     uint8_t platformSensorLevel; //1:12V,金属感应开关 ； 0:5V，光电开关
     uint8_t headSensorLevel; //1:12V,金属感应开关 ； 0:5V，光电开关
 

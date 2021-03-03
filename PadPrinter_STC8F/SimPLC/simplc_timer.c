@@ -8,6 +8,7 @@
 #include "management.h"
 #include "project.h"
 #include "24cxx.h"
+#include "pwm.h"
 
 Timer_TypeDef Timer[TIMER_NUM];//定时器资源
 Timer_TypeDef *hTimer = NULL;//定时器链表头指针
@@ -38,6 +39,17 @@ void TM4_Isr() interrupt 20 using 3
 	static uint8_t IO_FreDouble = 0;
 	uint8_t i;
 	Timer_TypeDef *pTimer = NULL;
+
+	//pwm.c使用
+	if(pwm.status)
+	{
+		pwm.timeCnt++;
+		if(pwm.timeCnt > 1)
+		{
+			pwm.timeCnt = 0;
+			pwm.timeFlag = 1;
+		}
+	}
 
 #if 1    
     //检查输入点是否需要延时

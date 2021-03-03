@@ -10,6 +10,7 @@
 #include "uart.h"
 #include "tm1638.h"
 #include "24cxx.h"
+#include "pwm.h"
 
 //=================================印头动作=================================
 
@@ -1003,5 +1004,96 @@ void ReturnProgram11(void)
 }
 
 
+void ShiftMotor(void)
+{
+	switch(man.platformState)
+    {
+        case 0:
+			if(man.delayPlatformPos < 4)
+			{
+	            SML(M_SHIFT_FINISH, 0);
+	
+	            MOUT3 = 1;
+	
+				Pwm_CMD(15, 8000);            
+	
+	            printf("Action----ShiftMotor----%d\r\n", (int)man.platformPos);
+	            
+	            man.platformState = 1;
+	
+	            man.delayPlatformPos++;
+			}
+			else //return
+			{
+				man.actPlatform = RETURN;
 
+                man.delayPlatformPos = 0;
 
+                printf("Action----ShiftMotor++++ReturnMotor\r\n");
+
+                SML(M_SHIFT_FINISH, 1);
+                SML(M_RETURN_FINISH, 0);
+                man.waitMSignal = M_RETURN_FINISH;	
+			}
+        break;
+        case 1:
+			if(Pwm_IsStop())
+			{  
+	            man.platformPos++;
+	            
+	            printf("Action----ShiftMotor----Finish----%d\r\n", (int)man.platformPos);
+	            
+	            SML(M_SHIFT_FINISH, 1);
+	            man.actPlatform = ACTION_NONE;
+	
+	            man.platformState = 0;
+			}
+        break;
+        default:
+        break;
+    }
+}
+
+void ReturnMotor(void)
+{
+//#if MACHINE3SENSOR_SIM_2SENSOR 
+//    uint8_t sensor = X_SHIFT_O;
+//#else
+//    uint8_t sensor = X_POS;
+//#endif
+    uint8_t sensor = X_SHIFT_O;
+
+    switch(man.platformState)
+    {
+        case 0://先回位一点
+
+            SML(M_RETURN_FINISH, 0);
+
+			MOUT3 = 0;
+			Pwm_CMD(15, 60000);
+
+            man.platformState = 1;
+
+            man.delayPlatformPos = 0;
+
+            printf("Action----ReturnMotor\r\n");
+        break;
+        case 1:
+            if(GXL(sensor))//确定到位
+            {
+                man.platformPos = 0;
+
+                Pwm_CMD(15, 0);//停止电机
+
+                printf("Action----ReturnMotor----Finish----%d\r\n", (int)man.platformPos);
+                
+                SML(M_RETURN_FINISH, 1);
+                man.actPlatform = ACTION_NONE;
+
+                man.platformState = 0;
+            }
+        break;
+        default:
+        break;
+    }
+}

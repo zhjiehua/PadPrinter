@@ -16,6 +16,14 @@
 #include "project.h"
 #include "misc.h"
 
+/*
+*定时器0	pwm/stepmotor
+*定时器1	串口波特率发生器
+*定时器2	未用
+*定时器3	蜂鸣器
+*定时器4	SimPLC
+*/
+
 /* main program */
 int main(void)
 {
@@ -49,6 +57,8 @@ int main(void)
     TM1638_Init();
     TM1638_SendData(0, "88888");
     
+	Pwm_Init();//pwm初始化
+
     EA = 1;//开启全局中断
     printf("\r\nHello PadPrinter!\r\n");
 

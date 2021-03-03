@@ -53,6 +53,7 @@ typedef enum
     MACHINE_2SENSORS = 1,
     MACHINE_3SENSORS = 2,
     MACHINE_0SENSORS = 3,
+	MACHINE_STEPMOTOR = 4,
 }MachineType_TypeDef;
 
 //³ÌÐò¶¯×÷

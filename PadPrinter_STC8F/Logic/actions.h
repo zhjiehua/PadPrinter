@@ -23,5 +23,7 @@ void ShiftReturnShiftReturn2Sensors(void);
 void ShiftProgram11(void);
 void ReturnProgram11(void);
 
+void ShiftMotor(void);
+void ReturnMotor(void);
 
 #endif

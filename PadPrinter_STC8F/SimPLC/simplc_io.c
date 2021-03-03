@@ -161,8 +161,11 @@ void SIMPLC_IO_Refresh(void)
 	//输出点刷新，注意下面的Y0~5为实际物理IO与输出点之间的映射关系
     Y0(OUT[Y_UPDOWN/8]&(0x01<<Y_UPDOWN));
     Y1(OUT[Y_FRONTBACK/8]&(0x01<<Y_FRONTBACK));
-    Y2(OUT[Y_SHIFT/8]&(0x01<<Y_SHIFT));
-    Y3(OUT[Y_POS/8]&(0x01<<Y_POS));
+	if(man.machineType != MACHINE_STEPMOTOR)
+	{
+	    Y2(OUT[Y_SHIFT/8]&(0x01<<Y_SHIFT));
+	    Y3(OUT[Y_POS/8]&(0x01<<Y_POS));
+	}
     Y4(OUT[Y_SCRAPER/8]&(0x01<<Y_SCRAPER));
     Y5(OUT[Y_SHIFT2/8]&(0x01<<Y_SHIFT2));
 

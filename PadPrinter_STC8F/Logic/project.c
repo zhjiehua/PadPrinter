@@ -386,6 +386,14 @@ void ProgramRead(void)
         man.ShiftReturn = ShiftReturn2Sensors;
         man.ShiftReturn2 = ShiftReturnShiftReturn2Sensors;
     }
+	else if(man.machineType == MACHINE_STEPMOTOR)
+	{
+		man.Shift = ShiftMotor;
+		man.Return = ReturnMotor;
+
+		man.ShiftReturn = ShiftReturn2Sensors;
+        man.ShiftReturn2 = ShiftReturnShiftReturn2Sensors;
+	}
     else//单色或其他设备默认用2传感器函数
     {
         man.Shift = Shift2Sensors;
